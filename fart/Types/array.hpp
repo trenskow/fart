@@ -50,11 +50,11 @@ namespace fart {
             }
             
             Strong<T> getItemAtIndex(size_t index) const throw(OutOfBoundException) {
-                return _storage.getItemAtIndex(index);
+                return Strong<T>(_storage.getItemAtIndex(index));
             }
             
             Strong<T> operator[](const size_t index) const throw(OutOfBoundException) {
-                return this->getItemAtIndex(index);
+                return Strong<T>(this->getItemAtIndex(index));
             }
             
             void append(Strong<T> item) {

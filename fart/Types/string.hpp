@@ -37,8 +37,8 @@ namespace fart {
             } Encoding;
             
             String();
-            String(const char* string, const Encoding encoding) throw(DecoderException);
-            String(const char* string) throw(DecoderException);
+            String(const char* string, const Encoding encoding = EncodingUTF8) throw(DecoderException);
+            String(const Data<uint8_t>& buffer, const Encoding encoding = EncodingUTF8) throw(DecoderException);
             String(const String& other);
             virtual ~String();
             

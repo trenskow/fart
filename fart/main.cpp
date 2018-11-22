@@ -53,7 +53,33 @@ int main(int argc, const char * argv[]) {
         printf("%s\n", otherString->getCString());
         
         Strong<Socket> socket;
-                        
+        
+        Strong<Array<Socket>> openSockets;
+        
+        socket->bind(Strong<Endpoint>(Strong<String>("0.0.0.0"), 3004));
+        socket->listen([&](Strong<Socket> newSocket) {
+            openSockets->append(newSocket);
+            newSocket->accept([](Strong<Data<uint8_t>> data, Strong<Endpoint> endpoint) {
+                Strong<String> string(data);
+                printf("%s", string->getCString());
+            });
+        });
+        
+        usleep(10000000);
+        
+        bool done = false;
+        
+        do {
+            usleep(100000);
+            done = true;
+            for (size_t idx = 0 ; idx < openSockets->getCount() ; idx++) {
+                if (openSockets->getItemAtIndex(idx)->getSocketState() != SocketStateClosed) {
+                    done = false;
+                    break;
+                }
+            }
+        } while(!done);
+            
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.getDescription(), exception.getSize());
     } catch (types::DecoderException exception) {

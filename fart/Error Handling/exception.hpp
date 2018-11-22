@@ -105,6 +105,29 @@ namespace fart {
             
         }
         
+        namespace network {
+            
+            class AddressAlreadyInUseException : public Exception {
+                
+                uint16_t _port;
+                
+            public:
+                
+                AddressAlreadyInUseException(uint16_t port) : _port(port) {};
+                AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
+                
+                virtual const char* getDescription() const {
+                    return "Port already in use.";
+                }
+                
+                const uint16_t getPort() const {
+                    return _port;
+                }
+                
+            };
+            
+        }
+        
     }
     
 }

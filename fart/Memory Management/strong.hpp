@@ -13,6 +13,8 @@
 
 #include "object.hpp"
 
+using namespace std;
+
 namespace fart {
     namespace memory {
         
@@ -27,14 +29,14 @@ namespace fart {
         private:
             T* _object;
             
-            void _setObject(T* object) {
+            void _setObject(T* object, bool newObject = false) {
                 if (_object != nullptr) {
                     _object->release();
                     _object = nullptr;
                 }
                 if (object) {
                     // If object is allocated on the stack, we make a copy on the heap.
-                    if (object->getRetainCount() == 0) {
+                    if (!newObject && object->getRetainCount() == 0) {
                         _object = new T(*object);
                     } else {
                         _object = object;
@@ -44,7 +46,7 @@ namespace fart {
             }
             
         public:
-            Strong(std::nullptr_t) : _object(nullptr) {};
+            Strong(nullptr_t) : _object(nullptr) {};
             Strong(T& object) : Strong(&object) {};
             
             Strong(T* object) : _object(nullptr) {
@@ -57,7 +59,7 @@ namespace fart {
             
             template<typename... Args>
             explicit Strong(Args&&... args) : _object(nullptr) {
-                _setObject(new T(std::forward<Args>(args)...));
+                _setObject(new T(std::forward<Args>(args)...), true);
             }
             
             ~Strong() {
@@ -87,6 +89,11 @@ namespace fart {
                 return *this;
             }
             
+            Strong<T>& operator =(Strong<T> object) {
+                _setObject(object);
+                return *this;
+            }
+            
             T* operator ->() const {
                 return _object;
             }
@@ -96,7 +103,7 @@ namespace fart {
             }
             
             bool operator!=(std::nullptr_t n) {
-                return !(this == n);
+                return !(this->_object == n);
             }
                         
         };

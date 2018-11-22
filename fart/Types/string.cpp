@@ -24,9 +24,15 @@ String::String(const char* string, const Encoding encoding) throw(DecoderExcepti
     }
 }
 
-String::String(const String& other) : _store(other._store) {}
+String::String(const Data<uint8_t>& data, const Encoding encoding) throw(DecoderException) {
+    switch (encoding) {
+        case EncodingUTF8:
+            _store.append(_decodeUTF8(data));
+            break;
+    }
+}
 
-String::String(const char* string) throw(DecoderException) : String(string, EncodingUTF8) {}
+String::String(const String& other) : _store(other._store) {}
 
 String::~String() {}
 
