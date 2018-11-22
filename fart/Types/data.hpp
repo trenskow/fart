@@ -1,0 +1,164 @@
+//
+//  data.hpp
+//  fart
+//
+//  Created by Kristian Trenskow on 17/08/2018.
+//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//
+
+#ifndef data_hpp
+#define data_hpp
+
+#include <cstdlib>
+#include <cstring>
+
+#include "mutex.hpp"
+#include "exception.hpp"
+#include "type.hpp"
+
+#define ARRAY_STORE_BLOCK_SIZE 4096
+
+namespace fart {
+    
+    using namespace memory;
+    using namespace exceptions::types;
+    
+    namespace types {
+        
+        template<typename T>
+        class Data : public Type {
+            
+        private:
+            T* _store;
+            size_t _count;
+            size_t _storeCount;
+            mutable uint64_t _hash;
+            mutable bool _hashIsDirty;
+            mutable Mutex _mutex;
+            
+            void ensureStoreSize(size_t count) {
+                if (_storeCount < count) {
+                    _storeCount = (count / ARRAY_STORE_BLOCK_SIZE) + 1 * ARRAY_STORE_BLOCK_SIZE;
+                    _store = (T*) realloc(_store, sizeof(T) * _storeCount);
+                }
+            }
+            
+        public:
+            
+            Data(const T* items, size_t count) : _store(nullptr), _storeCount(0), _count(0), _hash(0), _hashIsDirty(true) {
+                append(items, count);
+            }
+            
+            Data() : Data(nullptr, 0) {}
+            
+            Data(const Data<T>& other) : Data(nullptr, 0) {
+                append(other);
+            }
+            
+            virtual ~Data() {
+                _mutex.locked([this]() {
+                    if (_store != nullptr) {
+                        free(_store);
+                        _store = nullptr;
+                    }
+                });
+            }
+            
+            void append(const T* items, size_t count) {
+                if (!count) return;
+                _mutex.locked([this,items,count]() {
+                    this->ensureStoreSize(this->_count + count);
+                    memcpy(&this->_store[this->_count], items, sizeof(T) * count);
+                    this->_count += count;
+                    this->_hashIsDirty = true;
+                });
+            }
+            
+            void append(T element) {
+                append(&element, 1);
+            }
+                        
+            void append(const Data<T>& data) {
+                append(data.getItems(), data.getCount());
+            }
+            
+            const T removeItemAtIndex(size_t index) throw(OutOfBoundException) {
+                return _mutex.lockedValue([this,index]() {
+                    if (index >= _count) throw OutOfBoundException(index);
+                    T element = _store[index];
+                    for (size_t idx = index ; idx < _count - 1 ; idx++) {
+                        _store[idx] = _store[idx + 1];
+                    }
+                    _count--;
+                    _hashIsDirty = true;
+                    return element;
+                });
+            }
+            
+            size_t getCount() const {
+                return _mutex.lockedValue([this]() {
+                    return this->_count;
+                });
+            }
+            
+            const T getItemAtIndex(const size_t index) const throw(OutOfBoundException) {
+                return _mutex.lockedValue([this,index]() {
+                    if (index >= _count) throw OutOfBoundException(index);
+                    return _store[index];
+                });
+            }
+            
+            const T* getItems() const {
+                return _mutex.lockedValue([this]() {
+                    return _store;
+                });
+            }
+            
+            const T operator[](const size_t index) const throw(OutOfBoundException) {
+                return getItemAtIndex(index);
+            }
+            
+            const ssize_t indexOf(const T other) const {
+                return _mutex.lockedValue([this,other]() {
+                    for (size_t idx = 0 ; idx < _count ; idx++) {
+                        if (_store[idx] == other) return idx;
+                    }
+                    return -1;
+                });
+            }
+            
+            virtual const uint64_t getHash() const {
+                return _mutex.lockedValue([this]() {
+                    if (_hashIsDirty) {
+                        _hash = 5381;
+                        for (size_t idx = 0 ; idx < _count ; idx++) {
+                            _hash = ((_hash << 5) + _hash) + (uint64_t)_store[idx]; /* hash * 33 + c */
+                        }
+                        _hashIsDirty = false;
+                    }
+                    return _hash;
+                });
+            }
+            
+            virtual const Kind getKind() const {
+                return Kind::data;
+            }
+            
+            bool operator ==(const Data<T>& other) const {
+                if (!Type::operator==(other)) return false;
+                return _mutex.lockedValue([this,other]() {
+                    if (this->_count != other._count) return false;
+                    for (size_t idx = 0 ; idx < this->_count ; idx++) {
+                        if (this->_store[idx] != other._store[idx]) return false;
+                    }
+                    return true;
+                });
+            }
+            
+        };
+        
+    }
+    
+}
+
+#endif /* data_hpp */
