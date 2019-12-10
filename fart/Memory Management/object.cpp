@@ -29,7 +29,7 @@ Object::~Object() {
 
 Object::Object(const Object& other) : Object() {}
 
-void* Object::operator new(size_t size) throw(AllocationException) {
+void* Object::operator new(size_t size) noexcept(false) {
     void *mem = calloc(size, sizeof(uint8_t));
     if (!mem) throw AllocationException(size);
     return mem;

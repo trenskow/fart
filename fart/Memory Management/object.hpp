@@ -14,51 +14,47 @@
 
 #include <unistd.h>
 
-namespace fart {
-    
-    using namespace threading;
-    using namespace exceptions::memory;
-    
-    namespace memory {
-        
-        class Object {
-            
-            template<class T>
-            friend class Strong;
-            
-            template<class T>
-            friend class Weak;
+using namespace fart::threading;
+using namespace fart::exceptions::memory;
 
-        private:
-            mutable size_t _retainCount;
-            mutable void** _weakReferences;
-            mutable size_t _weakReferencesSize;
-            mutable size_t _weakReferencesCount;
-            mutable Mutex _mutex;
-            
-            void *operator new(size_t size) throw(AllocationException);
-            
-            void addWeakReference(void* weakReference) const;
-            void removeWeakReference(void* weakReference) const;
-            
-        protected:
-            void operator delete(void *ptr) throw();
-            
-        public:
-            
-            Object();
-            Object(const Object& other);
-            virtual ~Object();
-            
-            void retain() const;
-            void release() const;
-            
-            size_t getRetainCount() const;
-            
-        };
-        
-    }
+namespace fart::memory {
     
+    class Object {
+        
+        template<class T>
+        friend class Strong;
+        
+        template<class T>
+        friend class Weak;
+
+    private:
+        mutable size_t _retainCount;
+        mutable void** _weakReferences;
+        mutable size_t _weakReferencesSize;
+        mutable size_t _weakReferencesCount;
+        mutable Mutex _mutex;
+        
+        void *operator new(size_t size) noexcept(false);
+        
+        void addWeakReference(void* weakReference) const;
+        void removeWeakReference(void* weakReference) const;
+        
+    protected:
+        void operator delete(void *ptr) throw();
+        
+    public:
+        
+        Object();
+        Object(const Object& other);
+        virtual ~Object();
+        
+        void retain() const;
+        void release() const;
+        
+        size_t getRetainCount() const;
+        
+    };
+
 }
 
 #endif /* object_hpp */

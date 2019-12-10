@@ -11,18 +11,14 @@
 
 #include <unistd.h>
 
-namespace fart {
+namespace fart::types {
     
-    namespace types {
+    class Hashable {
         
-        class Hashable {
-            
-        public:
-            virtual const uint64_t getHash() const = 0;
-            
-        };
-                
-    }
+    public:
+        virtual const uint64_t getHash() const = 0;
+        
+    };
     
 }
 

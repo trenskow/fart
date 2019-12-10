@@ -14,33 +14,29 @@
 #include "object.hpp"
 #include "hashable.hpp"
 
-namespace fart {
-    
-    using namespace memory;
-    
-    namespace types {
+using namespace fart::memory;
+
+namespace fart::types {
         
-        class Type : public Object, public Hashable {
-            
-        public:
-            
-            enum class Kind : uint8_t {
-                data,
-                string,
-                number,
-                array,
-                dictionary
-            };
-            
-            virtual const Kind getKind() const = 0;
-            
-            virtual bool operator==(const Type& other) const;
-            bool operator!=(const Type& other) const;
-            
+    class Type : public Object, public Hashable {
+        
+    public:
+        
+        enum class Kind : uint8_t {
+            data,
+            string,
+            number,
+            array,
+            dictionary
         };
         
-    }
-    
+        virtual const Kind getKind() const = 0;
+        
+        virtual bool operator==(const Type& other) const;
+        bool operator!=(const Type& other) const;
+        
+    };
+
 }
 
 #endif /* type_hpp */

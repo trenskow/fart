@@ -17,6 +17,7 @@
 #include "dictionary.hpp"
 #include "socket.hpp"
 #include "endpoint.hpp"
+#include "server.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
@@ -51,6 +52,12 @@ int main(int argc, const char * argv[]) {
         array.removeItemAtIndex(0);
         
         printf("%s\n", otherString->getCString());
+        
+        otherString->split(" ")->forEach([](Strong<String> str) {
+            printf("%s\n", str->getCString());
+        });
+        
+        printf("%s\n", String::join(otherString->split(" "), " ")->getCString());
         
         Strong<Socket> socket;
         

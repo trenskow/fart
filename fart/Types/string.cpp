@@ -16,7 +16,11 @@ using namespace fart::exceptions::types;
 
 String::String() {}
 
-String::String(const char* string, const Encoding encoding) throw(DecoderException) {
+String::String(const Data<uint32_t>& storage) {
+    _store.append(storage);
+}
+
+String::String(const char* string, const Encoding encoding) noexcept(false) {
     switch (encoding) {
         case EncodingUTF8:
             _store.append(_decodeUTF8(string, strlen(string)));
@@ -24,7 +28,7 @@ String::String(const char* string, const Encoding encoding) throw(DecoderExcepti
     }
 }
 
-String::String(const Data<uint8_t>& data, const Encoding encoding) throw(DecoderException) {
+String::String(const Data<uint8_t>& data, const Encoding encoding) noexcept(false) {
     switch (encoding) {
         case EncodingUTF8:
             _store.append(_decodeUTF8(data));
@@ -36,7 +40,7 @@ String::String(const String& other) : _store(other._store) {}
 
 String::~String() {}
 
-Strong<Data<uint32_t>> String::_decodeUTF8(const char* buffer, size_t length) const throw(DecoderException) {
+Strong<Data<uint32_t>> String::_decodeUTF8(const char* buffer, size_t length) const noexcept(false) {
     
     Strong<Data<uint32_t>> ret;
     
@@ -147,6 +151,34 @@ Strong<Data<uint8_t>> String::getData(Encoding encoding) const {
 
 void String::append(const String &other) {
     _store.append(other._store);
+}
+
+Strong<Array<String>> String::split(const char *seperator, size_t max) const {
+    String sep(seperator);
+    return split(sep, max);
+}
+
+Strong<Array<String>> String::split(String &seperator, size_t max) const {
+    return _store.split(seperator._store, max)->map<String>([](Data<uint32_t>& current) {
+        return String(current);
+    });
+}
+
+Strong<String> String::join(Array<String>& strings) {
+    return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](String& current) {
+        return current._store;
+    })));
+}
+
+Strong<String> String::join(Array<String>& strings, const char *seperator) {
+    String sep(seperator);
+    return String::join(strings, sep);
+}
+
+Strong<String> String::join(Array<String> &strings, String &seperator) {
+    return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](String& current) {
+        return current._store;
+    }), seperator._store));
 }
 
 const uint64_t String::getHash() const {
