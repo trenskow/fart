@@ -17,7 +17,6 @@
 #include "dictionary.hpp"
 #include "socket.hpp"
 #include "endpoint.hpp"
-#include "server.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
