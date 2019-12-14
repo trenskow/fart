@@ -8,24 +8,23 @@
 
 #include <stdio.h>
 
-#include "strong.hpp"
-#include "exception.hpp"
-#include "string.hpp"
-#include "array.hpp"
-#include "weak.hpp"
-#include "number.hpp"
-#include "dictionary.hpp"
-#include "socket.hpp"
-#include "endpoint.hpp"
+#include "fart.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
 using namespace fart::exceptions;
 using namespace fart::network;
+using namespace fart::network::web::http;
 
 int main(int argc, const char * argv[]) {
     
     try {
+        
+        String testHttp = "GET /hello.htm HTTP/1.1\r\nUser-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\nHost: www.tutorialspoint.com\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: Keep-Alive\r\n\r\n";
+        
+        HTTPRequest request(testHttp.getData());
+        
+        printf("%s\n", request.getHeaderValue("Accept-Encoding")->getCString());
         
         Array<String> array;
         
