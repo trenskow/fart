@@ -11,5 +11,6 @@
 
 #include "./mutex.hpp"
 #include "./thread.hpp"
+#include "./semaphore.hpp"
 
 #endif /* threading_h */

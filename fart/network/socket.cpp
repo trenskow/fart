@@ -20,6 +20,12 @@ Socket::Socket(int socket) : Socket() {
     _socket = socket;
 }
 
+Socket::Socket(const Socket& other) : _isUDP(other._isUDP), _socket(other._socket), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {}
+
+Socket::Socket(Socket&& other) : _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {
+    
+}
+
 Socket::~Socket() {
     close();
 }
@@ -32,45 +38,47 @@ const uint64_t Socket::getHash() const {
 
 void Socket::_read(function<void()> setup, function<void(Strong<Data<uint8_t>>, Strong<Endpoint>)> readCallback) {
     
-    _mutex.locked([this,setup,readCallback]() {
+    this->retain();
+    
+    _receiveThread.detach([this,setup,readCallback]() {
         
-        _receiveThread.detach([this,setup,readCallback]() {
+        setup();
+        
+        ssize_t bytesRead = 0;
+        uint8_t buffer[BUFFER_SIZE];
+        
+        do {
             
-            setup();
+            _mutex.lock();
             
-            size_t bytesRead = 0;
-            uint8_t buffer[BUFFER_SIZE];
+            int socket = _socket;
+            Strong<Endpoint> endpoint = nullptr;
             
-            do {
-                
-                _mutex.lock();
-                
-                int socket = _socket;
-                Strong<Endpoint> endpoint = nullptr;
-                
-                if (!_isUDP) {
-                    endpoint = _remoteEndpoint;
-                    _mutex.unlock();
-                    bytesRead = recv(socket, buffer, BUFFER_SIZE, 0);
-                } else {
-                    _mutex.unlock();
-                    sockaddr_storage addr;
-                    socklen_t len = sizeof(sockaddr_storage);
-                    bytesRead = recvfrom(socket, buffer, BUFFER_SIZE, 0, (sockaddr *)&addr, &len);
-                    endpoint = Strong<Endpoint>((sockaddr*)&addr);
-                }
-                if (bytesRead > 0) {
-                    Strong<Data<uint8_t>> data(buffer, bytesRead);
-                    readCallback(data, endpoint);
-                }
-            } while (bytesRead > 0);
-            
-            close();
-            
-        });
+            if (!_isUDP) {
+                endpoint = _remoteEndpoint;
+                _mutex.unlock();
+                bytesRead = recv(socket, buffer, BUFFER_SIZE, 0);
+            } else {
+                _mutex.unlock();
+                sockaddr_storage addr;
+                socklen_t len = sizeof(sockaddr_storage);
+                bytesRead = recvfrom(socket, buffer, BUFFER_SIZE, 0, (sockaddr *)&addr, &len);
+                endpoint = Strong<Endpoint>((sockaddr*)&addr);
+            }
+            if (bytesRead > 0) {
+                Strong<Data<uint8_t>> data(buffer, bytesRead);
+                readCallback(data, endpoint);
+            } else {
+                close();
+            }
+        } while (bytesRead > 0);
+        
+        close();
+        
+        this->release();
         
     });
-    
+
 }
 
 void Socket::bind(Strong<Endpoint> endpoint) {
@@ -111,7 +119,9 @@ void Socket::bind(Strong<Endpoint> endpoint) {
     
 }
 
-void Socket::listen(function<void(Strong<Socket> incoming)> acceptCallback) {
+void Socket::listen(function<void(Socket& incoming)> acceptCallback) {
+    
+    this->retain();
     
     _mutex.locked([this,acceptCallback]() {
         
@@ -155,13 +165,15 @@ void Socket::listen(function<void(Strong<Socket> incoming)> acceptCallback) {
             
             close();
             
+            this->release();
+            
         });
         
     });
     
 }
 
-void Socket::accept(function<void(Strong<Data<uint8_t>>, Strong<Endpoint>)> readCallback) {
+void Socket::accept(function<void(Data<uint8_t>&, const Endpoint&)> readCallback) {
     _mutex.locked([this]() {
         _state = SocketStateConnected;
     });
@@ -169,7 +181,7 @@ void Socket::accept(function<void(Strong<Data<uint8_t>>, Strong<Endpoint>)> read
     }, readCallback);
 }
 
-void Socket::connect(Strong<Endpoint> endpoint, function<void(Strong<Data<uint8_t>>, Strong<Endpoint>)> readCallback) {
+void Socket::connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, const Endpoint&)> readCallback) {
     
     _mutex.locked([this,endpoint,readCallback]() {
         
@@ -210,11 +222,11 @@ void Socket::connect(Strong<Endpoint> endpoint, function<void(Strong<Data<uint8_
     
 }
 
-const size_t Socket::send(Strong<Data<uint8_t>> data) const {
-    return 0;
+const size_t Socket::send(const Data<uint8_t>& data) const {
+    return ::send(_socket, data.getItems(), data.getCount(), 0);
 }
 
-const size_t Socket::sendTo(Strong<Endpoint> endpoint, Strong<Data<uint8_t>> data) const {
+const size_t Socket::sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {
     return 0;
 }
 

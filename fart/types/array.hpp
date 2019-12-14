@@ -23,7 +23,7 @@ namespace fart::types {
     template<class T>
     class Array : public Type {
         
-        static_assert(std::is_base_of<Object, T>::value, "T must be a subclass of class Object.");
+        static_assert(std::is_base_of<Object, T>::value);
         
     private:
         Data<T*> _storage;

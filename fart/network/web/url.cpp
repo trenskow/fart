@@ -25,7 +25,7 @@ Strong<String> Url::decode(const String& url) {
         if (chr == '+') chr = ' ';
         else if (chr == '%') {
             if (idx >= url.getLength() - 2) throw UrlDecodingException(chr);
-            chr = (hexValue(url[idx + 1]) << 8) + hexValue(url[idx + 2]);
+            chr = (hexValue(url[idx + 1]) * 16) + hexValue(url[idx + 2]);
             idx += 2;
         }
         result->append(chr);

@@ -11,39 +11,42 @@
 
 #include <pthread.h>
 
-namespace fart {
-    namespace threading {
+namespace fart::threading {
+    
+    class Semaphore;
+    
+    class Mutex {
         
-        class Mutex {
-            
-        private:
-            pthread_mutexattr_t _attr;
-            mutable pthread_mutex_t _mutex;
-            
-        public:
-            Mutex();
-            ~Mutex();
-            
-            void lock() const;
-            void unlock() const;
-            
-            template<typename Func>
-            void locked(Func f) const {
-                lock();
-                f();
-                unlock();
-            }
+    private:
+        
+        friend class Semaphore;
+        
+        pthread_mutexattr_t _attr;
+        mutable pthread_mutex_t _mutex;
+        
+    public:
+        Mutex();
+        ~Mutex();
+        
+        void lock() const;
+        void unlock() const;
+        
+        template<typename Func>
+        void locked(Func f) const {
+            lock();
+            f();
+            unlock();
+        }
 
-            template<typename Func>
-            auto lockedValue(Func f) const {
-                lock();
-                auto ret = f();
-                unlock();
-                return ret;
-            }
-        };
-        
-    }
+        template<typename Func>
+        auto lockedValue(Func f) const {
+            lock();
+            auto ret = f();
+            unlock();
+            return ret;
+        }
+    };
+
 }
 
 #endif /* mutex_hpp */

@@ -45,9 +45,13 @@ Endpoint::Endpoint(Strong<String> host, uint16_t port, EndpointType type, uint32
     
 }
 
+Endpoint::Endpoint(const char* host, uint16_t port, EndpointType types, uint32_t scope_id) : Endpoint(Strong<String>(host), port, types, scope_id) {}
+
 Endpoint::Endpoint(sockaddr *addr) {
     memcpy(&this->_storage, addr, addr->sa_len);
 }
+
+Endpoint::Endpoint(uint16_t port, EndpointType types, uint32_t scope_id) : Endpoint("0.0.0.0", port, types, scope_id) {}
 
 Endpoint::~Endpoint() {}
 

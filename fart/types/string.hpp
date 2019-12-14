@@ -22,28 +22,26 @@ namespace fart::types {
     
     class String : public Type {
         
-    private:
-        Data<uint32_t> _store;
-        
-        String(const Data<uint32_t>& storage);
-        
-        Strong<Data<uint32_t>> _decodeUTF8(const char* buffer, size_t length) const noexcept(false);
-        Strong<Data<uint32_t>> _decodeUTF8(const Data<uint8_t> &buffer) const;
-        Strong<Data<uint8_t>> _encodeUTF8(const Data<uint32_t> &buffer) const;
-        
-        friend class Strong<String>;
-        
     public:
         
-        typedef enum {
+        enum Encoding {
             EncodingUTF8 = 0
-        } Encoding;
+        };
+        
+        enum Comparison {
+            ComparisonCaseSensitive = 0,
+            ComparisonCaseInsensitive
+        };
         
         String();
         String(const char* string, const Encoding encoding = EncodingUTF8) noexcept(false);
         String(const Data<uint8_t>& buffer, const Encoding encoding = EncodingUTF8) noexcept(false);
         String(const String& other);
         virtual ~String();
+        
+        static Strong<String> format(const char* format, ...);
+        
+        void setComparison(Comparison comparison);
         
         size_t getLength() const;
         const char* getCString(Encoding encoding = EncodingUTF8) const;
@@ -52,6 +50,7 @@ namespace fart::types {
         
         void append(const String& other);
         void append(const uint32_t character);
+        void append(const char* string, Encoding encoding = EncodingUTF8);
         
         Strong<Array<String>> split(const char *seperator, size_t max = 0) const;
         Strong<Array<String>> split(String& seperator, size_t max = 0) const;
@@ -59,7 +58,9 @@ namespace fart::types {
         static Strong<String> join(Array<String>& strings, const char *seperator);
         static Strong<String> join(Array<String>& strings, String* seperator);
         static Strong<String> join(Array<String>& strings, String& seperator);
-
+        
+        const int64_t parseNumber() const;
+        
         virtual const uint64_t getHash() const;
         
         virtual const Kind getKind() const;
@@ -71,6 +72,33 @@ namespace fart::types {
         
         operator const char*() const;
         
+    private:
+        friend class Strong<String>;
+        
+        class CaseComparitor : public Data<uint32_t>::Comparitor {
+            
+        public:
+            virtual ~CaseComparitor();
+            
+            virtual const uint32_t transform(uint32_t value) const;
+            
+            void setComparison(Comparison comparison);
+            
+        private:
+            
+            Comparison _comparison;
+            
+        };
+        
+        Data<uint32_t> _store;
+        Strong<CaseComparitor> _caseComparitor;
+        
+        String(const Data<uint32_t>& storage);
+        
+        Strong<Data<uint32_t>> _decodeUTF8(const char* buffer, size_t length) const noexcept(false);
+        Strong<Data<uint32_t>> _decodeUTF8(const Data<uint8_t> &buffer) const;
+        Strong<Data<uint8_t>> _encodeUTF8(const Data<uint32_t> &buffer, bool nullTerminate = false) const;
+            
     };
     
 }

@@ -23,7 +23,7 @@ namespace fart::memory {
     template<class T>
     class Strong {
         
-        static_assert(std::is_base_of<Object, T>::value, "T must be a subclass of class Object.");
+        static_assert(std::is_base_of<Object, T>::value);
         
     private:
         T* _object;

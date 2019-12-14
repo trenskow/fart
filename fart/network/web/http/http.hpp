@@ -9,7 +9,15 @@
 #ifndef http_h
 #define http_h
 
-#include "./request.hpp"
-#include "./response.hpp"
+#include "./head.hpp"
+#include "./request-head.hpp"
+#include "./response-head.hpp"
+#include "../server.hpp"
+
+namespace fart::network::web::http {
+
+    typedef Server<RequestHead, ResponseHead> HTTPServer;
+    
+}
 
 #endif /* http_h */

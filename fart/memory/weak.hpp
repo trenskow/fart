@@ -21,7 +21,7 @@ namespace fart::memory {
     template<class T>
     class Weak {
         
-        static_assert(std::is_base_of<Object, T>::value, "T must be a subclass of class IObject.");
+        static_assert(std::is_base_of<Object, T>::value);
         
         friend class Object;
         

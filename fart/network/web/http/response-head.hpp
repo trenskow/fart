@@ -9,14 +9,12 @@
 #ifndef response_hpp
 #define response_hpp
 
-#include "../../../memory/object.hpp"
-#include "../../../types/data.hpp"
+#include "./head.hpp"
 #include "../message.hpp"
-#include "./version.hpp"
 
 namespace fart::network::web::http {
     
-    class ResponseHead : public Object {
+    class ResponseHead : public Head {
         
     public:
         
@@ -24,8 +22,17 @@ namespace fart::network::web::http {
             OK = 200
         };
         
+        ResponseHead();
         ResponseHead(Data<uint8_t>& data);
+        ResponseHead(const ResponseHead& other);
         virtual ~ResponseHead();
+        
+        const Version getVersion() const;
+        const Status getStatus() const;
+        
+    protected:
+        
+        virtual Strong<Data<uint8_t>> getHeadData(const Data<uint8_t>& lineBreak) const;
         
     private:
         

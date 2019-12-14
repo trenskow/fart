@@ -36,7 +36,9 @@ namespace fart::network {
     public:
         
         Endpoint(Strong<String> host, uint16_t port, EndpointType types = EndpointTypeIPv4, uint32_t scope_id = 0);
+        Endpoint(const char* host, uint16_t port, EndpointType types = EndpointTypeIPv4, uint32_t scope_id = 0);
         Endpoint(sockaddr* addr);
+        Endpoint(uint16_t port, EndpointType types = EndpointTypeIPv4, uint32_t scope_id = 0);
         virtual ~Endpoint();
         
         const EndpointType getType() const;

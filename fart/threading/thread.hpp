@@ -15,33 +15,31 @@
 
 using namespace std;
 
-namespace fart {
-    namespace threading {
+namespace fart::threading {
         
-        class Thread {
-            
-        private:
-            
-            function<void()> _startCallback;
-            
-            pthread_t _thread;
-            bool _isDetached;
-            Mutex _mutex;
-            
-            void _start();
-            
-        public:
-            Thread();
-            ~Thread();
-            
-            void detach(function<void()> startCallback);
-            void join() const;
-            
-            const bool getIsDetached() const;
-            
-        };
+    class Thread {
         
-    }
+    private:
+        
+        function<void()> _startCallback;
+        
+        pthread_t _thread;
+        bool _isDetached;
+        Mutex _mutex;
+        
+        void _start();
+        
+    public:
+        Thread();
+        ~Thread();
+        
+        void detach(function<void()> startCallback);
+        void join() const;
+        
+        const bool getIsDetached() const;
+        
+    };
+
 }
 
 #endif /* thread_hpp */

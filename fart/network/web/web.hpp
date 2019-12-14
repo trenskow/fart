@@ -9,7 +9,6 @@
 #ifndef web_h
 #define web_h
 
-#include "./server.hpp"
 #include "./message.hpp"
 #include "./url.hpp"
 #include "./http/http.hpp"

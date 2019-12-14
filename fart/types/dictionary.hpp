@@ -9,6 +9,7 @@
 #ifndef dictionary_hpp
 #define dictionary_hpp
 
+#include <thread>
 #include "./array.hpp"
 #include "./type.hpp"
 
@@ -17,9 +18,9 @@ namespace fart::types {
     template<class Key, class Value>
     class Dictionary : public Type {
         
-        static_assert(std::is_base_of<Object, Key>::value, "T must be a subclass of class Object.");
-        static_assert(std::is_base_of<Hashable, Key>::value, "T must be a subclass of class Hashable.");
-        static_assert(std::is_base_of<Object, Value>::value, "T must be a subclass of class Object.");
+        static_assert(std::is_base_of<Object, Key>::value);
+        static_assert(std::is_base_of<Hashable, Key>::value);
+        static_assert(std::is_base_of<Object, Value>::value);
 
     private:
         Array<Key> _keys;
@@ -41,6 +42,10 @@ namespace fart::types {
             }
         }
         
+        const bool hasKey(const Key& key) const {
+            return _keys.indexOf(key) > -1;
+        }
+        
         Strong<Value> get(const Key& key) const noexcept(false) {
             ssize_t keyIndex = _keys.indexOf(key);
             if (keyIndex == -1) {
@@ -55,6 +60,12 @@ namespace fart::types {
         
         const size_t getCount() const {
             return _keys.getCount();
+        }
+        
+        void forEach(function<void(const Key&, const Value&)> todo) const {
+            for (size_t idx = 0 ; idx < _keys.getCount() ; idx++) {
+                todo(_keys[idx], _values[idx]);
+            }
         }
         
         const uint64_t getHash() const {

@@ -25,25 +25,23 @@ using namespace fart::exceptions::types;
 
 namespace fart::types {
     
+    class String;
+    
     template<typename T>
     class Data : public Type {
         
-    private:
-        T* _store;
-        size_t _count;
-        size_t _storeCount;
-        mutable uint64_t _hash;
-        mutable bool _hashIsDirty;
-        mutable Mutex _mutex;
-        
-        void ensureStoreSize(size_t count) {
-            if (_storeCount < count) {
-                _storeCount = (count / ARRAY_STORE_BLOCK_SIZE) + 1 * ARRAY_STORE_BLOCK_SIZE;
-                _store = (T*) realloc(_store, sizeof(T) * _storeCount);
-            }
-        }
-        
     public:
+        
+        class Comparitor : public Object {
+            
+        public:
+            virtual ~Comparitor() {}
+            
+            virtual const T transform(T value) const {
+                return value;
+            }
+            
+        };
         
         Data(const T* items, size_t count) : _store(nullptr), _storeCount(0), _count(0), _hash(0), _hashIsDirty(true) {
             append(items, count);
@@ -211,7 +209,8 @@ namespace fart::types {
                 if (_hashIsDirty) {
                     _hash = 5381;
                     for (size_t idx = 0 ; idx < _count ; idx++) {
-                        _hash = ((_hash << 5) + _hash) + (uint64_t)_store[idx]; /* hash * 33 + c */
+                        uint64_t value = (uint64_t)_comparitor->transform(_store[idx]);
+                        _hash = ((_hash << 5) + _hash) + value; /* hash * 33 + c */
                     }
                     _hashIsDirty = false;
                 }
@@ -228,12 +227,43 @@ namespace fart::types {
             return _mutex.lockedValue([this,other]() {
                 if (this->_count != other._count) return false;
                 for (size_t idx = 0 ; idx < this->_count ; idx++) {
-                    if (this->_store[idx] != other._store[idx]) return false;
+                    const T lhs = _comparitor->transform(_store[idx]);
+                    const T rhs = _comparitor->transform(other.getItemAtIndex(idx));
+                    if (lhs != rhs) return false;
                 }
                 return true;
             });
         }
         
+        void operator=(const Data<T>& other) {
+            _mutex.locked([this,other]() {
+                _count = 0;
+                append(other);
+            });
+        }
+        
+        void setComparitor(Comparitor& comparitor) {
+            _comparitor = comparitor;
+        }
+        
+    private:
+        
+        T* _store;
+        size_t _count;
+        size_t _storeCount;
+        mutable uint64_t _hash;
+        mutable bool _hashIsDirty;
+        mutable Mutex _mutex;
+        
+        Strong<Comparitor> _comparitor;
+        
+        void ensureStoreSize(size_t count) {
+            if (_storeCount < count) {
+                _storeCount = (count / ARRAY_STORE_BLOCK_SIZE) + 1 * ARRAY_STORE_BLOCK_SIZE;
+                _store = (T*) realloc(_store, sizeof(T) * _storeCount);
+            }
+        }
+            
     };
 
 }

@@ -19,72 +19,20 @@ using namespace fart::network::web::http;
 int main(int argc, const char * argv[]) {
     
     try {
-        
-        String testHttp = "GET /hello.htm HTTP/1.1\r\nUser-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\nHost: www.tutorialspoint.com\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: Keep-Alive\r\n\r\n";
-        
-        HTTPRequest request(testHttp.getData());
-        
-        printf("%s\n", request.getHeaderValue("Accept-Encoding")->getCString());
-        
-        Array<String> array;
-        
-        Dictionary<String, Number<double>> dictionary;
-        
-        Number<double> doubleValue = 12.0;
-        Strong<Number<uint64_t>> intValue(doubleValue);
-        
-        dictionary.set("testKey", Strong<Number<double>>(12));
-        
-        printf("Stored value is %1.0f.\n", (double)*dictionary.get("testKey"));
-        
-        String string = "This is my string";
-        
-        array.append(string); // String copied to heap
-        
-        Weak<String> weak;
-        
-        Strong<String> otherString = array[0];
-        
-        array[0]->append(" - and I'm testing it!");
-        
-        array.removeItemAtIndex(0);
-        
-        printf("%s\n", otherString->getCString());
-        
-        otherString->split(" ")->forEach([](Strong<String> str) {
-            printf("%s\n", str->getCString());
+                
+        HTTPServer server(3001, [](const HTTPRequest& request, HTTPResponse& response) {
+            String responseString = "<html><body><h1>Hello, ";
+            responseString.append(request.getPath());
+            responseString.append("!</h1></body></html>");
+            String contentType("text/html");
+            response.setHeaderValue("Content-Type", contentType);
+            response.setBody(responseString.getData());
         });
+                
+        Mutex mtx;
+        mtx.lock();
+        Semaphore().wait(mtx);
         
-        printf("%s\n", String::join(otherString->split(" "), " ")->getCString());
-        
-        Strong<Socket> socket;
-        
-        Strong<Array<Socket>> openSockets;
-        
-        socket->bind(Strong<Endpoint>(Strong<String>("0.0.0.0"), 3004));
-        socket->listen([&](Strong<Socket> newSocket) {
-            openSockets->append(newSocket);
-            newSocket->accept([](Strong<Data<uint8_t>> data, Strong<Endpoint> endpoint) {
-                Strong<String> string(data);
-                printf("%s", string->getCString());
-            });
-        });
-        
-        usleep(10000000);
-        
-        bool done = false;
-        
-        do {
-            usleep(100000);
-            done = true;
-            for (size_t idx = 0 ; idx < openSockets->getCount() ; idx++) {
-                if (openSockets->getItemAtIndex(idx)->getSocketState() != SocketStateClosed) {
-                    done = false;
-                    break;
-                }
-            }
-        } while(!done);
-            
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.getDescription(), exception.getSize());
     } catch (types::DecoderException exception) {

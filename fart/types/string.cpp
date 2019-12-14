@@ -6,21 +6,26 @@
 //  Copyright © 2018 Kristian Trenskow. All rights reserved.
 //
 
-#include "../exceptions/exception.hpp"
+#include <cstdarg>
+#include <cstdio>
 
+#include "../exceptions/exception.hpp"
 #include "./string.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
 using namespace fart::exceptions::types;
 
-String::String() {}
+String::String() {
+    _store.setComparitor(_caseComparitor);
+    _caseComparitor->setComparison(ComparisonCaseInsensitive);
+}
 
-String::String(const Data<uint32_t>& storage) {
+String::String(const Data<uint32_t>& storage) : String() {
     _store.append(storage);
 }
 
-String::String(const char* string, const Encoding encoding) noexcept(false) {
+String::String(const char* string, const Encoding encoding) noexcept(false) : String() {
     switch (encoding) {
         case EncodingUTF8:
             _store.append(_decodeUTF8(string, strlen(string)));
@@ -28,7 +33,7 @@ String::String(const char* string, const Encoding encoding) noexcept(false) {
     }
 }
 
-String::String(const Data<uint8_t>& data, const Encoding encoding) noexcept(false) {
+String::String(const Data<uint8_t>& data, const Encoding encoding) noexcept(false) : String() {
     switch (encoding) {
         case EncodingUTF8:
             _store.append(_decodeUTF8(data));
@@ -36,7 +41,7 @@ String::String(const Data<uint8_t>& data, const Encoding encoding) noexcept(fals
     }
 }
 
-String::String(const String& other) : _store(other._store) {}
+String::String(const String& other) : String(other._store) {}
 
 String::~String() {}
 
@@ -94,7 +99,7 @@ Strong<Data<uint32_t>> String::_decodeUTF8(const Data<uint8_t> &buffer) const {
     return _decodeUTF8((const char *)buffer.getItems(), buffer.getCount());
 }
 
-Strong<Data<uint8_t>> String::_encodeUTF8(const Data<uint32_t> &buffer) const {
+Strong<Data<uint8_t>> String::_encodeUTF8(const Data<uint32_t> &buffer, bool nullTerminate) const {
     
     Strong<Data<uint8_t>> ret;
     
@@ -125,10 +130,36 @@ Strong<Data<uint8_t>> String::_encodeUTF8(const Data<uint32_t> &buffer) const {
         
     }
     
-    ret->append('\0');
-    
+    if (nullTerminate) ret->append('\0');
+        
     return ret;
     
+}
+
+Strong<String> String::format(const char* format, ...) {
+    
+    va_list args;
+    
+    va_start(args, format);
+    
+    size_t size = vsnprintf(nullptr, 0, format, args) + 1;
+    
+    va_end(args);
+    
+    va_start(args, format);
+    
+    char buffer[size];
+    
+    vsnprintf(buffer, size, format, args);
+    
+    va_end(args);
+    
+    return Strong<String>((const char*)buffer);
+        
+}
+
+void String::setComparison(Comparison comparison) {
+    _caseComparitor->setComparison(comparison);
 }
 
 size_t String::getLength() const {
@@ -138,7 +169,7 @@ size_t String::getLength() const {
 const char* String::getCString(Encoding encoding) const {
     switch (encoding) {
         case EncodingUTF8:
-            return (const char *)getData(encoding)->getItems();
+            return (const char *)_encodeUTF8(_store, true)->getItems();
     }
 }
 
@@ -155,6 +186,13 @@ void String::append(const String &other) {
 
 void String::append(const uint32_t character) {
     _store.append(character);
+}
+
+void String::append(const char *string, Encoding encoding) {
+    switch (encoding) {
+        case EncodingUTF8:
+        _store.append(_decodeUTF8(Data<uint8_t>((const uint8_t*)string, strlen(string))));
+    }
 }
 
 Strong<Array<String>> String::split(const char *seperator, size_t max) const {
@@ -185,6 +223,22 @@ Strong<String> String::join(Array<String> &strings, String &seperator) {
     }), seperator._store));
 }
 
+const int64_t String::parseNumber() const {
+    if (_store.getCount() == 0) throw DecoderException(0);
+    int64_t multiplier = 1;
+    int64_t result = 0;
+    for (size_t idx = 0 ; idx < getLength() ; idx++) {
+        if (idx == 0 && _store[idx] == '-') {
+            multiplier = -1;
+            continue;
+        }
+        uint32_t character = _store[idx];
+        if (character < '0' || character > '9') throw DecoderException(idx);
+        result = result * 10 + (character - '0');
+    }
+    return result * multiplier;
+}
+
 const uint64_t String::getHash() const {
     return _store.getHash();
 }
@@ -213,4 +267,19 @@ void String::operator=(const String &other) {
 
 String::operator const char *() const {
     return this->getCString();
+}
+
+String::CaseComparitor::~CaseComparitor() {}
+
+const uint32_t String::CaseComparitor::transform(uint32_t value) const {
+    switch (_comparison) {
+        case ComparisonCaseInsensitive:
+            if (value >= 'A' && value <= 'Z') return value - ('A' - 'a');
+        default:
+            return value;
+    }
+}
+
+void String::CaseComparitor::setComparison(Comparison comparison) {
+    _comparison = comparison;
 }

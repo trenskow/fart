@@ -9,19 +9,15 @@
 #ifndef request_hpp
 #define request_hpp
 
-#include "../../../memory/object.hpp"
-#include "../../../memory/strong.hpp"
-#include "../../../types/data.hpp"
-#include "../../../types/string.hpp"
 #include "../message.hpp"
-#include "./version.hpp"
+#include "./head.hpp"
 
 using namespace fart::types;
 using namespace fart::network::web;
 
 namespace fart::network::web::http {
                 
-    class RequestHead : public Object {
+    class RequestHead : public Head {
         
     public:
         
@@ -33,6 +29,7 @@ namespace fart::network::web::http {
             DELETE
         };
         
+        RequestHead();
         RequestHead(Data<uint8_t>& data);
         RequestHead(const RequestHead& other);
         
@@ -42,11 +39,15 @@ namespace fart::network::web::http {
         const Method getMethod() const;
         const Strong<String> getPath() const;
         
+    protected:
+        
+        virtual Strong<Data<uint8_t>> getHeadData(const Data<uint8_t> &lineBreak) const;
+        
     private:
         
         Version _version;
         Method _method;
-        String _path;
+        Strong<String> _path;
         
         void ensureSpaceAt(Data<uint8_t>& data, size_t index) const noexcept(false);
         
