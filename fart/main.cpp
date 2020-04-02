@@ -15,23 +15,12 @@ using namespace fart::types;
 using namespace fart::exceptions;
 using namespace fart::network;
 using namespace fart::network::web::http;
+using namespace fart::serialization;
 
 int main(int argc, const char * argv[]) {
     
     try {
-                
-        HTTPServer server(3001, [](const HTTPRequest& request, HTTPResponse& response) {
-            String responseString = "<html><body><h1>Hello, ";
-            responseString.append(request.getPath());
-            responseString.append("!</h1></body></html>");
-            String contentType("text/html");
-            response.setHeaderValue("Content-Type", contentType);
-            response.setBody(responseString.getData());
-        });
-                
-        Mutex mtx;
-        mtx.lock();
-        Semaphore().wait(mtx);
+        
         
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.getDescription(), exception.getSize());
@@ -41,6 +30,8 @@ int main(int argc, const char * argv[]) {
         printf("%s (index: %zu)\n", exception.getDescription(), exception.getIndex());
     } catch (types::KeyNotFoundException<String> exception) {
         printf("%s (key: %s)\n", exception.getDescription(), (const char*)exception.getKey());
+    } catch (serialization::JSONMalformedException exception) {
+        printf("JSON is malformed (line: %zu, character: %zu)\n", exception.getLine(), exception.getCharacter());
     }
     
     return 0;

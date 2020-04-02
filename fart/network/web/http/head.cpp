@@ -44,8 +44,8 @@ const Version Head::parseVersion(String &version) {
 Strong<Data<uint8_t>> Head::versionData(Version version) {
     switch (version) {
         case HTTP1_0:
-            return String("HTTP/1.0").getData();
+            return String("HTTP/1.0").getUTF8Data();
         case HTTP1_1:
-            return String("HTTP/1.1").getData();
+            return String("HTTP/1.1").getUTF8Data();
     }
 }

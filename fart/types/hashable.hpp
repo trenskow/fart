@@ -9,14 +9,18 @@
 #ifndef hashable_hpp
 #define hashable_hpp
 
-#include <unistd.h>
+#include "../exceptions/exception.hpp"
+
+using namespace fart::exceptions;
 
 namespace fart::types {
     
     class Hashable {
         
     public:
-        virtual const uint64_t getHash() const = 0;
+        virtual const uint64_t getHash() const {
+            throw NotImplementedException();
+        };
         
     };
     

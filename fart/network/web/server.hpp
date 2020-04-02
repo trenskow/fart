@@ -27,6 +27,7 @@ namespace fart::network::web {
         Server(uint16_t port, function<void(const Message<Request>& request, Message<Response>& response)> requestHandler) : _requestHandler(requestHandler) {
             _listener.bind(Strong<Endpoint>(port));
             _listener.listen([this](Socket& acceptSocket) {
+                acceptSocket.setCloseCallback(_socketClosed, this);
                 _connections.append(acceptSocket);
                 acceptSocket.accept([this,&acceptSocket](Data<uint8_t>& data, const Endpoint& sender) {
                     this->_onData(data, acceptSocket);
@@ -36,9 +37,17 @@ namespace fart::network::web {
         
     protected:
         
-        virtual void postProcess(Message<Request> request, Socket& socket) const {}
+        virtual void postProcess(const Message<Request>& request, Socket& socket) const {}
         
     private:
+        
+        void _socketClosed(const Socket& socket) {
+            _connections.removeItem(socket);
+        }
+        
+        static void _socketClosed(const Socket& socket, void* context) {
+            ((Server<Request, Response>*)context)->_socketClosed(socket);
+        }
         
         void _onData(Data<uint8_t>& data, Socket& socket) {
             
@@ -60,10 +69,8 @@ namespace fart::network::web {
             
             socket.send(response->getData());
             
-            if (!request->hasHeader("connection") || *request->getHeaderValue("connection") != "keep-alive") {
-                socket.close();
-            }
-            
+            postProcess(request, socket);
+                        
         }
         
         Socket _listener;

@@ -15,8 +15,21 @@
 #include "../server.hpp"
 
 namespace fart::network::web::http {
-
-    typedef Server<RequestHead, ResponseHead> HTTPServer;
+    
+    class HTTPServer : public Server<RequestHead, ResponseHead> {
+        
+    public:
+        HTTPServer(uint16_t port, function<void(const HTTPRequest& request, HTTPResponse& response)> requestHandler) : Server(port, requestHandler) {}
+        
+    protected:
+        
+        virtual void postProcess(const Message<RequestHead>& request, Socket &socket) const {
+            if (!request.hasHeader("connection") || *request.getHeaderValue("connection") != String("keep-alive")) {
+                socket.close();
+            }
+        }
+        
+    };
     
 }
 

@@ -60,24 +60,24 @@ Strong<Data<uint8_t>> RequestHead::getHeadData(const Data<uint8_t>& lineBreak) c
     
     switch (getMethod()) {
        case HEAD:
-           result->append(String("HEAD").getData());
+           result->append(String("HEAD").getUTF8Data());
            break;
        case GET:
-           result->append(String("GET").getData());
+           result->append(String("GET").getUTF8Data());
            break;
        case POST:
-           result->append(String("POST").getData());
+           result->append(String("POST").getUTF8Data());
            break;
        case PUT:
-           result->append(String("PUT").getData());
+           result->append(String("PUT").getUTF8Data());
            break;
        case DELETE:
-           result->append(String("DELETE").getData());
+           result->append(String("DELETE").getUTF8Data());
            break;
     }
     
     result->append(' ');
-    result->append(_path->getData());
+    result->append(_path->getUTF8Data());
     result->append(' ');
     result->append(Head::versionData(_version));
     result->append(lineBreak);

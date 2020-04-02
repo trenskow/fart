@@ -19,7 +19,7 @@ Semaphore::~Semaphore() {
 }
 
 void Semaphore::wait(const Mutex& mutex) const {
-    auto err = pthread_cond_wait(&_condition, &mutex._mutex);
+    pthread_cond_wait(&_condition, &mutex._mutex);
 }
 
 void Semaphore::signal() const {

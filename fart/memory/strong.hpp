@@ -55,7 +55,7 @@ namespace fart::memory {
         Strong(const Strong<T>& other) : _object(nullptr) {
             _setObject(other._object);
         }
-        
+                
         template<typename... Args>
         explicit Strong(Args&&... args) : _object(nullptr) {
             _setObject(new T(std::forward<Args>(args)...), true);
@@ -104,7 +104,12 @@ namespace fart::memory {
         bool operator!=(std::nullptr_t n) {
             return !(this->_object == n);
         }
-                    
+        
+        template<class O>
+        Strong<O> as() {
+            return Strong<O>((O*)_object);
+        }
+        
     };
 
 }

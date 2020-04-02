@@ -23,11 +23,12 @@ Socket::Socket(int socket) : Socket() {
 Socket::Socket(const Socket& other) : _isUDP(other._isUDP), _socket(other._socket), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {}
 
 Socket::Socket(Socket&& other) : _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {
-    
+    printf("Move\n");
 }
 
 Socket::~Socket() {
     close();
+    _closeCallback.callback = nullptr;
 }
 
 const uint64_t Socket::getHash() const {
@@ -231,6 +232,9 @@ const size_t Socket::sendTo(const Endpoint& endpoint, const Data<uint8_t>& data)
 }
 
 void Socket::close() {
+    if (_state != SocketStateClosed && _closeCallback.callback != nullptr) {
+        _closeCallback.callback(*this, _closeCallback.context);
+    }
     _mutex.locked([this]() {
         shutdown(_socket, SHUT_RDWR);
         ::close(_socket);
@@ -266,4 +270,13 @@ const SocketState Socket::getSocketState() const {
 void Socket::awaitClose() const {
     if (_receiveThread.getIsDetached()) _receiveThread.join();
     if (_listenThread.getIsDetached()) _listenThread.join();
+}
+
+void Socket::setCloseCallback(void (*callback)(const Socket &, void *), void *context) {
+    _closeCallback.callback = callback;
+    _closeCallback.context = context;
+}
+
+bool Socket::operator==(const Socket &other) const {
+    return _socket == other._socket;
 }

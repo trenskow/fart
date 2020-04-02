@@ -37,12 +37,12 @@ Strong<Data<uint8_t>> ResponseHead::getHeadData(const Data<uint8_t>& lineBreak) 
     
     result->append(Head::versionData(_version));
     result->append(' ');
-    result->append(String::format("%d", _status)->getData());
+    result->append(String::format("%d", _status)->getUTF8Data());
     result->append(' ');
     
     switch (_status) {
         case OK:
-            result->append(String("OK").getData());
+            result->append(String("OK").getUTF8Data());
             break;
     }
     

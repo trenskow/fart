@@ -14,6 +14,7 @@
 
 using namespace fart::memory;
 using namespace fart::threading;
+using namespace fart::exceptions::types;
 
 namespace fart::types {
     
@@ -67,6 +68,15 @@ namespace fart::types {
         
         void removeItemAtIndex(size_t index) noexcept(false) {
             _storage.removeItemAtIndex(index)->release();
+            _hashMutex.locked([this]() {
+                _hashIsDirty = true;
+            });
+        }
+        
+        void removeItem(const T& item) {
+            ssize_t idx = indexOf(item);
+            if (idx == -1) throw NotFoundException<T>(item);
+            removeItemAtIndex(idx);
         }
         
         void replace(Strong<T> item, size_t index) {
@@ -87,14 +97,21 @@ namespace fart::types {
                 todo(this->getItemAtIndex(idx));
             }
         }
+                
+        template<typename R, typename F>
+        R reduceIndex(R initial, const F& todo) const {
+            R result = initial;
+            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
+                result = todo(result, idx);
+            }
+            return result;
+        }
         
         template<typename R, typename F>
         R reduce(R initial, const F& todo) const {
-            R result = initial;
-            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
-                result = todo(result, this->getItemAtIndex(idx));
-            }
-            return result;
+            return this->reduceIndex(initial, [this,todo](R current, const size_t idx) {
+                return todo(current, this->getItemAtIndex(idx));
+            });
         }
         
         template<typename R, typename F>

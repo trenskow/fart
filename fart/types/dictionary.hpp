@@ -42,6 +42,10 @@ namespace fart::types {
             }
         }
         
+        Strong<Array<Key>> getKeys() const {
+            return Strong<Array<Key>>(_keys);
+        }
+        
         const bool hasKey(const Key& key) const {
             return _keys.indexOf(key) > -1;
         }

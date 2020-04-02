@@ -36,6 +36,11 @@ namespace fart::network {
         
     public:
         
+        class ICloseListener {
+        public:
+            virtual void SocketClosed(const Socket& socket) const = 0;
+        };
+        
         Socket(int socket);
         Socket(bool isUDP = false);
         Socket(const Socket& other);
@@ -60,7 +65,17 @@ namespace fart::network {
         
         void awaitClose() const;
         
+        void setCloseCallback(void (*callback)(const Socket& socket, void* context), void* context);
+        
+        bool operator==(const Socket& other) const;
+        
     private:
+        
+        struct CloseCallback {
+            CloseCallback() : callback(nullptr), context(nullptr) {}
+            void (*callback)(const Socket& socket, void* context);
+            void *context;
+        };
         
         bool _isUDP;
         
@@ -74,6 +89,8 @@ namespace fart::network {
         Thread _receiveThread;
         
         Mutex _mutex;
+        
+        CloseCallback _closeCallback;
         
         void _read(function<void()> setup, function<void(Strong<Data<uint8_t>>, Strong<Endpoint> endpoint)> readCallback);
         

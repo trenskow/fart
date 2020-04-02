@@ -27,7 +27,7 @@ namespace fart::types {
     
     class String;
     
-    template<typename T>
+    template<typename T = uint8_t>
     class Data : public Type {
         
     public:
@@ -144,9 +144,11 @@ namespace fart::types {
             });
         }
         
-        Strong<Data<T>> subdata(const size_t offset, const size_t length) const {
+        Strong<Data<T>> subdata(const size_t offset, const ssize_t length = -1) const {
             return _mutex.lockedValue([this,offset,length]{
-                return Strong<Data<T>>(&_store[offset], length);
+                ssize_t l = length;
+                if (l < 0) l = _count - offset;
+                return Strong<Data<T>>(&_store[offset], l);
             });
         }
         
@@ -189,9 +191,9 @@ namespace fart::types {
         }
         
         static Strong<Data<T>> join(Array<Data<T>>& datas, Data<T>* seperator) {
-            return datas.reduce(Strong<Data<T>>(), [seperator](Strong<Data<T>> result, Data<T>& current) {
-                result->append(current);
-                if (seperator != nullptr) result->append(*seperator);
+            return datas.reduceIndex(Strong<Data<T>>(), [datas, seperator](Strong<Data<T>> result, const size_t idx) {
+                result->append(datas.getItemAtIndex(idx));
+                if (seperator != nullptr && idx != datas.getCount() - 1) result->append(*seperator);
                 return result;
             });
         }
@@ -202,6 +204,13 @@ namespace fart::types {
         
         static Strong<Data<T>> join(Array<Data<T>>& datas, Data<T>& seperator) {
             return join(datas, &seperator);
+        }
+        
+        template<typename O>
+        Strong<Data<O>> to() {
+            return _mutex.lockedValue([this]() {
+                return Strong<Data<O>>((const O*)this->_store, (this->_count * sizeof(T)) / sizeof(O));
+            });
         }
         
         virtual const uint64_t getHash() const {
@@ -259,7 +268,7 @@ namespace fart::types {
         
         void ensureStoreSize(size_t count) {
             if (_storeCount < count) {
-                _storeCount = (count / ARRAY_STORE_BLOCK_SIZE) + 1 * ARRAY_STORE_BLOCK_SIZE;
+                _storeCount = ((count / ARRAY_STORE_BLOCK_SIZE) + 1) * ARRAY_STORE_BLOCK_SIZE;
                 _store = (T*) realloc(_store, sizeof(T) * _storeCount);
             }
         }

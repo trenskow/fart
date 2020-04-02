@@ -16,5 +16,6 @@
 #include "./number.hpp"
 #include "./array.hpp"
 #include "./dictionary.hpp"
+#include "./null.hpp"
 
 #endif /* types_h */

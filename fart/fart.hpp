@@ -12,11 +12,13 @@
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
+#include "./system/endian.h"
 #include "./exceptions/exception.hpp"
 #include "./threading/threading.hpp"
 #include "./types/types.hpp"
 #include "./memory/memory.hpp"
 #include "./network/network.hpp"
+#include "./serialization/json.hpp"
 
 #pragma GCC visibility pop
 #endif
