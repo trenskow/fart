@@ -14,6 +14,9 @@
 #include "../types/null.hpp"
 #include "../types/string.hpp"
 #include "../types/dictionary.hpp"
+#include "../types/duration.hpp"
+#include "../types/date.hpp"
+#include "../system/endian.h"
 
 #include "json.hpp"
 
@@ -222,7 +225,7 @@ Strong<Type> _parseString(const String& string, size_t* idx, size_t* line, size_
                     case 'U': {
                         _ensureLength(string, idx, 4);
                         String code = string.substring(*idx + 1, 4);
-                        stringBytes.append(Endian::toSystemVariant(code.getHexData()->to<uint16_t>()->getItemAtIndex(0), Endian::Variant::big));
+                        stringBytes.append(Endian::toSystemVariant(code.getHexData()->as<uint16_t>()->getItemAtIndex(0), Endian::Variant::big));
                         (*idx) += 4;
                         (*character) += 4;
                         break;
@@ -318,11 +321,11 @@ Strong<String> JSON::stringify(const Type &data) {
     Strong<String> result;
     
     switch (data.getKind()) {
-        case types::Type::Kind::dictionary: {
+        case Type::Kind::dictionary: {
             result->append("{");
             auto dictionary = data.as<Dictionary<Type, Type>>();
             result->append(String::join(dictionary.getKeys()->map<String>([dictionary](Type& key) {
-                if (key.getKind() != types::Type::Kind::string) throw EncoderTypeException();
+                if (key.getKind() != Type::Kind::string) throw EncoderTypeException();
                 Strong<String> result;
                 result->append(stringify(key));
                 result->append(":");
@@ -332,7 +335,7 @@ Strong<String> JSON::stringify(const Type &data) {
             result->append("}");
             break;
         }
-        case types::Type::Kind::array: {
+        case Type::Kind::array: {
             Array<Type>& array = data.as<Array<Type>>();
             result->append("[");
             result->append(String::join(array.map<String>([](Type& item) {
@@ -341,7 +344,7 @@ Strong<String> JSON::stringify(const Type &data) {
             result->append("]");
             break;
         }
-        case types::Type::Kind::string: {
+        case Type::Kind::string: {
             auto bytes = data.as<String>().getUTF16Data(Endian::getSystemVariant());
             result->append("\"");
             for (size_t idx = 0 ; idx < bytes->getCount() ; idx++) {
@@ -370,8 +373,8 @@ Strong<String> JSON::stringify(const Type &data) {
                         break;
                     default:
                         if (!((byte >= 0x20 && byte <= 0x21) || (byte >= 0x23 && byte <= 0x5B) || byte >= 0x5D)) {
-                            uint16_t beByte = Endian::fromSystemVariant(byte, system::Endian::big);
-                            auto beByteData = Data<uint16_t>(&beByte, 1).to<uint8_t>();
+                            uint16_t beByte = Endian::fromSystemVariant(byte, Endian::big);
+                            auto beByteData = Data<uint16_t>(&beByte, 1).as<uint8_t>();
                             result->append("\\U");
                             result->append(String::fromHex(beByteData));
                         } else {
@@ -383,15 +386,15 @@ Strong<String> JSON::stringify(const Type &data) {
             result->append("\"");
             break;
         }
-        case types::Type::Kind::number: {
+        case Type::Kind::number: {
             switch (data.as<Number<uint64_t>>().getSubType()) {
-                case types::boolean:
+                case boolean:
                     result->append(data.as<Boolean>().getValue() ? "true" : "false");
                     break;
-                case types::integer:
+                case integer:
                     result->append(String::format("%lld", data.as<Integer>().getValue()));
                     break;
-                case types::floatingPoint: {
+                case floatingPoint: {
                     double value = data.as<Float>().getValue();
                     std::ostringstream stream;
                     stream << value;
@@ -401,11 +404,17 @@ Strong<String> JSON::stringify(const Type &data) {
             }
             break;
         }
-        case types::Type::Kind::data:
+        case Type::Kind::data:
             throw EncoderTypeException();
             break;
-        case types::Type::Kind::null:
+        case Type::Kind::null:
             result->append("null");
+            break;
+        case Type::Kind::duration:
+            return stringify(Number<double>(data.as<Duration>().getSeconds()));
+            break;
+        case Type::Kind::date:
+            return stringify(data.as<Date>().toISO8601());
             break;
     }
     

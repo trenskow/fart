@@ -171,23 +171,30 @@ namespace fart::types {
             });
         };
         
-        Strong<Array<Data<T>>> split(const Data<T>& separator, size_t max = 0) const {
-            return _mutex.lockedValue([this,separator,max]() {
+        Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, size_t max = 0) const {
+            return _mutex.lockedValue([this,separators,max]() {
                 Strong<Array<Data<T>>> result;
                 ssize_t idx = 0;
                 while (result->getCount() < max - 1) {
-                    ssize_t next = indexOf(separator, idx);
-                    if (next == -1) break;
-                    result->append(subdata(idx, next - idx));
-                    idx = next + separator.getCount();
+                    if (!separators.some([this,&idx,&result](const Data<T>& separator) {
+                        ssize_t next = indexOf(separator, idx);
+                        if (next == -1) return false;
+                        result->append(subdata(idx, next - idx));
+                        idx = next + separator.getCount();
+                        return true;
+                    })) break;
                 }
                 result->append(subdata(idx, getCount() - idx));
                 return result;
             });
         }
         
+        Strong<Array<Data<T>>> split(Strong<Data<T>> separator, size_t max = 0) const {
+            return split(Array<Data<T>>(separator, 1), max);
+        }
+        
         Strong<Array<Data<T>>> split(const T* seperator, size_t length, size_t max = 0) const {
-            return split(Data<T>(seperator, length), max);
+            return split(Strong<Data<T>>(seperator, length), max);
         }
         
         static Strong<Data<T>> join(Array<Data<T>>& datas, Data<T>* seperator) {
@@ -207,7 +214,7 @@ namespace fart::types {
         }
         
         template<typename O>
-        Strong<Data<O>> to() {
+        Strong<Data<O>> as() {
             return _mutex.lockedValue([this]() {
                 return Strong<Data<O>>((const O*)this->_store, (this->_count * sizeof(T)) / sizeof(O));
             });

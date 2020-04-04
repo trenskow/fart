@@ -58,8 +58,9 @@ namespace fart::types {
         void append(const uint32_t character);
         void append(const char* string);
         
-        Strong<Array<String>> split(const char *seperator, size_t max = 0) const;
-        Strong<Array<String>> split(String& seperator, size_t max = 0) const;
+        Strong<Array<String>> split(const char *separator, size_t max = 0) const;
+        Strong<Array<String>> split(String& separator, size_t max = 0) const;
+        Strong<Array<String>> split(const Array<String>& separators, size_t max = 0) const;
         static Strong<String> join(Array<String>& strings);
         static Strong<String> join(Array<String>& strings, const char *seperator);
         static Strong<String> join(Array<String>& strings, String* seperator);
@@ -67,6 +68,7 @@ namespace fart::types {
         
         const int64_t parseNumber(size_t startIndex = 0, size_t* consumed = nullptr) const;
         
+        ssize_t indexOf(const String& other, size_t offset = 0) const;
         Strong<String> substring(size_t offset, ssize_t length = -1) const;
                 
         virtual const uint64_t getHash() const;

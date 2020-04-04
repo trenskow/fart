@@ -94,6 +94,15 @@ namespace fart {
         }
 
         namespace types {
+            
+            class ISO8601Exception : public Exception {
+                
+            public:
+                virtual const char* getDescription() const {
+                    return "Not a valid ISO 8601 string";
+                }
+                
+            };
 
             class DecoderException : public Exception {
                 

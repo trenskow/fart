@@ -42,7 +42,7 @@ String::String(const Data<uint16_t>& data) noexcept(false) : String() {
     Strong<Data<uint16_t>> parseData(data);
     Endian::Variant endian = Endian::Variant::big;
     if (data.getCount() > 1) {
-        Data<uint8_t> bom = data.subdata(0, 2)->to<uint8_t>();
+        Data<uint8_t> bom = data.subdata(0, 2)->as<uint8_t>();
         uint8_t b0 = bom[0];
         uint8_t b1 = bom[1];
         if ((b0 == 0xFF || b0 == 0xFE) && (b1 == 0xFF || b1 == 0xFE)) {
@@ -311,6 +311,15 @@ Strong<Array<String>> String::split(String &seperator, size_t max) const {
     });
 }
 
+Strong<Array<String>> String::split(const Array<String>& separators, size_t max) const {
+    auto stores = separators.map<Data<uint32_t>>([](const String& current) {
+        return current._store;
+    });
+    return _store.split(stores, max)->map<String>([](Data<uint32_t>& current) {
+        return String(current);
+    });
+}
+
 Strong<String> String::join(Array<String>& strings) {
     return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](String& current) {
         return current._store;
@@ -346,6 +355,10 @@ const int64_t String::parseNumber(size_t startIndex, size_t* consumed) const {
     }
     if (consumed != nullptr) *consumed = idx - startIndex;
     return result * multiplier;
+}
+
+ssize_t String::indexOf(const String& other, size_t offset) const {
+    return this->_store.indexOf(other._store, offset);
 }
 
 Strong<String> String::substring(size_t offset, ssize_t length) const {

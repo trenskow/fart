@@ -24,7 +24,7 @@ namespace fart::memory {
     class Strong {
         
         static_assert(std::is_base_of<Object, T>::value);
-        
+                
     private:
         T* _object;
         
@@ -55,6 +55,8 @@ namespace fart::memory {
         Strong(const Strong<T>& other) : _object(nullptr) {
             _setObject(other._object);
         }
+        
+        Strong(const Weak<T>& other) : _object(other) {}
                 
         template<typename... Args>
         explicit Strong(Args&&... args) : _object(nullptr) {

@@ -17,5 +17,7 @@
 #include "./array.hpp"
 #include "./dictionary.hpp"
 #include "./null.hpp"
+#include "./duration.hpp"
+#include "./date.hpp"
 
 #endif /* types_h */

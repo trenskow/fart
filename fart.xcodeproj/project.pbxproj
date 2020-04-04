@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		A113FD1A23A4D15300984408 /* fart.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A113FD1923A4D15200984408 /* fart.hpp */; };
-		A113FD1C23A4D15300984408 /* fartPriv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A113FD1B23A4D15300984408 /* fartPriv.hpp */; };
 		A113FD2223A4D18800984408 /* version.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A15F5C4E23A2515800269F72 /* version.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD2323A4D18800984408 /* request-head.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1380CC623A240BF005D3255 /* request-head.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD2423A4D18800984408 /* request-head.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1380CC523A240BF005D3255 /* request-head.cpp */; };
@@ -22,7 +21,7 @@
 		A113FD2C23A4D18800984408 /* web.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1380CC323A2403D005D3255 /* web.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD2D23A4D18800984408 /* socket.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1FC98C6215296AE00CE1B63 /* socket.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD2E23A4D18800984408 /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1FC98C5215296AE00CE1B63 /* socket.cpp */; };
-		A113FD2F23A4D18800984408 /* endpoint.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1FC98C9215296E200CE1B63 /* endpoint.hpp */; };
+		A113FD2F23A4D18800984408 /* endpoint.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1FC98C9215296E200CE1B63 /* endpoint.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD3023A4D18800984408 /* endpoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1FC98C8215296E200CE1B63 /* endpoint.cpp */; };
 		A113FD3123A4D18800984408 /* network.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1380CC423A2405A005D3255 /* network.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD3223A4D19F00984408 /* object.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1E70CC52126A6F300888FD2 /* object.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -48,12 +47,17 @@
 		A113FD4623A4D1C600984408 /* exception.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1E70CD72126C1BF00888FD2 /* exception.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A113FD4823A4D2BB00984408 /* libfart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A113FD1723A4D15200984408 /* libfart.a */; };
 		A113FD4B23A4D4F400984408 /* head.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A113FD4923A4D4F400984408 /* head.cpp */; };
-		A113FD4C23A4D4F400984408 /* head.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A113FD4A23A4D4F400984408 /* head.hpp */; };
+		A113FD4C23A4D4F400984408 /* head.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A113FD4A23A4D4F400984408 /* head.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A18EE0492434C39900242173 /* null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A18EE0472434C39900242173 /* null.cpp */; };
 		A18EE04A2434C39900242173 /* null.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A18EE0482434C39900242173 /* null.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A18EE04E2434C63C00242173 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A18EE04C2434C63C00242173 /* json.cpp */; };
 		A18EE04F2434C63C00242173 /* json.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A18EE04D2434C63C00242173 /* json.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A18EE0552434E98800242173 /* endian.h in Headers */ = {isa = PBXBuildFile; fileRef = A18EE0542434E98800242173 /* endian.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A1938017243724AE00F914DA /* exceptions.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1938016243724AE00F914DA /* exceptions.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A1938019243724D100F914DA /* system.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1938018243724D100F914DA /* system.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A193801B243724EB00F914DA /* serialization.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A193801A243724EB00F914DA /* serialization.hpp */; };
+		A193801F243726D000F914DA /* date.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A193801D243726D000F914DA /* date.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A193802724387BAD00F914DA /* duration.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A193802524387BAD00F914DA /* duration.hpp */; };
 		A1E70CBD2126A6C600888FD2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1E70CBC2126A6C600888FD2 /* main.cpp */; };
 		A1F4357F23A5209000191611 /* semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1F4357D23A5209000191611 /* semaphore.cpp */; };
 		A1F4358023A5209000191611 /* semaphore.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A1F4357E23A5209000191611 /* semaphore.hpp */; };
@@ -73,12 +77,8 @@
 
 /* Begin PBXFileReference section */
 		A113FCC423A4CF0400984408 /* fart.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fart.hpp; sourceTree = "<group>"; };
-		A113FCC623A4CF0400984408 /* fartPriv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fartPriv.hpp; sourceTree = "<group>"; };
-		A113FCC823A4CF0400984408 /* fart.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fart.cpp; sourceTree = "<group>"; };
 		A113FD1723A4D15200984408 /* libfart.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfart.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A113FD1923A4D15200984408 /* fart.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fart.hpp; sourceTree = "<group>"; };
-		A113FD1B23A4D15300984408 /* fartPriv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fartPriv.hpp; sourceTree = "<group>"; };
-		A113FD1D23A4D15300984408 /* fart.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fart.cpp; sourceTree = "<group>"; };
 		A113FD4923A4D4F400984408 /* head.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = head.cpp; sourceTree = "<group>"; };
 		A113FD4A23A4D4F400984408 /* head.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = head.hpp; sourceTree = "<group>"; };
 		A1380CB623A1C80F005D3255 /* url.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = url.cpp; sourceTree = "<group>"; };
@@ -107,6 +107,11 @@
 		A18EE04C2434C63C00242173 /* json.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = json.cpp; sourceTree = "<group>"; };
 		A18EE04D2434C63C00242173 /* json.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
 		A18EE0542434E98800242173 /* endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = endian.h; sourceTree = "<group>"; };
+		A1938016243724AE00F914DA /* exceptions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = exceptions.hpp; sourceTree = "<group>"; };
+		A1938018243724D100F914DA /* system.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = system.hpp; sourceTree = "<group>"; };
+		A193801A243724EB00F914DA /* serialization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = serialization.hpp; sourceTree = "<group>"; };
+		A193801D243726D000F914DA /* date.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = date.hpp; sourceTree = "<group>"; };
+		A193802524387BAD00F914DA /* duration.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = duration.hpp; sourceTree = "<group>"; };
 		A1C3CD8023A0FDA000E1B8E1 /* message.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = message.hpp; sourceTree = "<group>"; };
 		A1C3CD8623A12A4A00E1B8E1 /* server.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = server.hpp; sourceTree = "<group>"; };
 		A1DBDA8821A6C94A001C3957 /* thread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = thread.cpp; sourceTree = "<group>"; };
@@ -153,8 +158,6 @@
 			isa = PBXGroup;
 			children = (
 				A113FCC423A4CF0400984408 /* fart.hpp */,
-				A113FCC623A4CF0400984408 /* fartPriv.hpp */,
-				A113FCC823A4CF0400984408 /* fart.cpp */,
 			);
 			path = fart;
 			sourceTree = "<group>";
@@ -170,8 +173,6 @@
 			isa = PBXGroup;
 			children = (
 				A113FD1923A4D15200984408 /* fart.hpp */,
-				A113FD1B23A4D15300984408 /* fartPriv.hpp */,
-				A113FD1D23A4D15300984408 /* fart.cpp */,
 			);
 			path = fart;
 			sourceTree = "<group>";
@@ -196,6 +197,7 @@
 			children = (
 				A18EE04D2434C63C00242173 /* json.hpp */,
 				A18EE04C2434C63C00242173 /* json.cpp */,
+				A193801A243724EB00F914DA /* serialization.hpp */,
 			);
 			path = serialization;
 			sourceTree = "<group>";
@@ -204,6 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				A18EE0542434E98800242173 /* endian.h */,
+				A1938018243724D100F914DA /* system.hpp */,
 			);
 			path = system;
 			sourceTree = "<group>";
@@ -295,9 +298,11 @@
 				A14D1B292145B93D00C9B775 /* number.hpp */,
 				A14D1B23213E6AEE00C9B775 /* array.hpp */,
 				A14D1B2C2145BA7C00C9B775 /* dictionary.hpp */,
-				A1380CC023A23FCE005D3255 /* types.hpp */,
 				A18EE0482434C39900242173 /* null.hpp */,
 				A18EE0472434C39900242173 /* null.cpp */,
+				A193802524387BAD00F914DA /* duration.hpp */,
+				A193801D243726D000F914DA /* date.hpp */,
+				A1380CC023A23FCE005D3255 /* types.hpp */,
 			);
 			path = types;
 			sourceTree = "<group>";
@@ -306,6 +311,7 @@
 			isa = PBXGroup;
 			children = (
 				A1E70CD72126C1BF00888FD2 /* exception.hpp */,
+				A1938016243724AE00F914DA /* exceptions.hpp */,
 			);
 			path = exceptions;
 			sourceTree = "<group>";
@@ -342,8 +348,9 @@
 				A113FD2823A4D18800984408 /* server.hpp in Headers */,
 				A113FD2F23A4D18800984408 /* endpoint.hpp in Headers */,
 				A113FD2A23A4D18800984408 /* url.hpp in Headers */,
-				A113FD1C23A4D15300984408 /* fartPriv.hpp in Headers */,
+				A193802724387BAD00F914DA /* duration.hpp in Headers */,
 				A113FD3523A4D19F00984408 /* weak.hpp in Headers */,
+				A193801B243724EB00F914DA /* serialization.hpp in Headers */,
 				A113FD3623A4D19F00984408 /* memory.hpp in Headers */,
 				A113FD4C23A4D4F400984408 /* head.hpp in Headers */,
 				A113FD3A23A4D1A900984408 /* data.hpp in Headers */,
@@ -352,6 +359,7 @@
 				A113FD2D23A4D18800984408 /* socket.hpp in Headers */,
 				A113FD2523A4D18800984408 /* response-head.hpp in Headers */,
 				A113FD2323A4D18800984408 /* request-head.hpp in Headers */,
+				A1938019243724D100F914DA /* system.hpp in Headers */,
 				A113FD2923A4D18800984408 /* message.hpp in Headers */,
 				A113FD1A23A4D15300984408 /* fart.hpp in Headers */,
 				A113FD4523A4D1BC00984408 /* threading.hpp in Headers */,
@@ -363,6 +371,8 @@
 				A113FD3823A4D1A900984408 /* type.hpp in Headers */,
 				A113FD3423A4D19F00984408 /* strong.hpp in Headers */,
 				A113FD2C23A4D18800984408 /* web.hpp in Headers */,
+				A1938017243724AE00F914DA /* exceptions.hpp in Headers */,
+				A193801F243726D000F914DA /* date.hpp in Headers */,
 				A113FD4623A4D1C600984408 /* exception.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

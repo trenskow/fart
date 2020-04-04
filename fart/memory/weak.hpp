@@ -50,7 +50,7 @@ namespace fart::memory {
             _setObject(nullptr);
         }
         
-        Weak(Strong<T> object) : Weak(*object) {}
+        Weak(const Strong<T>& other) : Weak(other) {}
         
         ~Weak() {
             _setObject(nullptr);

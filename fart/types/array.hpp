@@ -40,6 +40,12 @@ namespace fart::types {
             }
         }
         
+        Array(Strong<T> repeating, size_t count) : Array() {
+            for (size_t idx = 0 ; idx < count ; idx++) {
+                append(repeating);
+            }
+        }
+        
         virtual ~Array() {
             for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
                 _storage.getItemAtIndex(idx)->release();
@@ -121,6 +127,14 @@ namespace fart::types {
                 result->append(item);
                 return result;
             });
+        }
+        
+        template<typename F>
+        const bool some(const F& todo) const {
+            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
+                if (todo(this->getItemAtIndex(idx))) return true;
+            }
+            return false;
         }
         
         Strong<Array<T>> subarray(size_t index, size_t length) const {

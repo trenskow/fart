@@ -19,9 +19,16 @@ using namespace fart::serialization;
 
 int main(int argc, const char * argv[]) {
     
+    Weak<Array<Type>> weakArray;
+    
     try {
         
+        auto dict = Dictionary<String, Date>();
         
+        dict.set("Test", Strong<Date>("2020-04-04T09:07:50Z"));
+                
+        printf("%s\n", JSON::stringify(dict.as<Type>())->getCString());
+                
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.getDescription(), exception.getSize());
     } catch (types::DecoderException exception) {
