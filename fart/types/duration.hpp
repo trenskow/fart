@@ -17,12 +17,11 @@
 
 namespace fart::types {
     
-    class Duration : public Type {
+    class Duration {
         
     private:
         
         double _seconds;
-        mutable Mutex _mutex;
         
     public:
         
@@ -69,40 +68,32 @@ namespace fart::types {
         
         Duration(): _seconds(0) {}
         Duration(double duration) : _seconds(duration) {}
-        Duration(const Duration& other) {
-            _seconds = other._seconds;
+        Duration(const Duration& other) : _seconds(other._seconds) {}
+        
+        ~Duration() {};
+        
+        static Duration fromMicroseconds(double microseconds) {
+            return Duration::fromMilliseconds(microseconds / 1000);
         }
         
-        virtual ~Duration() {};
-        
-        template<class T = Strong<Duration>>
-        static T fromMicroseconds(double microseconds) {
-            return Duration::fromMilliseconds<T>(microseconds / 1000);
+        static Duration fromMilliseconds(double milliseconds) {
+            return Duration::fromSeconds(milliseconds / 1000);
         }
         
-        template<class T = Strong<Duration>>
-        static T fromMilliseconds(double milliseconds) {
-            return Duration::fromSeconds<T>(milliseconds / 1000);
+        static Duration fromSeconds(double seconds) {
+            return Duration(seconds);
         }
         
-        template<class T = Strong<Duration>>
-        static T fromSeconds(double seconds) {
-            return T(seconds);
+        static Duration fromMinutes(double minutes) {
+            return Duration::fromSeconds(minutes * 60);
         }
         
-        template<class T = Strong<Duration>>
-        static T fromMinutes(double minutes) {
-            return Duration::fromSeconds<T>(minutes * 60);
+        static Duration fromHours(double hours) {
+            return Duration::fromMinutes(hours * 60);
         }
         
-        template<class T = Strong<Duration>>
-        static T fromHours(double hours) {
-            return Duration::fromMinutes<T>(hours * 60);
-        }
-        
-        template<class T = Strong<Duration>>
-        static T fromDays(double days) {
-            return Duration::fromHours<T>(days * 24);
+        static Duration fromDays(double days) {
+            return Duration::fromHours(days * 24);
         }
         
         inline  double getMicroseconds() const {
@@ -114,89 +105,65 @@ namespace fart::types {
         }
         
         inline double getSeconds() const {
-            return this->_mutex.lockedValue([this](){
-                return this->_seconds;
-            });
+            return this->_seconds;
         }
         
         inline double getMinutes() const {
-            return this->getSeconds() / 60;
+            return this->getSeconds() / minute().getSeconds();
         }
         
         inline double getHours() const {
-            return this->getMinutes() / 60;
+            return this->getSeconds() / hour().getSeconds();
         }
         
         inline double getDays() const {
-            return this->getHours() / 24;
+            return this->getSeconds() / day().getSeconds();
         }
         
         operator double() const {
-            return this->_mutex.lockedValue([this](){
-                return this->_seconds;
-            });
+            return this->getSeconds();
         }
                 
-        Strong<Duration> operator+(const Duration& other) const noexcept {
-            return Strong<Duration>(this->getSeconds() + other.getSeconds());
+        Duration operator+(const Duration& other) const noexcept {
+            return this->getSeconds() + other.getSeconds();
         }
         
-        Strong<Duration> operator-(const Duration& other) const noexcept {
-            return Strong<Duration>(this->getSeconds() - other.getSeconds());
+        Duration operator-(const Duration& other) const noexcept {
+            return this->getSeconds() - other.getSeconds();
         }
         
-        Strong<Duration> operator*(const Duration& other) const noexcept {
-            return Strong<Duration>(this->getSeconds() * other.getSeconds());
+        Duration operator*(const Duration& other) const noexcept {
+            return this->getSeconds() * other.getSeconds();
         }
         
         Duration operator/(const Duration& other) const noexcept {
-            return Strong<Duration>(this->getSeconds() / other.getSeconds());
+            return this->getSeconds() / other.getSeconds();
         }
         
         Duration operator%(const Duration& other) const noexcept {
-            return Strong<Duration>(fmodl(this->getSeconds(), other.getSeconds()));
+            return fmodl(this->getSeconds(), other.getSeconds());
         }
         
         void operator+=(const Duration& other) {
-            this->_mutex.locked([this,&other](){
-                _seconds += other.getSeconds();
-            });
+            _seconds += other;
         }
         
         void operator-=(const Duration& other) {
-            this->_mutex.locked([this,&other](){
-                _seconds -= other.getSeconds();
-            });
+            _seconds -= other;
         }
         
         void operator*=(const Duration& other) {
-            this->_mutex.locked([this,&other](){
-                _seconds *= other.getSeconds();
-            });
+            _seconds *= other;
         }
         
         void operator/=(const Duration& other) {
-            this->_mutex.locked([this,&other](){
-                _seconds /= other.getSeconds();
-            });
+            _seconds /= other;
         }
         
         void operator%=(const Duration& other) {
-            this->_mutex.locked([this,&other](){
-                _seconds = fmodl(_seconds, other.getSeconds());
-            });
+            _seconds = fmodl(_seconds, other);
         }
-        
-        virtual const uint64_t getHash() const override {
-            return this->_mutex.lockedValue([this](){
-                return *((uint64_t*)&_seconds);
-            });
-        }
-        
-        const Kind getKind() const override {
-            return Kind::duration;
-        }
-        
+                
     };
     
 }

@@ -28,7 +28,6 @@ namespace fart::types {
             number,
             array,
             dictionary,
-            duration,
             date,
             null
         };

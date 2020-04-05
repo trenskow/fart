@@ -19,16 +19,12 @@
 using namespace fart::types::timezones;
 
 const TimeZone& TimeZone::utc() {
-    static const TimeZone utc = TimeZone("Z");
+    static const TimeZone utc = TimeZone();
     return utc;
 }
 
-TimeZone::TimeZone(const String& iso8601Suffix) : _iso8601Suffix(iso8601Suffix) {}
-
-Strong<String> TimeZone::iso8601Suffix() const {
-    return _iso8601Suffix;
-}
+TimeZone::TimeZone() {}
 
 Duration TimeZone::offset(const Date& at) const {
-    return Duration(0);
+    return 0;
 };

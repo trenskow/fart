@@ -410,9 +410,6 @@ Strong<String> JSON::stringify(const Type &data) {
         case Type::Kind::null:
             result->append("null");
             break;
-        case Type::Kind::duration:
-            return stringify(Number<double>(data.as<Duration>().getSeconds()));
-            break;
         case Type::Kind::date:
             return stringify(data.as<Date>().toISO8601());
             break;

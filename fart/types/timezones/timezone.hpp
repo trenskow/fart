@@ -57,10 +57,8 @@ namespace fart::types {
             
         private:
             
-            TimeZone(const String& iso8601Suffix);
+            TimeZone();
             
-            String _iso8601Suffix;
-
         public:
             
             virtual ~TimeZone() {}
@@ -68,7 +66,6 @@ namespace fart::types {
             static const TimeZone& utc();
             
             virtual Duration offset(const Date& at) const;
-            virtual Strong<String> iso8601Suffix() const;
             
         };
         

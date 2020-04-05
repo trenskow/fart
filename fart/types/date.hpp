@@ -128,11 +128,11 @@ namespace fart::types {
         }
         
         void _set(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours, const uint8_t minutes, const uint8_t seconds, uint64_t microseconds) {
-            _time += Duration::fromDays<Duration>(_daysFromEpoch(year, month, day));
-            _time += Duration::fromHours<Duration>(hours);
-            _time += Duration::fromMinutes<Duration>(minutes);
-            _time += Duration::fromSeconds<Duration>(seconds);
-            _time += Duration::fromMicroseconds<Duration>(microseconds);
+            _time += Duration::fromDays(_daysFromEpoch(year, month, day));
+            _time += Duration::fromHours(hours);
+            _time += Duration::fromMinutes(minutes);
+            _time += Duration::fromSeconds(seconds);
+            _time += Duration::fromMicroseconds(microseconds);
         }
         
     public:
@@ -149,7 +149,7 @@ namespace fart::types {
         }
         
         Date(): _timeZone(TimeZone::utc()) {
-            _time = Duration::fromSeconds<Duration>(time(nullptr));
+            _time = Duration::fromSeconds(time(nullptr));
         }
         
         Date(const Duration& time) : Date() {
@@ -229,14 +229,14 @@ namespace fart::types {
                     if (timeZonePart->getLength() > 0) {
                         bool isNegative = parts->getItemAtIndex(1)->indexOf("-") > -1;
                         if (timeZonePart->getLength() == 2) {
-                            timeZoneOffset = Duration::fromHours<Duration>(_decodePart(timeZonePart));
+                            timeZoneOffset = Duration::fromHours(_decodePart(timeZonePart));
                         }
                         else if (timeZonePart->getLength() >= 4) {
                             size_t minutesOffset = timeZonePart->getLength() == 4 ? 2 : 3;
                             auto hours = _decodePart(timeZonePart->substring(0, 2)) * 60;
                             auto minutes = _decodePart(timeZonePart->substring(minutesOffset, 2));
                             auto total = (hours + minutes) * (isNegative ? -1 : 1);
-                            timeZoneOffset = Duration::fromMinutes<Duration>(total);
+                            timeZoneOffset = Duration::fromMinutes(total);
                         }
                     }
                     
@@ -288,7 +288,7 @@ namespace fart::types {
         }
         
         const uint8_t getHours() const {
-            return this->sinceMidnight().getSeconds() / Duration::hour();
+            return this->sinceMidnight() / Duration::hour();
         }
         
         const uint8_t getMinutes() const {
@@ -342,7 +342,17 @@ namespace fart::types {
                 if (microseconds != 0) {
                     ret->append(String::format(".%llu", microseconds));
                 }
-                ret->append(this->_timeZone.iso8601Suffix());
+                Duration offset = this->_timeZone.offset(*this);
+                if (offset == 0) {
+                    ret->append("Z");
+                }
+                else {
+                    double absOffset = fabs(offset);
+                    uint64_t hours = Duration(absOffset).getHours();
+                    uint64_t minutes = Duration(absOffset - Duration::fromHours(hours)).getMinutes();
+                    String prefix = offset < 0 ? "-" : "+";
+                    ret->append(String::format("%s%02llu:%02llu", prefix.getCString(), hours, minutes));
+                }
                 return ret;
             });
         }
@@ -353,7 +363,8 @@ namespace fart::types {
         
         virtual const uint64_t getHash() const override {
             return this->_mutex.lockedValue([this](){
-                return this->_time.getHash();
+                double hash = this->_time.getSeconds();
+                return *((uint64_t*)&hash);
             });
         }
         
