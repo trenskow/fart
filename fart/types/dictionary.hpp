@@ -34,10 +34,10 @@ namespace fart::types {
         void set(const Key& key, Strong<Value> value) {
             ssize_t index = _keys.indexOf(key);
             if (index > -1) {
-                _keys.replace(Strong<String>(key), index);
+                _keys.replace(key, index);
                 _values.replace(value, index);
             } else {
-                _keys.append(Strong<String>(key));
+                _keys.append(key);
                 _values.append(value);
             }
         }
@@ -72,11 +72,11 @@ namespace fart::types {
             }
         }
         
-        const uint64_t getHash() const {
+        virtual const uint64_t getHash() const override {
             return _keys.getHash() ^ _values.getHash();
         }
         
-        virtual const Kind getKind() const {
+        virtual const Kind getKind() const override {
             return Kind::dictionary;
         }
         

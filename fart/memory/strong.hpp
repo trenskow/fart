@@ -48,6 +48,10 @@ namespace fart::memory {
         Strong(nullptr_t) : _object(nullptr) {};
         Strong(T& object) : Strong(&object) {};
         
+        Strong(const T& object) : Strong(nullptr) {
+            _setObject(new T(object), true);
+        }
+        
         Strong(T* object) : _object(nullptr) {
             _setObject(object);
         }

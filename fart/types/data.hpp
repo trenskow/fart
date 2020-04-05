@@ -220,7 +220,7 @@ namespace fart::types {
             });
         }
         
-        virtual const uint64_t getHash() const {
+        virtual const uint64_t getHash() const override {
             return _mutex.lockedValue([this]() {
                 if (_hashIsDirty) {
                     _hash = 5381;
@@ -234,7 +234,7 @@ namespace fart::types {
             });
         }
         
-        virtual const Kind getKind() const {
+        virtual const Kind getKind() const override {
             return Kind::data;
         }
         

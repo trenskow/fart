@@ -9,7 +9,10 @@
 #ifndef array_hpp
 #define array_hpp
 
+#include <type_traits>
+
 #include "../threading/mutex.hpp"
+#include "../memory/strong.hpp"
 #include "./type.hpp"
 
 using namespace fart::memory;
@@ -61,7 +64,7 @@ namespace fart::types {
         }
         
         Strong<T> operator[](const size_t index) const noexcept(false) {
-            return Strong<T>(this->getItemAtIndex(index));
+            return this->getItemAtIndex(index);
         }
         
         void append(Strong<T> item) {
@@ -149,7 +152,7 @@ namespace fart::types {
             return subarray(index, getCount() - index);
         }
         
-        const uint64_t getHash() const {
+        const uint64_t getHash() const override {
             return _hashMutex.lockedValue([this]() {
                 if (_hashIsDirty) {
                     _hash = 5381;
@@ -162,7 +165,7 @@ namespace fart::types {
             });
         }
         
-        virtual const Kind getKind() const {
+        virtual const Kind getKind() const override {
             return Kind::array;
         }
         

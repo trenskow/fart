@@ -71,9 +71,9 @@ namespace fart::types {
         ssize_t indexOf(const String& other, size_t offset = 0) const;
         Strong<String> substring(size_t offset, ssize_t length = -1) const;
                 
-        virtual const uint64_t getHash() const;
+        virtual const uint64_t getHash() const override;
         
-        virtual const Kind getKind() const;
+        virtual const Kind getKind() const override;
         
         virtual bool operator==(const String& other) const;
         bool operator==(const char* other) const;

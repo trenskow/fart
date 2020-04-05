@@ -10,6 +10,7 @@
 #define url_hpp
 
 #include "../../memory/object.hpp"
+#include "../../memory/strong.hpp"
 #include "../../types/string.hpp"
 
 using namespace fart::types;

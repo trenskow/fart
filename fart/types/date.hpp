@@ -10,12 +10,14 @@
 #define date_hpp
 
 #include <cmath>
+#include <ctime>
 
 #include "../exceptions/exception.hpp"
 #include "../threading/mutex.hpp"
 #include "type.hpp"
 #include "duration.hpp"
 #include "string.hpp"
+#include "timezones/timezone.hpp"
 
 #ifndef MIN
 #define MIN(a,b) (a < b ? a : b)
@@ -26,29 +28,13 @@
 #endif
 
 using namespace fart::exceptions::types;
+using namespace fart::types::timezones;
 
 namespace fart::types {
     
     class Date : public Type {
         
     public:
-        
-        class TimeZone {
-            
-            friend class Date;
-            
-        protected:
-            Strong<String> iso8601suffix() const {
-                return Strong<String>("Z");
-            }
-            
-        public:
-            
-            virtual Duration offset(const Date& at) const {
-                return Duration(0);
-            };
-            
-        };
                 
         enum Month: uint8_t {
             january = 1,
@@ -84,14 +70,10 @@ namespace fart::types {
         
         mutable Mutex _mutex;
         
-        static bool isLeapYear(int64_t year) {
-            return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
-        }
-        
-        static uint16_t daysInMonth(Month month, int64_t inYear) {
+        static const uint16_t daysInMonth(Month month, bool isLeapYear = false) {
             switch (month) {
                 case january: return 31;
-                case february: return isLeapYear(inYear) ? 29 : 28;
+                case february: return isLeapYear ? 29 : 28;
                 case march: return 31;
                 case april: return 30;
                 case may: return 31;
@@ -145,22 +127,40 @@ namespace fart::types {
             return ret;
         }
         
-        void _set(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t nanoseconds = 0) {
+        void _set(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours, const uint8_t minutes, const uint8_t seconds, uint64_t microseconds) {
             _time += Duration::fromDays<Duration>(_daysFromEpoch(year, month, day));
             _time += Duration::fromHours<Duration>(hours);
             _time += Duration::fromMinutes<Duration>(minutes);
             _time += Duration::fromSeconds<Duration>(seconds);
-            _time += Duration::fromNanoseconds<Duration>(nanoseconds);
+            _time += Duration::fromMicroseconds<Duration>(microseconds);
         }
         
     public:
-                
-        Date(const Duration& time) : _time(time) {}
-        Date(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t nanoseconds = 0) {
-            this->_set(year, month, day, hours, minutes, seconds, nanoseconds);
+        
+        static const uint8_t daysInWeek = 7;
+        
+        static const Date& getEpoch() {
+            static const Date epoch = Duration::zero();
+            return epoch;
         }
         
-        Date(const String& iso8601) {
+        static const bool isLeapYear(int64_t year) {
+            return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+        }
+        
+        Date(): _timeZone(TimeZone::utc()) {
+            _time = Duration::fromSeconds<Duration>(time(nullptr));
+        }
+        
+        Date(const Duration& time) : Date() {
+            _time = time;
+        }
+        
+        Date(const int64_t year, const uint8_t month = 1, const uint8_t day = 1, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t microseconds = 0) : Date() {
+            this->_set(year, month, day, hours, minutes, seconds, microseconds);
+        }
+        
+        Date(const String& iso8601) : Date() {
             
             int64_t year = 0;
             int8_t month = 0;
@@ -168,7 +168,7 @@ namespace fart::types {
             int8_t hours = 0;
             int8_t minutes = 0;
             int8_t seconds = 0;
-            uint64_t nanoseconds = 0;
+            uint64_t microseconds = 0;
             Duration timeZoneOffset;
             
             auto parts = iso8601.split("T");
@@ -221,7 +221,7 @@ namespace fart::types {
                         }
                         
                         if (timeComponentsSubParts->getCount() > 1) {
-                            nanoseconds = _decodePart(timeComponentsSubParts->getItemAtIndex(1));
+                            microseconds = _decodePart(timeComponentsSubParts->getItemAtIndex(1));
                         }
                         
                     } else throw ISO8601Exception();
@@ -245,7 +245,7 @@ namespace fart::types {
             }
             else ISO8601Exception();
             
-            this->_set(year, month, day, hours, minutes, seconds, nanoseconds);
+            this->_set(year, month, day, hours, minutes, seconds, microseconds);
             
             _time += timeZoneOffset;
             
@@ -253,58 +253,73 @@ namespace fart::types {
         
         virtual ~Date() {}
         
-        int64_t getYear() const {
+        const int64_t getYear() const {
             int64_t year;
             _components(this->_getTimeZoned().getDays(), &year, nullptr, nullptr);
             return year;
         }
         
-        Month getMonth() const {
+        const Month getMonth() const {
             uint8_t month;
             _components(this->_getTimeZoned().getDays(), nullptr, &month, nullptr);
             return Month(month);
         }
         
-        int16_t getDay() const {
+        const int16_t getDay() const {
             uint8_t day;
             _components(this->_getTimeZoned().getDays(), nullptr, nullptr, &day);
             return day;
         }
         
-        Weekday getWeekday() const {
-            return Weekday(((int64_t)this->_getTimeZoned().getDays() + _epochWeekday) % 7);
+        const Weekday getWeekday() const {
+            return Weekday(((int64_t)this->_getTimeZoned().getDays() + _epochWeekday) % daysInWeek);
         }
         
         Duration sinceMidnight() const {
             return this->_mutex.lockedValue([this](){
                 auto seconds = this->_time.getSeconds();
-                auto days = floor(this->_getTimeZoned().getDays());
-                auto daysSeconds = days * 24.0 * 60.0 * 60.0;
+                double daysSeconds = floor(this->_getTimeZoned().getDays()) * Duration::day();
                 return Duration(seconds - daysSeconds);
             });
         }
         
-        uint8_t getHours() const {
-            return this->sinceMidnight().getSeconds() / (60.0 * 60.0);
+        const bool isLeapYear() {
+            return Date::isLeapYear(this->getYear());
         }
         
-        uint8_t getMinutes() const {
-            return (this->sinceMidnight().getSeconds() - (this->getHours() * 60.0 * 60.0)) / 60.0;
+        const uint8_t getHours() const {
+            return this->sinceMidnight().getSeconds() / Duration::hour();
         }
         
-        uint8_t getSeconds() const {
-            return (this->sinceMidnight().getSeconds()) - (this->getHours() * 60.0 * 60.0) - (this->getMinutes() * 60.0);
+        const uint8_t getMinutes() const {
+            return (this->sinceMidnight().getSeconds() - (this->getHours() * Duration::hour())) / Duration::minute();
         }
         
-        uint32_t getNanoseconds() const {
+        const uint8_t getSeconds() const {
+            return (this->sinceMidnight().getSeconds()) - (this->getHours() * Duration::hour()) - (this->getMinutes() * Duration::minute());
+        }
+        
+        const uint32_t getMicroseconds() const {
             return this->_mutex.lockedValue([this](){
-                return (this->_time.getSeconds() - floor(this->_time.getSeconds())) * 1000000.0;
+                return (this->_time.getSeconds() - floor(this->_time.getSeconds())) * 1000000;
             });
         }
                 
         Duration getTime() const {
             return this->_mutex.lockedValue([this](){
                 return this->_time;
+            });
+        }
+        
+        const TimeZone getTimeZone() const {
+            return this->_mutex.lockedValue([this](){
+                return this->_timeZone;
+            });
+        }
+        
+        void setTimeZone(const TimeZone timeZone) {
+            return this->_mutex.locked([this,&timeZone](){
+                this->_timeZone = timeZone;
             });
         }
         
@@ -323,17 +338,23 @@ namespace fart::types {
                             this->getHours(),
                             this->getMinutes(),
                             this->getSeconds()));
-                auto nanoseconds = this->getNanoseconds();
-                if (nanoseconds != 0) {
-                    ret->append(String::format(".%llu", nanoseconds));
+                auto microseconds = this->getMicroseconds();
+                if (microseconds != 0) {
+                    ret->append(String::format(".%llu", microseconds));
                 }
-                ret->append(this->_timeZone.iso8601suffix());
+                ret->append(this->_timeZone.iso8601Suffix());
                 return ret;
             });
         }
         
         const Kind getKind() const override {
             return Kind::date;
+        }
+        
+        virtual const uint64_t getHash() const override {
+            return this->_mutex.lockedValue([this](){
+                return this->_time.getHash();
+            });
         }
         
     };

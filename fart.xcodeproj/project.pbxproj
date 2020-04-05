@@ -48,6 +48,9 @@
 		A113FD4823A4D2BB00984408 /* libfart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A113FD1723A4D15200984408 /* libfart.a */; };
 		A113FD4B23A4D4F400984408 /* head.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A113FD4923A4D4F400984408 /* head.cpp */; };
 		A113FD4C23A4D4F400984408 /* head.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A113FD4A23A4D4F400984408 /* head.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A134192F24392D6400DE422E /* timezone.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A134192A24392A0900DE422E /* timezone.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A134193024392D6800DE422E /* timezones.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A134192D24392A1500DE422E /* timezones.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		A134193124392DDD00DE422E /* timezone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A134192924392A0900DE422E /* timezone.cpp */; };
 		A18EE0492434C39900242173 /* null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A18EE0472434C39900242173 /* null.cpp */; };
 		A18EE04A2434C39900242173 /* null.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A18EE0482434C39900242173 /* null.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		A18EE04E2434C63C00242173 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A18EE04C2434C63C00242173 /* json.cpp */; };
@@ -81,6 +84,9 @@
 		A113FD1923A4D15200984408 /* fart.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fart.hpp; sourceTree = "<group>"; };
 		A113FD4923A4D4F400984408 /* head.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = head.cpp; sourceTree = "<group>"; };
 		A113FD4A23A4D4F400984408 /* head.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = head.hpp; sourceTree = "<group>"; };
+		A134192924392A0900DE422E /* timezone.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timezone.cpp; sourceTree = "<group>"; };
+		A134192A24392A0900DE422E /* timezone.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timezone.hpp; sourceTree = "<group>"; };
+		A134192D24392A1500DE422E /* timezones.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timezones.hpp; sourceTree = "<group>"; };
 		A1380CB623A1C80F005D3255 /* url.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = url.cpp; sourceTree = "<group>"; };
 		A1380CB723A1C80F005D3255 /* url.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = url.hpp; sourceTree = "<group>"; };
 		A1380CBD23A23F2B005D3255 /* fart.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fart.hpp; sourceTree = "<group>"; };
@@ -175,6 +181,16 @@
 				A113FD1923A4D15200984408 /* fart.hpp */,
 			);
 			path = fart;
+			sourceTree = "<group>";
+		};
+		A1341928243929FB00DE422E /* timezones */ = {
+			isa = PBXGroup;
+			children = (
+				A134192A24392A0900DE422E /* timezone.hpp */,
+				A134192924392A0900DE422E /* timezone.cpp */,
+				A134192D24392A1500DE422E /* timezones.hpp */,
+			);
+			path = timezones;
 			sourceTree = "<group>";
 		};
 		A1380CB923A23E87005D3255 /* http */ = {
@@ -289,6 +305,7 @@
 		A1E70CCE2126B3C900888FD2 /* types */ = {
 			isa = PBXGroup;
 			children = (
+				A1341928243929FB00DE422E /* timezones */,
 				A14D1B2F2145BBEF00C9B775 /* hashable.hpp */,
 				A14D1B35214677B600C9B775 /* type.hpp */,
 				A14D1B34214677B600C9B775 /* type.cpp */,
@@ -353,12 +370,14 @@
 				A193801B243724EB00F914DA /* serialization.hpp in Headers */,
 				A113FD3623A4D19F00984408 /* memory.hpp in Headers */,
 				A113FD4C23A4D4F400984408 /* head.hpp in Headers */,
+				A134193024392D6800DE422E /* timezones.hpp in Headers */,
 				A113FD3A23A4D1A900984408 /* data.hpp in Headers */,
 				A113FD3723A4D1A900984408 /* hashable.hpp in Headers */,
 				A113FD3E23A4D1A900984408 /* array.hpp in Headers */,
 				A113FD2D23A4D18800984408 /* socket.hpp in Headers */,
 				A113FD2523A4D18800984408 /* response-head.hpp in Headers */,
 				A113FD2323A4D18800984408 /* request-head.hpp in Headers */,
+				A134192F24392D6400DE422E /* timezone.hpp in Headers */,
 				A1938019243724D100F914DA /* system.hpp in Headers */,
 				A113FD2923A4D18800984408 /* message.hpp in Headers */,
 				A113FD1A23A4D15300984408 /* fart.hpp in Headers */,
@@ -458,6 +477,7 @@
 				A113FD3C23A4D1A900984408 /* string.cpp in Sources */,
 				A113FD4223A4D1BC00984408 /* mutex.cpp in Sources */,
 				A113FD3323A4D19F00984408 /* object.cpp in Sources */,
+				A134193124392DDD00DE422E /* timezone.cpp in Sources */,
 				A113FD2623A4D18800984408 /* response-head.cpp in Sources */,
 				A18EE0492434C39900242173 /* null.cpp in Sources */,
 				A113FD2E23A4D18800984408 /* socket.cpp in Sources */,

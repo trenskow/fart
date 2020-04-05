@@ -52,11 +52,11 @@ namespace fart::types {
             return _subType;
         }
         
-        virtual const uint64_t getHash() const {
+        virtual const uint64_t getHash() const override {
             return (uint64_t)_value;
         }
         
-        virtual const Kind getKind() const {
+        virtual const Kind getKind() const override {
             return Kind::number;
         }
         
