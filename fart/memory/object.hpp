@@ -9,10 +9,14 @@
 #ifndef object_hpp
 #define object_hpp
 
+#include <assert.h>
+#include <unistd.h>
+
 #include "../threading/mutex.hpp"
 #include "../exceptions/exception.hpp"
+#include "./weak.hpp"
 
-#include <unistd.h>
+#define WEAK_REFERENCES_BLOCK_SIZE 128
 
 using namespace fart::threading;
 using namespace fart::exceptions::memory;
@@ -28,30 +32,82 @@ namespace fart::memory {
         friend class Weak;
 
     private:
+        
         mutable size_t _retainCount;
         mutable void** _weakReferences;
         mutable size_t _weakReferencesSize;
         mutable size_t _weakReferencesCount;
         mutable Mutex _mutex;
         
-        void *operator new(size_t size) noexcept(false);
+        void *operator new(size_t size) noexcept(false) {
+            void *mem = calloc(size, sizeof(uint8_t));
+            if (!mem) throw AllocationException(size);
+            return mem;
+        }
         
-        void addWeakReference(void* weakReference) const;
-        void removeWeakReference(void* weakReference) const;
+        void addWeakReference(void* weakReference) const {
+            _mutex.locked([this,weakReference]() {
+                if (_weakReferencesSize < _weakReferencesCount + 1) {
+                    _weakReferencesSize = ((_weakReferencesCount + 1) / WEAK_REFERENCES_BLOCK_SIZE) + 1 * WEAK_REFERENCES_BLOCK_SIZE;
+                    _weakReferences = (void**)realloc(_weakReferences, _weakReferencesSize);
+                    _weakReferences[_weakReferencesCount++] = weakReference;
+                }
+            });
+        }
+        
+        void removeWeakReference(void* weakReference) const {
+            _mutex.locked([this,weakReference]() {
+                for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
+                    if (_weakReferences[idx] == weakReference) {
+                        for (size_t midx = idx ; midx <= _weakReferencesCount - 1 ; midx++) {
+                            _weakReferences[midx] = _weakReferences[midx + 1];
+                        }
+                        _weakReferencesCount--;
+                    }
+                }
+            });
+        }
         
     protected:
-        void operator delete(void *ptr) throw();
+        
+        void operator delete(void *ptr) throw() {
+            free(ptr);
+        }
         
     public:
         
-        Object();
-        Object(const Object& other);
-        virtual ~Object();
+        Object() : _retainCount(0), _weakReferences(nullptr), _weakReferencesSize(0), _weakReferencesCount(0) {}
         
-        void retain() const;
-        void release() const;
+        Object(const Object& other) : Object() {}
         
-        size_t retainCount() const;
+        virtual ~Object() {
+            _mutex.locked([this]() {
+                assert(_retainCount == 0);
+                for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
+                    ((Weak<Object>*)_weakReferences[0])->_object = nullptr;
+                }
+            });
+        }
+        
+        void retain() const {
+            _mutex.locked([this]() {
+                this->_retainCount++;
+            });
+        }
+        
+        void release() const {
+            bool destroy = _mutex.lockedValue([this]() {
+                this->_retainCount--;
+                return (this->_retainCount == 0);
+            });
+            if (destroy) delete this;
+        }
+        
+        size_t retainCount() const {
+            return _mutex.lockedValue([this]() {
+                return this->_retainCount;
+            });
+        }
         
     };
 

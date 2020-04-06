@@ -12,20 +12,33 @@
 #include "../../memory/object.hpp"
 #include "../../memory/strong.hpp"
 #include "../../types/string.hpp"
+#include "../../exceptions/exception.hpp"
 
 using namespace fart::types;
 using namespace fart::memory;
+using namespace fart::exceptions::network;
 
 namespace fart::network::web {
     
     class Url : public Object {
-        
-    private:
-        static const uint8_t hexValue(uint32_t value) noexcept(false);
-        
+                
     public:
         
-        static Strong<String> decode(const String& url);
+        static Strong<String> decode(const String& url) {
+            Strong<String> result;
+            for (size_t idx = 0 ; idx < url.length() ; idx++) {
+                uint32_t chr = url[idx];
+                if (chr == '+') chr = ' ';
+                else if (chr == '%') {
+                    if (idx >= url.length() - 2) throw UrlDecodingException(chr);
+                    chr = url.substring(idx + 1, 2)->hexData()->itemAtIndex(0);
+                    idx += 2;
+                }
+                result->append(chr);
+            }
+            return result;
+        }
+
         
     };
     

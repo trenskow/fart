@@ -32,12 +32,27 @@ namespace fart::types {
             null
         };
         
-        virtual const Kind kind() const;
+        virtual const Kind kind() const {
+            throw NotImplementedException();
+        }
         
-        virtual bool operator==(const Type& other) const;
-        virtual bool operator==(const Type* other) const;
-        bool operator!=(const Type& other) const;
-        bool operator!=(const Type* other) const;
+        virtual bool operator==(const Type& other) const {
+            if (this->kind() != other.kind()) return false;
+            return this->hash() == other.hash();
+        }
+        
+        virtual bool operator==(const Type* other) const {
+            if (other == nullptr) return false;
+            return *this == *other;
+        }
+        
+        bool operator!=(const Type& other) const {
+            return !(*this == other);
+        }
+        
+        bool operator!=(const Type* other) const {
+            return !(*this == other);
+        }
         
         template<class T>
         T& as() const {

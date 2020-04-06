@@ -11,9 +11,9 @@
 
 #include <type_traits>
 
-#include "./object.hpp"
-
 namespace fart::memory {
+    
+    class Object;
     
     template<class T>
     class Strong;

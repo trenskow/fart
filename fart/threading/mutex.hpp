@@ -25,11 +25,24 @@ namespace fart::threading {
         mutable pthread_mutex_t _mutex;
         
     public:
-        Mutex();
-        ~Mutex();
+        Mutex() {
+            pthread_mutexattr_init(&_attr);
+            pthread_mutexattr_settype(&_attr, PTHREAD_MUTEX_RECURSIVE);
+            pthread_mutex_init(&_mutex, &_attr);
+        }
         
-        void lock() const;
-        void unlock() const;
+        ~Mutex() {
+            pthread_mutex_destroy(&_mutex);
+            pthread_mutexattr_destroy(&_attr);
+        }
+        
+        void lock() const {
+            pthread_mutex_lock(&_mutex);
+        }
+        
+        void unlock() const {
+            pthread_mutex_unlock(&_mutex);
+        }
         
         template<typename Func>
         void locked(Func f) const {

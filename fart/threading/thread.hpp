@@ -27,16 +27,53 @@ namespace fart::threading {
         bool _isDetached;
         Mutex _mutex;
         
-        void _start();
+        void _start() {
+            _mutex.locked([this]() {
+                _isDetached = true;
+            });
+            _startCallback();
+            _mutex.locked([this]() {
+                _isDetached = false;
+                _startCallback = nullptr;
+            });
+        }
         
     public:
-        Thread();
-        ~Thread();
+        Thread() : _isDetached(false) {};
         
-        void detach(function<void()> startCallback);
-        void join() const;
+        ~Thread() {
+            join();
+        }
         
-        const bool isDetached() const;
+        void detach(function<void()> startCallback) {
+            _mutex.locked([this,startCallback]() {
+                
+                if (_isDetached) {
+                    // Handle error;
+                    return;
+                }
+                
+                _startCallback = startCallback;
+                
+                pthread_create(&_thread, nullptr, [](void* ctx) {
+                    ((Thread *)ctx)->_start();
+                    pthread_exit(nullptr);
+                    return (void *)0;
+                }, this);
+
+            });
+        }
+        
+        void join() const {
+            pthread_t thread = _mutex.lockedValue([this](){ return _thread; });
+            pthread_join(thread, nullptr);
+        }
+        
+        const bool isDetached() const {
+            return _mutex.lockedValue([this]() {
+                return _isDetached;
+            });
+        }
         
     };
 

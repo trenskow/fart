@@ -17,12 +17,25 @@ namespace fart::threading {
     class Semaphore {
         
     public:
-        Semaphore();
-        ~Semaphore();
+        Semaphore() {
+            pthread_cond_init(&_condition, nullptr);
+        }
         
-        void wait(const Mutex& mutex) const;
-        void signal() const;
-        void broadcast() const;
+        ~Semaphore() {
+            pthread_cond_destroy(&_condition);
+        }
+        
+        void wait(const Mutex& mutex) const {
+            pthread_cond_wait(&_condition, &mutex._mutex);
+        }
+        
+        void signal() const {
+            pthread_cond_signal(&_condition);
+        }
+        
+        void broadcast() const {
+            pthread_cond_broadcast(&_condition);
+        }
         
     private:
         

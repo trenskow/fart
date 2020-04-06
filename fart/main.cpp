@@ -23,12 +23,8 @@ int main(int argc, const char * argv[]) {
     
     try {
         
-        auto date = *Date("2020-04-06T02:41:20+02:00").to(Date::TimeZone::local);
-        
-        printf("%d\n", date.hours());
-        
-        date.to(Date::TimeZone::utc)->toISO8601()->withCString([](const char* date){
-            printf("%s\n", date);
+        JSON::stringify(Date().as<Type>())->withCString([](const char* json) {
+            printf("%s\n", json);
         });
         
     } catch (memory::AllocationException exception) {
