@@ -296,22 +296,22 @@ void String::append(const char *string) {
     _store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 }
 
-Strong<Array<String>> String::split(const char *seperator, size_t max) const {
+Strong<Array<String>> String::split(const char *seperator, IncludeSeparator includeSeparator, size_t max) const {
     String sep(seperator);
-    return split(sep, max);
+    return split(sep, includeSeparator, max);
 }
 
-Strong<Array<String>> String::split(String &seperator, size_t max) const {
-    return _store.split(seperator._store, max)->map<String>([](Data<uint32_t>& current) {
+Strong<Array<String>> String::split(String &seperator, IncludeSeparator includeSeparator, size_t max) const {
+    return _store.split(seperator._store, includeSeparator, max)->map<String>([](Data<uint32_t>& current) {
         return String(current);
     });
 }
 
-Strong<Array<String>> String::split(const Array<String>& separators, size_t max) const {
+Strong<Array<String>> String::split(const Array<String>& separators, IncludeSeparator includeSeparator, size_t max) const {
     auto stores = separators.map<Data<uint32_t>>([](const String& current) {
         return current._store;
     });
-    return _store.split(stores, max)->map<String>([](Data<uint32_t>& current) {
+    return _store.split(stores, includeSeparator, max)->map<String>([](Data<uint32_t>& current) {
         return String(current);
     });
 }

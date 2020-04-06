@@ -27,6 +27,12 @@ namespace fart::types {
     
     class String;
     
+    enum IncludeSeparator {
+        none,
+        prefix,
+        suffix
+    };
+    
     template<typename T = uint8_t>
     class Data : public Type {
         
@@ -188,16 +194,32 @@ namespace fart::types {
             });
         }
         
-        Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, size_t max = 0) const {
-            return _mutex.lockedValue([this,separators,max]() {
+        Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+            return _mutex.lockedValue([this,separators,&includeSeparator,max]() {
                 Strong<Array<Data<T>>> result;
                 ssize_t idx = 0;
                 while (result->count() < max - 1) {
-                    if (!separators.some([this,&idx,&result](const Data<T>& separator) {
-                        ssize_t next = indexOf(separator, idx);
+                    if (!separators.some([this,&idx,&result,&includeSeparator](const Data<T>& separator) {
+                        ssize_t next = indexOf(separator, idx + (includeSeparator == prefix ? separator.count() : 0));
                         if (next == -1) return false;
-                        result->append(subdata(idx, next - idx));
-                        idx = next + separator.count();
+                        switch (includeSeparator) {
+                            case none:
+                            case prefix:
+                                result->append(subdata(idx, next - idx));
+                                break;
+                            case suffix:
+                                result->append(subdata(idx, next + separator.count()));
+                                break;
+                        }
+                        switch (includeSeparator) {
+                            case none:
+                            case suffix:
+                                idx = next + separator.count();
+                                break;
+                            case prefix:
+                                idx = next;
+                                break;
+                        }
                         return true;
                     })) break;
                 }
@@ -206,12 +228,12 @@ namespace fart::types {
             });
         }
         
-        Strong<Array<Data<T>>> split(Strong<Data<T>> separator, size_t max = 0) const {
-            return split(Array<Data<T>>(separator, 1), max);
+        Strong<Array<Data<T>>> split(Strong<Data<T>> separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+            return split(Array<Data<T>>(separator, 1), includeSeparator, max);
         }
         
-        Strong<Array<Data<T>>> split(const T* seperator, size_t length, size_t max = 0) const {
-            return split(Strong<Data<T>>(seperator, length), max);
+        Strong<Array<Data<T>>> split(const T* seperator, size_t length, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+            return split(Strong<Data<T>>(seperator, length), includeSeparator, max);
         }
         
         static Strong<Data<T>> join(Array<Data<T>>& datas, Data<T>* seperator) {

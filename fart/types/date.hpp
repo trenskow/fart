@@ -148,11 +148,11 @@ namespace fart::types {
         Date(const String& iso8601) : Date() {
             
             int64_t year = 0;
-            int8_t month = 0;
-            int8_t day = 0;
-            int8_t hours = 0;
-            int8_t minutes = 0;
-            int8_t seconds = 0;
+            uint8_t month = 0;
+            uint8_t day = 0;
+            uint8_t hours = 0;
+            uint8_t minutes = 0;
+            uint8_t seconds = 0;
             uint64_t microseconds = 0;
             Duration timeZoneOffset;
                         
@@ -180,8 +180,8 @@ namespace fart::types {
                     seperators.append(Strong<String>("+"));
                     seperators.append(Strong<String>("-"));
                     seperators.append(Strong<String>("Z"));
-
-                    auto timeParts = parts->itemAtIndex(1)->split(seperators);
+                    
+                    auto timeParts = parts->itemAtIndex(1)->split(seperators, prefix);
                     
                     if (timeParts->count() == 1) throw ISO8601Exception();
                     
@@ -212,7 +212,7 @@ namespace fart::types {
                     } else throw ISO8601Exception();
                     
                     if (timeZonePart->length() > 0) {
-                        timeZoneOffset = Duration::parse(timeZonePart) * (parts->itemAtIndex(1)->indexOf("-") > -1 ? -1.0 : 1.0);
+                        timeZoneOffset = Duration::parse(timeZonePart);
                     }
                     
                 }

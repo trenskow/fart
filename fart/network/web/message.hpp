@@ -61,7 +61,7 @@ namespace fart::network::web {
             Data<uint8_t> deliminator(lineBreak);
             deliminator.append(lineBreak);
             
-            Strong<Array<Data<uint8_t>>> parts = data.split(deliminator, 2);
+            Strong<Array<Data<uint8_t>>> parts = data.split(deliminator, none, 2);
             
             if (parts->count() < 1) {
                 throw DataIncompleteException();

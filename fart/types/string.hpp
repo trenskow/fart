@@ -85,9 +85,9 @@ namespace fart::types {
         void append(const uint32_t character);
         void append(const char* string);
         
-        Strong<Array<String>> split(const char *separator, size_t max = 0) const;
-        Strong<Array<String>> split(String& separator, size_t max = 0) const;
-        Strong<Array<String>> split(const Array<String>& separators, size_t max = 0) const;
+        Strong<Array<String>> split(const char *separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const;
+        Strong<Array<String>> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const;
+        Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const;
         static Strong<String> join(Array<String>& strings);
         static Strong<String> join(Array<String>& strings, const char *seperator);
         static Strong<String> join(Array<String>& strings, String* seperator);

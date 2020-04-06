@@ -126,8 +126,7 @@ namespace fart::types {
         template<typename R, typename F>
         Strong<Array<R>> map(const F& todo) const {
             return this->reduce(Strong<Array<R>>(), [todo](Strong<Array<R>> result, T& current) {
-                Strong<R> item(todo(current));
-                result->append(item);
+                result->append(todo(current));
                 return result;
             });
         }
