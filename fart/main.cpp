@@ -23,12 +23,12 @@ int main(int argc, const char * argv[]) {
     
     try {
         
-        auto dict = Dictionary<String, Date>();
+        auto date = Date("2020-04-06T02:41:20Z");
         
-        dict.set("Test", Strong<Date>());
-                
-        printf("%s\n", JSON::stringify(dict.as<Type>())->getCString());
-                
+        date.toISO8601()->withCString([](const char* date){
+            printf("%s\n", date);
+        });
+        
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.getDescription(), exception.getSize());
     } catch (types::DecoderException exception) {
@@ -36,7 +36,9 @@ int main(int argc, const char * argv[]) {
     } catch (types::OutOfBoundException exception) {
         printf("%s (index: %zu)\n", exception.getDescription(), exception.getIndex());
     } catch (types::KeyNotFoundException<String> exception) {
-        printf("%s (key: %s)\n", exception.getDescription(), (const char*)exception.getKey());
+        exception.getKey().withCString([&exception](const char* key){
+            printf("%s (key: %s)\n", exception.getDescription(), key);
+        });
     } catch (serialization::JSONMalformedException exception) {
         printf("JSON is malformed (line: %zu, character: %zu)\n", exception.getLine(), exception.getCharacter());
     }

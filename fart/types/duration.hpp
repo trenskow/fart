@@ -132,18 +132,14 @@ namespace fart::types {
             return this->getSeconds() - other.getSeconds();
         }
         
-        Duration operator*(const Duration& other) const noexcept {
-            return this->getSeconds() * other.getSeconds();
+        Duration operator*(const double other) const noexcept {
+            return this->getSeconds() * other;
         }
         
-        Duration operator/(const Duration& other) const noexcept {
-            return this->getSeconds() / other.getSeconds();
+        Duration operator/(const double other) const noexcept {
+            return this->getSeconds() / other;
         }
-        
-        Duration operator%(const Duration& other) const noexcept {
-            return fmodl(this->getSeconds(), other.getSeconds());
-        }
-        
+                
         void operator+=(const Duration& other) {
             _seconds += other;
         }
@@ -152,18 +148,14 @@ namespace fart::types {
             _seconds -= other;
         }
         
-        void operator*=(const Duration& other) {
+        void operator*=(const double other) {
             _seconds *= other;
         }
         
-        void operator/=(const Duration& other) {
+        void operator/=(const double other) {
             _seconds /= other;
         }
-        
-        void operator%=(const Duration& other) {
-            _seconds = fmodl(_seconds, other);
-        }
-                
+                        
     };
     
 }

@@ -17,24 +17,19 @@
 #include "type.hpp"
 #include "duration.hpp"
 #include "string.hpp"
-#include "timezones/timezone.hpp"
-
-#ifndef MIN
-#define MIN(a,b) (a < b ? a : b)
-#endif
-
-#ifndef MAX
-#define MAX(a,b) (a > b ? a : b)
-#endif
 
 using namespace fart::exceptions::types;
-using namespace fart::types::timezones;
 
 namespace fart::types {
     
     class Date : public Type {
         
     public:
+        
+        enum TimeZone {
+            utc,
+            local
+        };
                 
         enum Month: uint8_t {
             january = 1,
@@ -110,13 +105,7 @@ namespace fart::types {
             if (month != nullptr) *month = m;
             if (day != nullptr) *day = d;
         }
-        
-        Duration _getTimeZoned() const {
-            return this->_mutex.lockedValue([this](){
-                return this->_time + this->_timeZone.offset(*this);
-            });
-        }
-        
+                
         static int64_t _decodePart(const String& string) {
             int64_t ret = 0;
             for (size_t idx = 0 ; idx < string.getLength() ; idx++) {
@@ -128,11 +117,19 @@ namespace fart::types {
         }
         
         void _set(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours, const uint8_t minutes, const uint8_t seconds, uint64_t microseconds) {
-            _time += Duration::fromDays(_daysFromEpoch(year, month, day));
+            _time = Duration::fromDays(_daysFromEpoch(year, month, day));
             _time += Duration::fromHours(hours);
             _time += Duration::fromMinutes(minutes);
             _time += Duration::fromSeconds(seconds);
             _time += Duration::fromMicroseconds(microseconds);
+        }
+        
+        static const Duration _localOffset() {
+            time_t rawTime;
+            tm * timeinfo;
+            time(&rawTime);
+            timeinfo = localtime(&rawTime);
+            return timeinfo->tm_gmtoff;
         }
         
     public:
@@ -148,13 +145,11 @@ namespace fart::types {
             return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
         }
         
-        Date(): _timeZone(TimeZone::utc()) {
+        Date() : _timeZone(TimeZone::utc) {
             _time = Duration::fromSeconds(time(nullptr));
         }
         
-        Date(const Duration& time) : Date() {
-            _time = time;
-        }
+        Date(const Duration& time, TimeZone timeZone = TimeZone::utc) : _time(time), _timeZone(timeZone) { }
         
         Date(const int64_t year, const uint8_t month = 1, const uint8_t day = 1, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t microseconds = 0) : Date() {
             this->_set(year, month, day, hours, minutes, seconds, microseconds);
@@ -170,7 +165,7 @@ namespace fart::types {
             int8_t seconds = 0;
             uint64_t microseconds = 0;
             Duration timeZoneOffset;
-            
+                        
             auto parts = iso8601.split("T");
             
             if (parts->getCount() > 0) {
@@ -247,38 +242,46 @@ namespace fart::types {
             
             this->_set(year, month, day, hours, minutes, seconds, microseconds);
             
-            _time += timeZoneOffset;
+            _time -= timeZoneOffset;
             
         }
         
         virtual ~Date() {}
         
         const int64_t getYear() const {
-            int64_t year;
-            _components(this->_getTimeZoned().getDays(), &year, nullptr, nullptr);
-            return year;
+            return this->_mutex.lockedValue([this](){
+                int64_t year;
+                _components(this->_time.getDays(), &year, nullptr, nullptr);
+                return year;
+            });
         }
         
         const Month getMonth() const {
-            uint8_t month;
-            _components(this->_getTimeZoned().getDays(), nullptr, &month, nullptr);
-            return Month(month);
+            return this->_mutex.lockedValue([this](){
+                uint8_t month;
+                _components(this->_time.getDays(), nullptr, &month, nullptr);
+                return Month(month);
+            });
         }
         
         const int16_t getDay() const {
-            uint8_t day;
-            _components(this->_getTimeZoned().getDays(), nullptr, nullptr, &day);
-            return day;
+            return this->_mutex.lockedValue([this](){
+                uint8_t day;
+                _components(this->_time.getDays(), nullptr, nullptr, &day);
+                return day;
+            });
         }
         
         const Weekday getWeekday() const {
-            return Weekday(((int64_t)this->_getTimeZoned().getDays() + _epochWeekday) % daysInWeek);
+            return this->_mutex.lockedValue([this](){
+                return Weekday(((int64_t)this->_time.getDays() + _epochWeekday) % daysInWeek);
+            });
         }
         
-        Duration sinceMidnight() const {
+        const Duration sinceMidnight() const {
             return this->_mutex.lockedValue([this](){
                 auto seconds = this->_time.getSeconds();
-                double daysSeconds = floor(this->_getTimeZoned().getDays()) * Duration::day();
+                double daysSeconds = floor(this->_time.getDays()) * Duration::day();
                 return Duration(seconds - daysSeconds);
             });
         }
@@ -305,27 +308,23 @@ namespace fart::types {
             });
         }
                 
-        Duration getTime() const {
+        const Duration getTime() const {
             return this->_mutex.lockedValue([this](){
                 return this->_time;
             });
         }
-        
-        const TimeZone getTimeZone() const {
-            return this->_mutex.lockedValue([this](){
-                return this->_timeZone;
-            });
-        }
-        
-        void setTimeZone(const TimeZone timeZone) {
-            return this->_mutex.locked([this,&timeZone](){
-                this->_timeZone = timeZone;
-            });
-        }
-        
+                
         template<class T = Strong<Duration>>
         T since(const Date& other) const {
             return this->getTime() - other.getTime();
+        }
+        
+        Strong<Date> to(TimeZone timeZone) const {
+            return this->_mutex.lockedValue([this,&timeZone](){
+                if (this->_timeZone == timeZone) return Strong<Date>(*this);
+                if (timeZone == local) return Strong<Date>(this->_time + _localOffset(), TimeZone::local);
+                return Strong<Date>(this->_time - _localOffset(), TimeZone::utc);
+            });
         }
         
         Strong<String> toISO8601() const {
@@ -342,16 +341,21 @@ namespace fart::types {
                 if (microseconds != 0) {
                     ret->append(String::format(".%llu", microseconds));
                 }
-                Duration offset = this->_timeZone.offset(*this);
-                if (offset == 0) {
-                    ret->append("Z");
-                }
-                else {
-                    double absOffset = fabs(offset);
-                    uint64_t hours = Duration(absOffset).getHours();
-                    uint64_t minutes = Duration(absOffset - Duration::fromHours(hours)).getMinutes();
-                    String prefix = offset < 0 ? "-" : "+";
-                    ret->append(String::format("%s%02llu:%02llu", prefix.getCString(), hours, minutes));
+                switch (this->_timeZone) {
+                    case TimeZone::utc:
+                        ret->append("Z");
+                        break;
+                    case TimeZone::local: {
+                        double offset = _localOffset();
+                        double absOffset = fabs(offset);
+                        uint64_t hours = Duration(absOffset).getHours();
+                        uint64_t minutes = Duration(absOffset - Duration::fromHours(hours)).getMinutes();
+                        String prefix = offset < 0 ? "-" : "+";
+                        prefix.withCString([&ret,&hours,&minutes](const char* prefix){
+                            ret->append(String::format("%s%02llu:%02llu", prefix, hours, minutes));
+                        });
+                        break;
+                    }
                 }
                 return ret;
             });
@@ -365,6 +369,30 @@ namespace fart::types {
             return this->_mutex.lockedValue([this](){
                 double hash = this->_time.getSeconds();
                 return *((uint64_t*)&hash);
+            });
+        }
+        
+        Strong<Date> operator+(const Duration& duration) const {
+            return Strong<Date>(this->getSeconds() + duration.getSeconds());
+        }
+        
+        Strong<Date> operator-(const Duration& duration) const {
+            return Strong<Date>(this->getSeconds() - duration.getSeconds());
+        }
+        
+        const Duration operator-(const Date& other) const {
+            return this->getSeconds() - other.getSeconds();
+        }
+        
+        void operator+=(const Duration& duration) {
+            this->_mutex.locked([this,&duration](){
+                _time += duration;
+            });
+        }
+        
+        void operator-=(const Duration& duration) {
+            this->_mutex.locked([this,&duration](){
+                _time -= duration;
             });
         }
         

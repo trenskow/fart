@@ -10,6 +10,7 @@
 #define exception_hpp
 
 #include <cstdlib>
+#include <cstring>
 
 namespace fart {
     
@@ -30,6 +31,56 @@ namespace fart {
             }
             
         };
+        
+        namespace io {
+            
+            namespace fs {
+                
+                class CannotResolveFilenameException: public Exception {
+                    
+                public:
+                    
+                    const char * getDescription() const override {
+                        return "Cannot resolve filename.";
+                    }
+                    
+                };
+                
+                class CannotOpenFileException: public Exception {
+                    
+                public:
+                    
+                    const char * getDescription() const override {
+                        return "Cannot open file.";
+                    }
+                    
+                };
+                
+                class PositionIsOutsideFileRange: public Exception {
+                    
+                private:
+                    
+                    ssize_t _position;
+                    
+                public:
+                    
+                    PositionIsOutsideFileRange(ssize_t position) {
+                        _position = position;
+                    }
+                    
+                    const ssize_t getPosition() const {
+                        return _position;
+                    }
+                    
+                    const char * getDescription() const override {
+                        return "Position is outside file range.";
+                    }
+                    
+                };
+                
+            }
+            
+        }
         
         namespace serialization {
             
@@ -207,6 +258,16 @@ namespace fart {
                 
                 const T& getItem() const {
                     return _item;
+                }
+                
+            };
+            
+            class TimeZoneDecoderException: public Exception {
+                
+            public:
+                
+                const char * getDescription() const override {
+                    return "TimeZone decoder error";
                 }
                 
             };

@@ -9,6 +9,8 @@
 #ifndef string_hpp
 #define string_hpp
 
+#include <cstdio>
+
 #include "../system/endian.h"
 #include "../memory/strong.hpp"
 #include "../exceptions/exception.hpp"
@@ -37,6 +39,14 @@ namespace fart::types {
         String(const Data<uint16_t>& buffer, Endian::Variant endian) noexcept(false);
         String(const Data<uint16_t>& buffer) noexcept(false);
         String(const String& other);
+        
+        template<typename F>
+        static Strong<String> fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
+            return Strong<String>(Data<uint8_t>::fromCBuffer([&todo,&size](void* buffer, size_t length) {
+                return todo((char*)buffer, length);
+            }));
+        }
+        
         virtual ~String();
         
         static
@@ -46,9 +56,26 @@ namespace fart::types {
         void setComparison(Comparison comparison);
         
         size_t getLength() const;
-        const char* getCString() const;
         
-        Strong<Data<uint8_t>> getUTF8Data() const;
+        template<typename F>
+        void withCString(const F& todo) const {
+            auto data = this->getUTF8Data(true);
+            todo((const char*)data->getItems());
+        }
+        
+        template<typename T, typename F>
+        auto mapCString(const F& todo) const {
+            auto data = this->getUTF8Data(true);
+            return todo((const char*)data->getItems());
+        }
+        
+        void print(bool newLine = true) const {
+            this->withCString([&newLine](const char* str) {
+                newLine ? printf("%s\n", str) : printf("%s", str);
+            });
+        }
+        
+        Strong<Data<uint8_t>> getUTF8Data(bool nullTerminate = false) const;
         Strong<Data<uint16_t>> getUTF16Data(Endian::Variant endian = Endian::Variant::big) const;
         
         static Strong<String> fromHex(const Data<uint8_t>& data);
@@ -79,9 +106,7 @@ namespace fart::types {
         bool operator==(const char* other) const;
         const uint32_t operator[](size_t idx) const;
         void operator=(const String& other);
-        
-        operator const char*() const;
-        
+                
     private:
         friend class Strong<String>;
         

@@ -133,6 +133,16 @@ namespace fart::types {
         }
         
         template<typename F>
+        Strong<Array<T>> filter(const F& todo) const {
+            Strong<Array<T>> result;
+            for (size_t idx = 0 ; idx < getCount() ; idx++) {
+                const T& item = getItemAtIndex(idx);
+                if (todo(item)) result->append(item);
+            }
+            return result;
+        }
+        
+        template<typename F>
         const bool some(const F& todo) const {
             for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
                 if (todo(this->getItemAtIndex(idx))) return true;

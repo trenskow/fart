@@ -43,7 +43,11 @@ namespace fart::types {
         }
         
         Strong<Array<Key>> getKeys() const {
-            return Strong<Array<Key>>(_keys);
+            return _keys;
+        }
+        
+        Strong<Array<Value>> getValues() const {
+            return _values;
         }
         
         const bool hasKey(const Key& key) const {

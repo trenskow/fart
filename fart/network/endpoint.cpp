@@ -25,7 +25,9 @@ Endpoint::Endpoint(Strong<String> host, uint16_t port, EndpointType type, uint32
             addr->sin_addr.s_addr = INADDR_ANY;
             addr->sin_port = htons(port);
             
-            inet_pton(AF_INET, *host, &addr->sin_addr);
+            host->withCString([&addr](const char* host){
+                inet_pton(AF_INET, host, &addr->sin_addr);
+            });
             
         } break;
         case EndpointTypeIPv6: {
@@ -38,7 +40,9 @@ Endpoint::Endpoint(Strong<String> host, uint16_t port, EndpointType type, uint32
             addr->sin6_port = htons(port);
             addr->sin6_scope_id = scope_id;
             
-            inet_pton(AF_INET6, *host, &addr->sin6_addr);
+            host->withCString([&addr](const char* host) {
+                inet_pton(AF_INET6, host, &addr->sin6_addr);
+            });
 
         } break;
     }

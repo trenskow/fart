@@ -268,12 +268,8 @@ size_t String::getLength() const {
     return _store.getCount();
 }
 
-const char* String::getCString() const {
-    return (const char *)_encodeUTF8(_store, true)->getItems();
-}
-
-Strong<Data<uint8_t>> String::getUTF8Data() const {
-    return _encodeUTF8(_store);
+Strong<Data<uint8_t>> String::getUTF8Data(bool nullTerminate) const {
+    return _encodeUTF8(_store, nullTerminate);
 }
 
 Strong<Data<uint16_t>> String::getUTF16Data(Endian::Variant endian) const {
@@ -389,10 +385,6 @@ const uint32_t String::operator[](size_t idx) const {
 void String::operator=(const String &other) {
     _store.drain();
     _store.append(other._store);
-}
-
-String::operator const char *() const {
-    return this->getCString();
 }
 
 String::CaseComparitor::~CaseComparitor() {}

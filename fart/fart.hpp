@@ -12,6 +12,7 @@
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
+#include "./tools/tools.hpp"
 #include "./system/system.hpp"
 #include "./exceptions/exceptions.hpp"
 #include "./threading/threading.hpp"

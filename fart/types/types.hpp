@@ -19,6 +19,5 @@
 #include "./null.hpp"
 #include "./duration.hpp"
 #include "./date.hpp"
-#include "./timezones/timezones.hpp"
 
 #endif /* types_h */

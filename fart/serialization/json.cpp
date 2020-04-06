@@ -411,7 +411,7 @@ Strong<String> JSON::stringify(const Type &data) {
             result->append("null");
             break;
         case Type::Kind::date:
-            return stringify(data.as<Date>().toISO8601());
+            return stringify(data.as<Date>().to(Date::TimeZone::utc)->toISO8601());
             break;
     }
     

@@ -17,11 +17,11 @@
 #include "../memory/strong.hpp"
 #include "./type.hpp"
 #include "./array.hpp"
-
-#define ARRAY_STORE_BLOCK_SIZE 4096
+#include "../tools/math.hpp"
 
 using namespace fart::memory;
 using namespace fart::exceptions::types;
+using namespace fart::tools::math;
 
 namespace fart::types {
     
@@ -31,6 +31,8 @@ namespace fart::types {
     class Data : public Type {
         
     public:
+        
+        static const size_t blockSize = 4096;
         
         class Comparitor : public Object {
             
@@ -42,6 +44,13 @@ namespace fart::types {
             }
             
         };
+        
+        template<typename F>
+        static Strong<Data<T>> fromCBuffer(const F& todo, size_t count = blockSize) {
+            T buffer[count];
+            size_t length = todo(buffer, count);
+            return Strong<Data<T>>((T*)buffer, length);
+        }
         
         Data(const T* items, size_t count) : _store(nullptr), _storeCount(0), _count(0), _hash(0), _hashIsDirty(true) {
             append(items, count);
@@ -171,6 +180,14 @@ namespace fart::types {
             });
         };
         
+        const size_t copy(void* bytes, size_t count, size_t offset = 0) {
+            return _mutex.lockedValue([this,bytes,&count,&offset](){
+                ssize_t toCopy = tools::math::max<ssize_t>(0, tools::math::min<ssize_t>(count, (ssize_t)_count - (ssize_t)offset));
+                memcpy(bytes, _store, sizeof(T) * count);
+                return toCopy;
+            });
+        }
+        
         Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, size_t max = 0) const {
             return _mutex.lockedValue([this,separators,max]() {
                 Strong<Array<Data<T>>> result;
@@ -275,7 +292,7 @@ namespace fart::types {
         
         void ensureStoreSize(size_t count) {
             if (_storeCount < count) {
-                _storeCount = ((count / ARRAY_STORE_BLOCK_SIZE) + 1) * ARRAY_STORE_BLOCK_SIZE;
+                _storeCount = ((count / blockSize) + 1) * blockSize;
                 _store = (T*) realloc(_store, sizeof(T) * _storeCount);
             }
         }
