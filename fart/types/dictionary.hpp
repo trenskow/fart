@@ -42,11 +42,11 @@ namespace fart::types {
             }
         }
         
-        Strong<Array<Key>> getKeys() const {
+        Strong<Array<Key>> keys() const {
             return _keys;
         }
         
-        Strong<Array<Value>> getValues() const {
+        Strong<Array<Value>> values() const {
             return _values;
         }
         
@@ -66,28 +66,28 @@ namespace fart::types {
             return get(key);
         }
         
-        const size_t getCount() const {
-            return _keys.getCount();
+        const size_t count() const {
+            return _keys.count();
         }
         
         void forEach(function<void(const Key&, const Value&)> todo) const {
-            for (size_t idx = 0 ; idx < _keys.getCount() ; idx++) {
+            for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
                 todo(_keys[idx], _values[idx]);
             }
         }
         
-        virtual const uint64_t getHash() const override {
-            return _keys.getHash() ^ _values.getHash();
+        virtual const uint64_t hash() const override {
+            return _keys.hash() ^ _values.hash();
         }
         
-        virtual const Kind getKind() const override {
+        virtual const Kind kind() const override {
             return Kind::dictionary;
         }
         
         bool operator==(const Dictionary<Key,Value>& other) const {
             if (!Type::operator==(other)) return false;
-            if (_keys.getCount() != other._keys.getCount) return false;
-            for (size_t idx = 0 ; idx < _keys.getCount() ; idx++) {
+            if (_keys.count() != other._keys.count) return false;
+            for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
                 if (_keys[idx] != other._keys[idx] || _values[idx] != other._values[idx]) {
                     return false;
                 }

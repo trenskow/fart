@@ -32,7 +32,7 @@ namespace fart::types {
         Number(const T value, const NumberSubType subType = NumberSubType::integer) : _value(value), _subType(subType) {}
         Number(const Number<T>& other, const NumberSubType subType = NumberSubType::integer) : Number(other._value, subType) {}
         template<typename N>
-        Number(const Number<N>& other) : _value(other.getValue()), _subType(other.getSubType()) {}
+        Number(const Number<N>& other) : _value(other.value()), _subType(other.subType()) {}
         virtual ~Number() {}
         
         operator T() const {
@@ -44,19 +44,19 @@ namespace fart::types {
             return Number<N>(_value);
         }
         
-        const T getValue() const {
+        const T value() const {
             return _value;
         }
         
-        const NumberSubType getSubType() const {
+        const NumberSubType subType() const {
             return _subType;
         }
         
-        virtual const uint64_t getHash() const override {
+        virtual const uint64_t hash() const override {
             return (uint64_t)_value;
         }
         
-        virtual const Kind getKind() const override {
+        virtual const Kind kind() const override {
             return Kind::number;
         }
         

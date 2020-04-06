@@ -86,7 +86,7 @@ namespace fart::types {
         }
                     
         void append(const Data<T>& data) {
-            append(data.getItems(), data.getCount());
+            append(data.items(), data.count());
         }
         
         const T removeItemAtIndex(size_t index) noexcept(false) {
@@ -102,27 +102,27 @@ namespace fart::types {
             });
         }
         
-        size_t getCount() const {
+        size_t count() const {
             return _mutex.lockedValue([this]() {
                 return this->_count;
             });
         }
         
-        const T getItemAtIndex(const size_t index) const noexcept(false) {
+        const T itemAtIndex(const size_t index) const noexcept(false) {
             return _mutex.lockedValue([this,index]() {
                 if (index >= _count) throw OutOfBoundException(index);
                 return _store[index];
             });
         }
         
-        const T* getItems() const {
+        const T* items() const {
             return _mutex.lockedValue([this]() {
                 return _store;
             });
         }
         
         const T operator[](const size_t index) const noexcept(false) {
-            return getItemAtIndex(index);
+            return itemAtIndex(index);
         }
         
         const ssize_t indexOf(const Data<T>& other, const size_t offset = 0) const {
@@ -192,16 +192,16 @@ namespace fart::types {
             return _mutex.lockedValue([this,separators,max]() {
                 Strong<Array<Data<T>>> result;
                 ssize_t idx = 0;
-                while (result->getCount() < max - 1) {
+                while (result->count() < max - 1) {
                     if (!separators.some([this,&idx,&result](const Data<T>& separator) {
                         ssize_t next = indexOf(separator, idx);
                         if (next == -1) return false;
                         result->append(subdata(idx, next - idx));
-                        idx = next + separator.getCount();
+                        idx = next + separator.count();
                         return true;
                     })) break;
                 }
-                result->append(subdata(idx, getCount() - idx));
+                result->append(subdata(idx, count() - idx));
                 return result;
             });
         }
@@ -216,8 +216,8 @@ namespace fart::types {
         
         static Strong<Data<T>> join(Array<Data<T>>& datas, Data<T>* seperator) {
             return datas.reduceIndex(Strong<Data<T>>(), [datas, seperator](Strong<Data<T>> result, const size_t idx) {
-                result->append(datas.getItemAtIndex(idx));
-                if (seperator != nullptr && idx != datas.getCount() - 1) result->append(*seperator);
+                result->append(datas.itemAtIndex(idx));
+                if (seperator != nullptr && idx != datas.count() - 1) result->append(*seperator);
                 return result;
             });
         }
@@ -237,7 +237,7 @@ namespace fart::types {
             });
         }
         
-        virtual const uint64_t getHash() const override {
+        virtual const uint64_t hash() const override {
             return _mutex.lockedValue([this]() {
                 if (_hashIsDirty) {
                     _hash = 5381;
@@ -251,7 +251,7 @@ namespace fart::types {
             });
         }
         
-        virtual const Kind getKind() const override {
+        virtual const Kind kind() const override {
             return Kind::data;
         }
         
@@ -261,7 +261,7 @@ namespace fart::types {
                 if (this->_count != other._count) return false;
                 for (size_t idx = 0 ; idx < this->_count ; idx++) {
                     const T lhs = _comparitor->transform(_store[idx]);
-                    const T rhs = _comparitor->transform(other.getItemAtIndex(idx));
+                    const T rhs = _comparitor->transform(other.itemAtIndex(idx));
                     if (lhs != rhs) return false;
                 }
                 return true;

@@ -36,7 +36,7 @@ namespace fart::threading {
         void detach(function<void()> startCallback);
         void join() const;
         
-        const bool getIsDetached() const;
+        const bool isDetached() const;
         
     };
 

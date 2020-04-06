@@ -18,7 +18,7 @@ namespace fart {
         
         class Exception {
         public:
-            virtual const char* getDescription() const = 0;
+            virtual const char* description() const = 0;
         };
         
         class NotImplementedException: public Exception {
@@ -26,7 +26,7 @@ namespace fart {
         public:
             NotImplementedException() {}
             
-            virtual const char* getDescription() const {
+            virtual const char* description() const {
                 return "Not implemented.";
             }
             
@@ -40,7 +40,7 @@ namespace fart {
                     
                 public:
                     
-                    const char * getDescription() const override {
+                    const char * description() const override {
                         return "Cannot resolve filename.";
                     }
                     
@@ -50,7 +50,7 @@ namespace fart {
                     
                 public:
                     
-                    const char * getDescription() const override {
+                    const char * description() const override {
                         return "Cannot open file.";
                     }
                     
@@ -68,11 +68,11 @@ namespace fart {
                         _position = position;
                     }
                     
-                    const ssize_t getPosition() const {
+                    const ssize_t position() const {
                         return _position;
                     }
                     
-                    const char * getDescription() const override {
+                    const char * description() const override {
                         return "Position is outside file range.";
                     }
                     
@@ -96,15 +96,15 @@ namespace fart {
                     this->_character = character;
                 }
                 
-                const size_t getLine() const {
+                const size_t line() const {
                     return this->_line;
                 }
                 
-                const size_t getCharacter() const {
+                const size_t character() const {
                     return this->_character;
                 }
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "JSON is malformed.";
                 }
                 
@@ -113,7 +113,7 @@ namespace fart {
             class JSONUnexpectedEndOfDataException: public Exception {
                 
             public:
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Unexpected end of JSON data.";
                 }
                 
@@ -132,11 +132,11 @@ namespace fart {
                 AllocationException(const size_t size) : _size(size) {}
                 AllocationException(const AllocationException& other) : _size(other._size) {}
                 
-                const size_t getSize() const {
+                const size_t size() const {
                     return _size;
                 }
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Cannot allocate memory.";
                 }
                 
@@ -149,7 +149,7 @@ namespace fart {
             class ISO8601Exception : public Exception {
                 
             public:
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Not a valid ISO 8601 string";
                 }
                 
@@ -164,11 +164,11 @@ namespace fart {
                 DecoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
                 DecoderException(const DecoderException& other) : _characterIndex(other._characterIndex) {}
                 
-                const size_t getCharacterIndex() const {
+                const size_t characterIndex() const {
                     return _characterIndex;
                 }
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Cannot decode character";
                 }
                 
@@ -182,11 +182,11 @@ namespace fart {
             public:
                 EncoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
                 
-                const size_t getCharacterIndex() const {
+                const size_t characterIndex() const {
                     return _characterIndex;
                 }
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Cannot encode character";
                 }
                 
@@ -197,7 +197,7 @@ namespace fart {
             public:
                 EncoderTypeException() {}
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Cannot encode type.";
                 }
                 
@@ -212,11 +212,11 @@ namespace fart {
                 OutOfBoundException(const size_t index) : _index(index) {}
                 OutOfBoundException(const OutOfBoundException& other) : _index(other._index) {}
                 
-                const size_t getIndex() const {
+                const size_t index() const {
                     return _index;
                 }
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Index is out of bounds.";
                 }
                 
@@ -232,11 +232,11 @@ namespace fart {
                 KeyNotFoundException(T key) : _key(key) {};
                 KeyNotFoundException(const KeyNotFoundException<T>& other) : _key(other._key) {}
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Key was not found";
                 }
                 
-                const T& getKey() const {
+                const T& key() const {
                     return _key;
                 }
                 
@@ -252,22 +252,22 @@ namespace fart {
                 NotFoundException(const T& item) : _item(item) {}
                 NotFoundException(const NotFoundException<T>& other) : _item(other._item) {}
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Item not found.";
                 }
                 
-                const T& getItem() const {
+                const T& item() const {
                     return _item;
                 }
                 
             };
             
-            class TimeZoneDecoderException: public Exception {
-                
+            class DurationParserException: public Exception {
+                                
             public:
                 
-                const char * getDescription() const override {
-                    return "TimeZone decoder error";
+                const char * description() const override {
+                    return "Could not parse duration";
                 }
                 
             };
@@ -285,11 +285,11 @@ namespace fart {
                 AddressAlreadyInUseException(uint16_t port) : _port(port) {};
                 AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Port already in use.";
                 }
                 
-                const uint16_t getPort() const {
+                const uint16_t port() const {
                     return _port;
                 }
                 
@@ -304,11 +304,11 @@ namespace fart {
                 UrlDecodingException(uint8_t chr) : _character(chr) {};
                 UrlDecodingException(const UrlDecodingException& other) : _character(other._character) {}
                 
-                virtual const char* getDescription() const {
+                virtual const char* description() const {
                     return "Cannot decode character.";
                 }
                 
-                const uint8_t getCharacter() const {
+                const uint8_t character() const {
                     return _character;
                 }
                 
@@ -318,7 +318,7 @@ namespace fart {
 
                 class DataIncompleteException : public Exception {
                     
-                    virtual const char* getDescription() const {
+                    virtual const char* description() const {
                         return "Data is incomplete.";
                     }
                     
@@ -326,7 +326,7 @@ namespace fart {
 
                 class DataMalformedException : public Exception {
                     
-                    virtual const char* getDescription() const {
+                    virtual const char* description() const {
                         return "Data is malformed.";
                     }
                     
@@ -334,7 +334,7 @@ namespace fart {
 
                 class MethodNotSupportedException : public Exception {
                     
-                    virtual const char* getDescription() const {
+                    virtual const char* description() const {
                         return "Method is not supported.";
                     }
                     
@@ -342,7 +342,7 @@ namespace fart {
 
                 class VersionNotSupportedException : public Exception {
                     
-                    virtual const char* getDescription() const {
+                    virtual const char* description() const {
                         return "Version is not supported.";
                     }
                     

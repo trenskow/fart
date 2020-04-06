@@ -51,7 +51,7 @@ void Thread::join() const {
     pthread_join(thread, nullptr);
 }
 
-const bool Thread::getIsDetached() const {
+const bool Thread::isDetached() const {
     return _mutex.lockedValue([this]() {
         return _isDetached;
     });

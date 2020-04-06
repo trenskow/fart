@@ -36,7 +36,7 @@ namespace fart::system {
             big
         };
         
-        static inline Variant getSystemVariant() {
+        static inline Variant systemVariant() {
             static const uint32_t test = 0x00000001;
             return *((uint8_t *)&test) == 0x01 ? Variant::little : Variant::big;
         }
@@ -49,12 +49,12 @@ namespace fart::system {
         
         template<typename T>
         static const T toSystemVariant(T val, Variant from) {
-            return convert(val, from, getSystemVariant());
+            return convert(val, from, systemVariant());
         }
         
         template<typename T>
         static const T fromSystemVariant(T val, Variant to) {
-            return convert(val, getSystemVariant(), to);
+            return convert(val, systemVariant(), to);
         }
         
     };

@@ -24,7 +24,7 @@ namespace fart::network::web::http {
     protected:
         
         virtual void postProcess(const Message<RequestHead>& request, Socket &socket) const {
-            if (!request.hasHeader("connection") || *request.getHeaderValue("connection") != String("keep-alive")) {
+            if (!request.hasHeader("connection") || *request.headerValue("connection") != String("keep-alive")) {
                 socket.close();
             }
         }

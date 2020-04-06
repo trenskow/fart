@@ -59,20 +59,20 @@ Endpoint::Endpoint(uint16_t port, EndpointType types, uint32_t scope_id) : Endpo
 
 Endpoint::~Endpoint() {}
 
-const EndpointType Endpoint::getType() const {
+const EndpointType Endpoint::type() const {
     return _mutex.lockedValue([this]() {
         if (this->_storage.ss_family == AF_INET) return EndpointTypeIPv4;
         return EndpointTypeIPv6;
     });
 }
 
-Strong<String> Endpoint::getHost() const {
+Strong<String> Endpoint::host() const {
     
     return _mutex.lockedValue([this]() {
         
         char ret[1024];
         
-        switch (this->getType()) {
+        switch (this->type()) {
             case EndpointTypeIPv4:
                 inet_ntop(AF_INET, &((sockaddr_in *)&this->_storage)->sin_addr, ret, 1024);
                 break;
@@ -87,9 +87,9 @@ Strong<String> Endpoint::getHost() const {
     
 }
 
-const uint16_t Endpoint::getPort() const {
+const uint16_t Endpoint::port() const {
     return _mutex.lockedValue([this]() {
-        switch (this->getType()) {
+        switch (this->type()) {
             case EndpointTypeIPv4:
                 return ntohs(((sockaddr_in *)&this->_storage)->sin_port);
             case EndpointTypeIPv6:
@@ -100,7 +100,7 @@ const uint16_t Endpoint::getPort() const {
 
 void Endpoint::setPort(const uint16_t port) {
     _mutex.locked([this,port]() {
-        switch (this->getType()) {
+        switch (this->type()) {
             case EndpointTypeIPv4:
                 ((sockaddr_in *)&this->_storage)->sin_port = htons(port);
                 break;
@@ -111,7 +111,7 @@ void Endpoint::setPort(const uint16_t port) {
     });
 }
 
-const sockaddr* Endpoint::getSockAddr() const {
+const sockaddr* Endpoint::sockAddr() const {
     return _mutex.lockedValue([this]() {
         return (sockaddr *)&this->_storage;
     });

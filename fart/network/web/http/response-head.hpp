@@ -27,12 +27,12 @@ namespace fart::network::web::http {
         ResponseHead(const ResponseHead& other);
         virtual ~ResponseHead();
         
-        const Version getVersion() const;
-        const Status getStatus() const;
+        const Version version() const;
+        const Status status() const;
         
     protected:
         
-        virtual Strong<Data<uint8_t>> getHeadData(const Data<uint8_t>& lineBreak) const;
+        virtual Strong<Data<uint8_t>> headData(const Data<uint8_t>& lineBreak) const;
         
     private:
         

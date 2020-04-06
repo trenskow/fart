@@ -10,12 +10,12 @@
 
 using namespace fart::types;
 
-const Type::Kind Null::getKind() const {
+const Type::Kind Null::kind() const {
     return Kind::null;
 }
 
 bool Null::operator==(const Type& other) const {
-    return other.getKind() == Kind::null;
+    return other.kind() == Kind::null;
 }
 
 bool Null::operator==(const Type* other) const {

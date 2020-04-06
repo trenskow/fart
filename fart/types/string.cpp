@@ -31,17 +31,17 @@ String::String(const char* string) noexcept(false) : String() {
 }
 
 String::String(const Data<uint8_t>& data) noexcept(false) : String() {
-    _store.append(_decodeUTF8(data.getItems(), data.getCount()));
+    _store.append(_decodeUTF8(data.items(), data.count()));
 }
 
 String::String(const Data<uint16_t>& data, Endian::Variant endian) noexcept(false) : String() {
-    _store.append(_decodeUTF16(data.getItems(), data.getCount(), endian));
+    _store.append(_decodeUTF16(data.items(), data.count(), endian));
 }
 
 String::String(const Data<uint16_t>& data) noexcept(false) : String() {
     Strong<Data<uint16_t>> parseData(data);
     Endian::Variant endian = Endian::Variant::big;
-    if (data.getCount() > 1) {
+    if (data.count() > 1) {
         Data<uint8_t> bom = data.subdata(0, 2)->as<uint8_t>();
         uint8_t b0 = bom[0];
         uint8_t b1 = bom[1];
@@ -52,7 +52,7 @@ String::String(const Data<uint16_t>& data) noexcept(false) : String() {
             parseData = parseData->subdata(2);
         }
     }
-    _store.append(_decodeUTF16(parseData->getItems(), parseData->getCount(), endian));
+    _store.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
 }
 
 String::String(const String& other) : String(other._store) {}
@@ -114,11 +114,11 @@ Strong<Data<uint8_t>> String::_encodeUTF8(const Data<uint32_t> &buffer, bool nul
     
     Strong<Data<uint8_t>> ret;
     
-    for (size_t idx = 0 ; idx < buffer.getCount() ; idx++) {
+    for (size_t idx = 0 ; idx < buffer.count() ; idx++) {
         
         uint8_t chr[4];
         
-        uint32_t codePoint = buffer.getItemAtIndex(idx);
+        uint32_t codePoint = buffer.itemAtIndex(idx);
         if (codePoint < 0x80) {
             ret->append(codePoint);
         } else if (codePoint < 0x800) {
@@ -173,7 +173,7 @@ Strong<Data<uint16_t>> String::_encodeUTF16(const Data<uint32_t> &buffer, Endian
     
     Strong<Data<uint16_t>> ret;
     
-    for (size_t idx = 0 ; idx < buffer.getCount() ; idx++) {
+    for (size_t idx = 0 ; idx < buffer.count() ; idx++) {
         
         uint32_t chr = buffer[idx];
         
@@ -210,11 +210,11 @@ const uint8_t String::_valueToHex(uint8_t value, size_t idx) {
 
 Strong<Data<uint32_t>> String::_decodeHex(const Data<uint8_t> &buffer) {
     
-    if (buffer.getCount() % 2 != 0) throw OutOfBoundException(buffer.getCount() + 1);
+    if (buffer.count() % 2 != 0) throw OutOfBoundException(buffer.count() + 1);
     
     Strong<Data<uint32_t>> ret;
     
-    for (size_t idx = 0 ; idx < buffer.getCount() ; idx += 2) {
+    for (size_t idx = 0 ; idx < buffer.count() ; idx += 2) {
         auto byte = buffer[idx];
         ret->append(_valueToHex(byte >> 4, idx));
         ret->append(_valueToHex(byte & 0xF, idx));
@@ -226,11 +226,11 @@ Strong<Data<uint32_t>> String::_decodeHex(const Data<uint8_t> &buffer) {
 
 Strong<Data<uint8_t>> String::_encodeHex(const Data<uint32_t> &buffer) {
     
-    if (buffer.getCount() % 2 != 0) throw OutOfBoundException(buffer.getCount() + 1);
+    if (buffer.count() % 2 != 0) throw OutOfBoundException(buffer.count() + 1);
     
     Strong<Data<uint8_t>> ret;
     
-    for (size_t idx = 0 ; idx < buffer.getCount() ; idx += 2) {
+    for (size_t idx = 0 ; idx < buffer.count() ; idx += 2) {
         ret->append(_valueFromHex(buffer[idx], idx) << 4 | _valueFromHex(buffer[idx + 1], idx + 1));
     }
     
@@ -264,15 +264,15 @@ void String::setComparison(Comparison comparison) {
     _caseComparitor->setComparison(comparison);
 }
 
-size_t String::getLength() const {
-    return _store.getCount();
+size_t String::length() const {
+    return _store.count();
 }
 
-Strong<Data<uint8_t>> String::getUTF8Data(bool nullTerminate) const {
+Strong<Data<uint8_t>> String::UTF8Data(bool nullTerminate) const {
     return _encodeUTF8(_store, nullTerminate);
 }
 
-Strong<Data<uint16_t>> String::getUTF16Data(Endian::Variant endian) const {
+Strong<Data<uint16_t>> String::UTF16Data(Endian::Variant endian) const {
     return _encodeUTF16(_store, endian);
 }
 
@@ -280,7 +280,7 @@ Strong<String> String::fromHex(const Data<uint8_t> &data) {
     return Strong<String>(_decodeHex(data));
 }
 
-Strong<Data<uint8_t>> String::getHexData() const {
+Strong<Data<uint8_t>> String::hexData() const {
     return _encodeHex(_store);
 }
 
@@ -333,13 +333,13 @@ Strong<String> String::join(Array<String> &strings, String &seperator) {
     }), seperator._store));
 }
 
-const int64_t String::parseNumber(size_t startIndex, size_t* consumed) const {
-    if (_store.getCount() <= startIndex) throw DecoderException(startIndex);
+const int64_t String::toInteger(size_t startIndex, size_t* consumed) const {
+    if (_store.count() <= startIndex) throw DecoderException(startIndex);
     if (_store[startIndex] != '-' && (_store[startIndex] < '0' || _store[startIndex] > '9')) throw DecoderException(startIndex);
     int64_t multiplier = 1;
     int64_t result = 0;
     size_t idx;
-    for (idx = startIndex ; idx < getLength() ; idx++) {
+    for (idx = startIndex ; idx < length() ; idx++) {
         if (idx == startIndex && _store[idx] == '-') {
             multiplier = -1;
             continue;
@@ -361,11 +361,11 @@ Strong<String> String::substring(size_t offset, ssize_t length) const {
     return Strong<String>(_store.subdata(offset, length));
 }
 
-const uint64_t String::getHash() const {
-    return _store.getHash();
+const uint64_t String::hash() const {
+    return _store.hash();
 }
 
-const Type::Kind String::getKind() const {
+const Type::Kind String::kind() const {
     return Kind::string;
 }
 

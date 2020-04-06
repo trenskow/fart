@@ -105,16 +105,6 @@ namespace fart::types {
             if (month != nullptr) *month = m;
             if (day != nullptr) *day = d;
         }
-                
-        static int64_t _decodePart(const String& string) {
-            int64_t ret = 0;
-            for (size_t idx = 0 ; idx < string.getLength() ; idx++) {
-                ret *= 10;
-                if (string[idx] < '0' || string[idx] > '9') throw ISO8601Exception();
-                ret += string[idx] - '0';
-            }
-            return ret;
-        }
         
         void _set(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours, const uint8_t minutes, const uint8_t seconds, uint64_t microseconds) {
             _time = Duration::fromDays(_daysFromEpoch(year, month, day));
@@ -127,7 +117,7 @@ namespace fart::types {
         static const Duration _localOffset() {
             time_t rawTime;
             tm * timeinfo;
-            time(&rawTime);
+            ::time(&rawTime);
             timeinfo = localtime(&rawTime);
             return timeinfo->tm_gmtoff;
         }
@@ -136,7 +126,7 @@ namespace fart::types {
         
         static const uint8_t daysInWeek = 7;
         
-        static const Date& getEpoch() {
+        static const Date& epoch() {
             static const Date epoch = Duration::zero();
             return epoch;
         }
@@ -146,7 +136,7 @@ namespace fart::types {
         }
         
         Date() : _timeZone(TimeZone::utc) {
-            _time = Duration::fromSeconds(time(nullptr));
+            _time = Duration::fromSeconds(::time(nullptr));
         }
         
         Date(const Duration& time, TimeZone timeZone = TimeZone::utc) : _time(time), _timeZone(timeZone) { }
@@ -168,71 +158,61 @@ namespace fart::types {
                         
             auto parts = iso8601.split("T");
             
-            if (parts->getCount() > 0) {
+            if (parts->count() > 0) {
                 
-                auto datePart = parts->getItemAtIndex(0);
+                auto datePart = parts->itemAtIndex(0);
                 
-                year = _decodePart(datePart->substring(0, 4));
+                year = datePart->substring(0, 4)->toInteger();
                 
-                if (datePart->getLength() == 8) {
-                    month = _decodePart(datePart->substring(4, 2));
-                    day = _decodePart(datePart->substring(6, 2));
+                if (datePart->length() == 8) {
+                    month = datePart->substring(4, 2)->toInteger();
+                    day = datePart->substring(6, 2)->toInteger();
                 }
-                else if (datePart->getLength() == 10) {
-                    month = _decodePart(datePart->substring(5, 2));
-                    day = _decodePart(datePart->substring(8, 2));
+                else if (datePart->length() == 10) {
+                    month = datePart->substring(5, 2)->toInteger();
+                    day = datePart->substring(8, 2)->toInteger();
                 }
                 else throw ISO8601Exception();
                 
-                if (parts->getCount() > 1) {
+                if (parts->count() > 1) {
                     
                     auto seperators = Array<String>();
                     seperators.append(Strong<String>("+"));
                     seperators.append(Strong<String>("-"));
                     seperators.append(Strong<String>("Z"));
 
-                    auto timeParts = parts->getItemAtIndex(1)->split(seperators);
+                    auto timeParts = parts->itemAtIndex(1)->split(seperators);
                     
-                    if (timeParts->getCount() == 1) throw ISO8601Exception();
+                    if (timeParts->count() == 1) throw ISO8601Exception();
                     
-                    auto timeComponentsPart = timeParts->getItemAtIndex(0);
-                    auto timeZonePart = timeParts->getItemAtIndex(1);
+                    auto timeComponentsPart = timeParts->itemAtIndex(0);
+                    auto timeZonePart = timeParts->itemAtIndex(1);
                     
                     auto timeComponentsSubParts = timeComponentsPart->split(".");
                     
-                    if (timeComponentsSubParts->getCount() > 0) {
+                    if (timeComponentsSubParts->count() > 0) {
                         
-                        auto hmsComponentParts = timeComponentsSubParts->getItemAtIndex(0);
+                        auto hmsComponentParts = timeComponentsSubParts->itemAtIndex(0);
                         
-                        hours = _decodePart(hmsComponentParts->substring(0, 2));
+                        hours = hmsComponentParts->substring(0, 2)->toInteger();
                         
-                        if (hmsComponentParts->getLength() == 6) {
-                            minutes = _decodePart(hmsComponentParts->substring(2, 2));
-                            seconds = _decodePart(hmsComponentParts->substring(4, 2));
+                        if (hmsComponentParts->length() == 6) {
+                            minutes = hmsComponentParts->substring(2, 2)->toInteger();
+                            seconds = hmsComponentParts->substring(4, 2)->toInteger();
                         }
-                        else if (timeComponentsPart->getLength() == 8) {
-                            minutes = _decodePart(hmsComponentParts->substring(3, 2));
-                            seconds = _decodePart(hmsComponentParts->substring(6, 2));
+                        else if (timeComponentsPart->length() == 8) {
+                            minutes = hmsComponentParts->substring(3, 2)->toInteger();
+                            seconds = hmsComponentParts->substring(6, 2)->toInteger();
                         }
                         
-                        if (timeComponentsSubParts->getCount() > 1) {
-                            microseconds = _decodePart(timeComponentsSubParts->getItemAtIndex(1));
+                        if (timeComponentsSubParts->count() > 1) {
+                            microseconds = timeComponentsSubParts->itemAtIndex(1)->toInteger();
                         }
                         
                     } else throw ISO8601Exception();
                     
-                    if (timeZonePart->getLength() > 0) {
-                        bool isNegative = parts->getItemAtIndex(1)->indexOf("-") > -1;
-                        if (timeZonePart->getLength() == 2) {
-                            timeZoneOffset = Duration::fromHours(_decodePart(timeZonePart));
-                        }
-                        else if (timeZonePart->getLength() >= 4) {
-                            size_t minutesOffset = timeZonePart->getLength() == 4 ? 2 : 3;
-                            auto hours = _decodePart(timeZonePart->substring(0, 2)) * 60;
-                            auto minutes = _decodePart(timeZonePart->substring(minutesOffset, 2));
-                            auto total = (hours + minutes) * (isNegative ? -1 : 1);
-                            timeZoneOffset = Duration::fromMinutes(total);
-                        }
+                    if (timeZonePart->length() > 0) {
+                        timeZoneOffset = Duration::parse(timeZonePart) * (parts->itemAtIndex(1)->indexOf("-") > -1 ? -1.0 : 1.0);
                     }
                     
                 }
@@ -248,67 +228,67 @@ namespace fart::types {
         
         virtual ~Date() {}
         
-        const int64_t getYear() const {
+        const int64_t year() const {
             return this->_mutex.lockedValue([this](){
                 int64_t year;
-                _components(this->_time.getDays(), &year, nullptr, nullptr);
+                _components(this->_time.days(), &year, nullptr, nullptr);
                 return year;
             });
         }
         
-        const Month getMonth() const {
+        const Month month() const {
             return this->_mutex.lockedValue([this](){
                 uint8_t month;
-                _components(this->_time.getDays(), nullptr, &month, nullptr);
+                _components(this->_time.days(), nullptr, &month, nullptr);
                 return Month(month);
             });
         }
         
-        const int16_t getDay() const {
+        const int16_t day() const {
             return this->_mutex.lockedValue([this](){
                 uint8_t day;
-                _components(this->_time.getDays(), nullptr, nullptr, &day);
+                _components(this->_time.days(), nullptr, nullptr, &day);
                 return day;
             });
         }
         
-        const Weekday getWeekday() const {
+        const Weekday weekday() const {
             return this->_mutex.lockedValue([this](){
-                return Weekday(((int64_t)this->_time.getDays() + _epochWeekday) % daysInWeek);
+                return Weekday(((int64_t)this->_time.days() + _epochWeekday) % daysInWeek);
             });
         }
         
-        const Duration sinceMidnight() const {
+        const Duration durationSinceMidnight() const {
             return this->_mutex.lockedValue([this](){
-                auto seconds = this->_time.getSeconds();
-                double daysSeconds = floor(this->_time.getDays()) * Duration::day();
+                auto seconds = this->_time.seconds();
+                double daysSeconds = floor(this->_time.days()) * Duration::day();
                 return Duration(seconds - daysSeconds);
             });
         }
         
         const bool isLeapYear() {
-            return Date::isLeapYear(this->getYear());
+            return Date::isLeapYear(this->year());
         }
         
-        const uint8_t getHours() const {
-            return this->sinceMidnight() / Duration::hour();
+        const uint8_t hours() const {
+            return this->durationSinceMidnight() / Duration::hour();
         }
         
-        const uint8_t getMinutes() const {
-            return (this->sinceMidnight().getSeconds() - (this->getHours() * Duration::hour())) / Duration::minute();
+        const uint8_t minutes() const {
+            return (this->durationSinceMidnight().seconds() - (this->hours() * Duration::hour())) / Duration::minute();
         }
         
-        const uint8_t getSeconds() const {
-            return (this->sinceMidnight().getSeconds()) - (this->getHours() * Duration::hour()) - (this->getMinutes() * Duration::minute());
+        const uint8_t seconds() const {
+            return (this->durationSinceMidnight().seconds()) - (this->hours() * Duration::hour()) - (this->minutes() * Duration::minute());
         }
         
-        const uint32_t getMicroseconds() const {
+        const uint32_t microseconds() const {
             return this->_mutex.lockedValue([this](){
-                return (this->_time.getSeconds() - floor(this->_time.getSeconds())) * 1000000;
+                return (this->_time.seconds() - floor(this->_time.seconds())) * 1000000;
             });
         }
                 
-        const Duration getTime() const {
+        const Duration durationSinceEpoch() const {
             return this->_mutex.lockedValue([this](){
                 return this->_time;
             });
@@ -316,7 +296,7 @@ namespace fart::types {
                 
         template<class T = Strong<Duration>>
         T since(const Date& other) const {
-            return this->getTime() - other.getTime();
+            return this->durationSinceEpoch() - other.durationSinceEpoch();
         }
         
         Strong<Date> to(TimeZone timeZone) const {
@@ -331,13 +311,13 @@ namespace fart::types {
             return this->_mutex.lockedValue([this](){
                 Strong<String> ret;
                 ret->append(String::format("%02lld-%02d-%02dT%02d:%02d:%02d",
-                            this->getYear(),
-                            this->getMonth(),
-                            this->getDay(),
-                            this->getHours(),
-                            this->getMinutes(),
-                            this->getSeconds()));
-                auto microseconds = this->getMicroseconds();
+                            this->year(),
+                            this->month(),
+                            this->day(),
+                            this->hours(),
+                            this->minutes(),
+                            this->seconds()));
+                auto microseconds = this->microseconds();
                 if (microseconds != 0) {
                     ret->append(String::format(".%llu", microseconds));
                 }
@@ -346,14 +326,7 @@ namespace fart::types {
                         ret->append("Z");
                         break;
                     case TimeZone::local: {
-                        double offset = _localOffset();
-                        double absOffset = fabs(offset);
-                        uint64_t hours = Duration(absOffset).getHours();
-                        uint64_t minutes = Duration(absOffset - Duration::fromHours(hours)).getMinutes();
-                        String prefix = offset < 0 ? "-" : "+";
-                        prefix.withCString([&ret,&hours,&minutes](const char* prefix){
-                            ret->append(String::format("%s%02llu:%02llu", prefix, hours, minutes));
-                        });
+                        ret->append(_localOffset().toString(Duration::ToStringOptions::prefixPositive));
                         break;
                     }
                 }
@@ -361,27 +334,27 @@ namespace fart::types {
             });
         }
         
-        const Kind getKind() const override {
+        const Kind kind() const override {
             return Kind::date;
         }
         
-        virtual const uint64_t getHash() const override {
+        virtual const uint64_t hash() const override {
             return this->_mutex.lockedValue([this](){
-                double hash = this->_time.getSeconds();
+                double hash = this->_time.seconds();
                 return *((uint64_t*)&hash);
             });
         }
         
         Strong<Date> operator+(const Duration& duration) const {
-            return Strong<Date>(this->getSeconds() + duration.getSeconds());
+            return Strong<Date>(this->seconds() + duration.seconds());
         }
         
         Strong<Date> operator-(const Duration& duration) const {
-            return Strong<Date>(this->getSeconds() - duration.getSeconds());
+            return Strong<Date>(this->seconds() - duration.seconds());
         }
         
         const Duration operator-(const Date& other) const {
-            return this->getSeconds() - other.getSeconds();
+            return this->seconds() - other.seconds();
         }
         
         void operator+=(const Duration& duration) {
@@ -397,7 +370,7 @@ namespace fart::types {
         }
         
         bool operator==(const Date& other) const {
-            return this->to(TimeZone::utc)->getSeconds() == other.to(TimeZone::utc)->getSeconds();
+            return this->to(TimeZone::utc)->seconds() == other.to(TimeZone::utc)->seconds();
         }
         
         bool operator!=(const Date& other) const {
@@ -405,11 +378,11 @@ namespace fart::types {
         }
         
         bool operator>(const Date& other) const {
-            return this->to(TimeZone::utc)->getSeconds() > other.to(TimeZone::utc)->getSeconds();
+            return this->to(TimeZone::utc)->seconds() > other.to(TimeZone::utc)->seconds();
         }
         
         bool operator<(const Date& other) const {
-            return this->to(TimeZone::utc)->getSeconds() < other.to(TimeZone::utc)->getSeconds();
+            return this->to(TimeZone::utc)->seconds() < other.to(TimeZone::utc)->seconds();
         }
         
     };

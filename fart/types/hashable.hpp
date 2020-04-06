@@ -18,7 +18,7 @@ namespace fart::types {
     class Hashable {
         
     public:
-        virtual const uint64_t getHash() const {
+        virtual const uint64_t hash() const {
             throw NotImplementedException();
         };
         

@@ -47,7 +47,7 @@ namespace fart::network {
         Socket(Socket&& other);
         virtual ~Socket();
         
-        virtual const uint64_t getHash() const;
+        virtual const uint64_t hash() const;
         
         void bind(Strong<Endpoint> endpoint);
         void listen(function<void(Socket&)> acceptCallback);
@@ -57,11 +57,11 @@ namespace fart::network {
         const size_t sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const;
         void close();
         
-        Strong<Endpoint> getLocalEndpoint() const;
-        Strong<Endpoint> getRemoteEndpoint() const;
+        Strong<Endpoint> localEndpoint() const;
+        Strong<Endpoint> remoteEndpoint() const;
         
-        const bool getIsUDP() const;
-        const SocketState getSocketState() const;
+        const bool isUDP() const;
+        const SocketState socketState() const;
         
         void awaitClose() const;
         

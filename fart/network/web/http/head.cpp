@@ -17,13 +17,13 @@ Head::Head() {}
 Head::Head(Data<uint8_t>& data) {
     
     Data<uint8_t> lineBreak = Message<Head>::dataForLineBreakMode(Message<Head>::determineLineBreakMode(data));
-    Data<uint8_t> head = data.remove(0, data.indexOf(lineBreak) + lineBreak.getCount());
+    Data<uint8_t> head = data.remove(0, data.indexOf(lineBreak) + lineBreak.count());
     
-    head.remove(head.getCount() - lineBreak.getCount(), lineBreak.getCount());
+    head.remove(head.count() - lineBreak.count(), lineBreak.count());
     
     Array<Data<uint8_t>> parts = head.split((uint8_t*)" ", 1);
     
-    if (parts.getCount() != 3) throw DataMalformedException();
+    if (parts.count() != 3) throw DataMalformedException();
     
     _parts = parts.map<String>([](Data<uint8_t>& current) {
         return String(current);
@@ -44,8 +44,8 @@ const Version Head::parseVersion(String &version) {
 Strong<Data<uint8_t>> Head::versionData(Version version) {
     switch (version) {
         case HTTP1_0:
-            return String("HTTP/1.0").getUTF8Data();
+            return String("HTTP/1.0").UTF8Data();
         case HTTP1_1:
-            return String("HTTP/1.1").getUTF8Data();
+            return String("HTTP/1.1").UTF8Data();
     }
 }

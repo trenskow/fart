@@ -38,46 +38,46 @@ RequestHead::RequestHead(const RequestHead& other) : _version(other._version), _
 RequestHead::~RequestHead() {}
 
 void RequestHead::ensureSpaceAt(Data<uint8_t> &data, size_t index) const {
-    if (data.getCount() < index) throw DataIncompleteException();
-    if (data.getItemAtIndex(index)) throw DataMalformedException();
+    if (data.count() < index) throw DataIncompleteException();
+    if (data.itemAtIndex(index)) throw DataMalformedException();
 }
 
-const Version RequestHead::getVersion() const {
+const Version RequestHead::version() const {
     return _version;
 }
 
-const RequestHead::Method RequestHead::getMethod() const {
+const RequestHead::Method RequestHead::method() const {
     return _method;
 }
 
-const Strong<String> RequestHead::getPath() const {
+const Strong<String> RequestHead::path() const {
     return Strong<String>(_path);
 }
 
-Strong<Data<uint8_t>> RequestHead::getHeadData(const Data<uint8_t>& lineBreak) const {
+Strong<Data<uint8_t>> RequestHead::headData(const Data<uint8_t>& lineBreak) const {
     
-    Strong<Data<uint8_t>> result = MessageHead::getHeadData(lineBreak);
+    Strong<Data<uint8_t>> result = MessageHead::headData(lineBreak);
     
-    switch (getMethod()) {
+    switch (method()) {
        case HEAD:
-           result->append(String("HEAD").getUTF8Data());
+           result->append(String("HEAD").UTF8Data());
            break;
        case GET:
-           result->append(String("GET").getUTF8Data());
+           result->append(String("GET").UTF8Data());
            break;
        case POST:
-           result->append(String("POST").getUTF8Data());
+           result->append(String("POST").UTF8Data());
            break;
        case PUT:
-           result->append(String("PUT").getUTF8Data());
+           result->append(String("PUT").UTF8Data());
            break;
        case DELETE:
-           result->append(String("DELETE").getUTF8Data());
+           result->append(String("DELETE").UTF8Data());
            break;
     }
     
     result->append(' ');
-    result->append(_path->getUTF8Data());
+    result->append(_path->UTF8Data());
     result->append(' ');
     result->append(Head::versionData(_version));
     result->append(lineBreak);

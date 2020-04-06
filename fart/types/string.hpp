@@ -55,18 +55,18 @@ namespace fart::types {
         
         void setComparison(Comparison comparison);
         
-        size_t getLength() const;
+        size_t length() const;
         
         template<typename F>
         void withCString(const F& todo) const {
-            auto data = this->getUTF8Data(true);
-            todo((const char*)data->getItems());
+            auto data = this->UTF8Data(true);
+            todo((const char*)data->items());
         }
         
         template<typename T, typename F>
         auto mapCString(const F& todo) const {
-            auto data = this->getUTF8Data(true);
-            return todo((const char*)data->getItems());
+            auto data = this->UTF8Data(true);
+            return todo((const char*)data->items());
         }
         
         void print(bool newLine = true) const {
@@ -75,11 +75,11 @@ namespace fart::types {
             });
         }
         
-        Strong<Data<uint8_t>> getUTF8Data(bool nullTerminate = false) const;
-        Strong<Data<uint16_t>> getUTF16Data(Endian::Variant endian = Endian::Variant::big) const;
+        Strong<Data<uint8_t>> UTF8Data(bool nullTerminate = false) const;
+        Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::Variant::big) const;
         
         static Strong<String> fromHex(const Data<uint8_t>& data);
-        Strong<Data<uint8_t>> getHexData() const;
+        Strong<Data<uint8_t>> hexData() const;
         
         void append(const String& other);
         void append(const uint32_t character);
@@ -93,14 +93,14 @@ namespace fart::types {
         static Strong<String> join(Array<String>& strings, String* seperator);
         static Strong<String> join(Array<String>& strings, String& seperator);
         
-        const int64_t parseNumber(size_t startIndex = 0, size_t* consumed = nullptr) const;
+        const int64_t toInteger(size_t startIndex = 0, size_t* consumed = nullptr) const;
         
         ssize_t indexOf(const String& other, size_t offset = 0) const;
         Strong<String> substring(size_t offset, ssize_t length = -1) const;
                 
-        virtual const uint64_t getHash() const override;
+        virtual const uint64_t hash() const override;
         
-        virtual const Kind getKind() const override;
+        virtual const Kind kind() const override;
         
         virtual bool operator==(const String& other) const;
         bool operator==(const char* other) const;

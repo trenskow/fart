@@ -12,13 +12,13 @@
 using namespace fart::exceptions;
 using namespace fart::types;
 
-const Type::Kind Type::getKind() const {
+const Type::Kind Type::kind() const {
     throw NotImplementedException();
 }
 
 bool Type::operator==(const Type& other) const {
-    if (this->getKind() != other.getKind()) return false;
-    return this->getHash() == other.getHash();
+    if (this->kind() != other.kind()) return false;
+    return this->hash() == other.hash();
 }
 
 bool Type::operator==(const Type* other) const {

@@ -51,7 +51,7 @@ namespace fart::memory {
         void retain() const;
         void release() const;
         
-        size_t getRetainCount() const;
+        size_t retainCount() const;
         
     };
 

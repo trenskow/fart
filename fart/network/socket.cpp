@@ -31,7 +31,7 @@ Socket::~Socket() {
     _closeCallback.callback = nullptr;
 }
 
-const uint64_t Socket::getHash() const {
+const uint64_t Socket::hash() const {
     return _mutex.lockedValue([this]() {
         return _socket;
     });
@@ -88,7 +88,7 @@ void Socket::bind(Strong<Endpoint> endpoint) {
         
         _localEndpoint = endpoint;
         
-        const sockaddr* addr = _localEndpoint->getSockAddr();
+        const sockaddr* addr = _localEndpoint->sockAddr();
         
         if (_socket < 0) {
             
@@ -99,7 +99,7 @@ void Socket::bind(Strong<Endpoint> endpoint) {
                 return;
             }
             
-            if (_localEndpoint->getType() == EndpointTypeIPv6) {
+            if (_localEndpoint->type() == EndpointTypeIPv6) {
                 int32_t on = 1;
                 setsockopt(_socket, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
             }
@@ -157,7 +157,7 @@ void Socket::listen(function<void(Socket& incoming)> acceptCallback) {
                 if (newSocketFd >= 0) {
                     Strong<Socket> newSocket(newSocketFd);
                     acceptCallback(newSocket);
-                    if (newSocket->getSocketState() != SocketStateConnected) {
+                    if (newSocket->socketState() != SocketStateConnected) {
                         newSocket->close();
                     }
                 }
@@ -197,7 +197,7 @@ void Socket::connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, co
         
         _remoteEndpoint = endpoint;
         
-        _socket = socket(_remoteEndpoint->getSockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
+        _socket = socket(_remoteEndpoint->sockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
         
         if (_socket < 0) {
             // Handle error;
@@ -210,7 +210,7 @@ void Socket::connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, co
         
         _mutex.locked([this]() {
             
-            if (::connect(_socket, _remoteEndpoint->getSockAddr(), _remoteEndpoint->getSockAddr()->sa_len) != 0) {
+            if (::connect(_socket, _remoteEndpoint->sockAddr(), _remoteEndpoint->sockAddr()->sa_len) != 0) {
                 // Handle error
                 return;
             }
@@ -224,7 +224,7 @@ void Socket::connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, co
 }
 
 const size_t Socket::send(const Data<uint8_t>& data) const {
-    return ::send(_socket, data.getItems(), data.getCount(), 0);
+    return ::send(_socket, data.items(), data.count(), 0);
 }
 
 const size_t Socket::sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {
@@ -243,33 +243,33 @@ void Socket::close() {
     });
 }
 
-Strong<Endpoint> Socket::getLocalEndpoint() const {
+Strong<Endpoint> Socket::localEndpoint() const {
     return _mutex.lockedValue([this]() {
         return this->_localEndpoint;
     });
 }
 
-Strong<Endpoint> Socket::getRemoteEndpoint() const {
+Strong<Endpoint> Socket::remoteEndpoint() const {
     return _mutex.lockedValue([this]() {
         return this->_remoteEndpoint;
     });
 }
 
-const bool Socket::getIsUDP() const {
+const bool Socket::isUDP() const {
     return _mutex.lockedValue([this]() {
         return this->_isUDP;
     });
 }
 
-const SocketState Socket::getSocketState() const {
+const SocketState Socket::socketState() const {
     return _mutex.lockedValue([this]() {
         return this->_state;
     });
 }
 
 void Socket::awaitClose() const {
-    if (_receiveThread.getIsDetached()) _receiveThread.join();
-    if (_listenThread.getIsDetached()) _listenThread.join();
+    if (_receiveThread.isDetached()) _receiveThread.join();
+    if (_listenThread.isDetached()) _listenThread.join();
 }
 
 void Socket::setCloseCallback(void (*callback)(const Socket &, void *), void *context) {

@@ -20,11 +20,11 @@ const uint8_t Url::hexValue(uint32_t value) {
 
 Strong<String> Url::decode(const String& url) {
     Strong<String> result;
-    for (size_t idx = 0 ; idx < url.getLength() ; idx++) {
+    for (size_t idx = 0 ; idx < url.length() ; idx++) {
         uint32_t chr = url[idx];
         if (chr == '+') chr = ' ';
         else if (chr == '%') {
-            if (idx >= url.getLength() - 2) throw UrlDecodingException(chr);
+            if (idx >= url.length() - 2) throw UrlDecodingException(chr);
             chr = (hexValue(url[idx + 1]) * 16) + hexValue(url[idx + 2]);
             idx += 2;
         }

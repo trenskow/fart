@@ -67,7 +67,7 @@ namespace fart::network::web {
             
             _requestHandler(request, response);
             
-            socket.send(response->getData());
+            socket.send(response->data());
             
             postProcess(request, socket);
                         

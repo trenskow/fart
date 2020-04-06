@@ -35,7 +35,7 @@ namespace fart::memory {
             }
             if (object) {
                 // If object is allocated on the stack, we make a copy on the heap.
-                if (!newObject && object->getRetainCount() == 0) {
+                if (!newObject && object->retainCount() == 0) {
                     _object = new T(*object);
                 } else {
                     _object = object;

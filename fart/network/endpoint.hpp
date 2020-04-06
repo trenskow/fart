@@ -41,11 +41,11 @@ namespace fart::network {
         Endpoint(uint16_t port, EndpointType types = EndpointTypeIPv4, uint32_t scope_id = 0);
         virtual ~Endpoint();
         
-        const EndpointType getType() const;
-        Strong<String> getHost() const;
-        const uint16_t getPort() const;
+        const EndpointType type() const;
+        Strong<String> host() const;
+        const uint16_t port() const;
         void setPort(const uint16_t port);
-        const sockaddr* getSockAddr() const;
+        const sockaddr* sockAddr() const;
         
     };
 

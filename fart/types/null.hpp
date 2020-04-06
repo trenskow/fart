@@ -16,7 +16,7 @@ namespace fart::types {
     class Null: public Type {
         
     public:
-        virtual const Kind getKind() const;
+        virtual const Kind kind() const;
         
         virtual bool operator==(const Type& other) const;
         virtual bool operator==(const Type* other) const;

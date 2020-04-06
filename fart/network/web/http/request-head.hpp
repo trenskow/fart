@@ -35,13 +35,13 @@ namespace fart::network::web::http {
         
         virtual ~RequestHead();
         
-        const Version getVersion() const;
-        const Method getMethod() const;
-        const Strong<String> getPath() const;
+        const Version version() const;
+        const Method method() const;
+        const Strong<String> path() const;
         
     protected:
         
-        virtual Strong<Data<uint8_t>> getHeadData(const Data<uint8_t> &lineBreak) const;
+        virtual Strong<Data<uint8_t>> headData(const Data<uint8_t> &lineBreak) const;
         
     private:
         

@@ -27,7 +27,7 @@ Strong<Type> _parse(const String& string, size_t* idx, size_t* line, size_t* cha
 Strong<Type> _parseString(const String& string, size_t* idx, size_t* line, size_t* character);
 
 void _ensureLength(const String& string, size_t* idx, size_t length) {
-    if (string.getLength() < *idx + length) {
+    if (string.length() < *idx + length) {
         throw JSONUnexpectedEndOfDataException();
     }
 }
@@ -39,7 +39,7 @@ void _ensureData(const String& string, size_t* idx) {
 void _offsetWhiteSpaces(const String& string, size_t* idx, size_t* line, size_t* character) {
     
     // First we ignore any whitespaces.
-    while (string.getLength() > *idx && (string[*idx] == 0x20 || string[*idx] == 0x09 || string[*idx] == 0x0A || string[*idx] == 0x0D)) {
+    while (string.length() > *idx && (string[*idx] == 0x20 || string[*idx] == 0x09 || string[*idx] == 0x0A || string[*idx] == 0x0D)) {
         if (string[*idx] == 0x0A) {
             (*line)++;
             (*character) = 0;
@@ -68,7 +68,7 @@ Strong<Type> _parseDictionary(const String& string, size_t* idx, size_t* line, s
         _offsetWhiteSpaces(string, idx, line, character);
         if (string[*idx] == '}') break;
         if (string[*idx] == ',') {
-            if (result->getCount() == 0) throw JSONMalformedException(*line, *character);
+            if (result->count() == 0) throw JSONMalformedException(*line, *character);
             (*idx)++;
             (*character)++;
             _offsetWhiteSpaces(string, idx, line, character);
@@ -107,11 +107,11 @@ Strong<Type> _parseArray(const String& string, size_t* idx, size_t* line, size_t
         _offsetWhiteSpaces(string, idx, line, character);
         if (string[*idx] == ']') break;
         if (string[*idx] == ',') {
-            if (result->getCount() == 0) throw JSONMalformedException(*line, *character);
+            if (result->count() == 0) throw JSONMalformedException(*line, *character);
             (*idx)++;
             (*character)++;
             _offsetWhiteSpaces(string, idx, line, character);
-        } else if (result->getCount() > 0) throw JSONMalformedException(*line, *character);
+        } else if (result->count() > 0) throw JSONMalformedException(*line, *character);
         result->append(_parse(string, idx, line, character));
         _offsetWhiteSpaces(string, idx, line, character);
         if (string[*idx] != ',' && string[*idx] != ']') throw JSONMalformedException(*line, *character);
@@ -137,7 +137,7 @@ Strong<Type> _parseNumber(const String& string, size_t* idx, size_t* line, size_
         (*character)++;
     }
 
-    double full = string.parseNumber(*idx, &consumed);
+    double full = string.toInteger(*idx, &consumed);
     double fragment = 0;
     double exponent = 1;
     
@@ -148,7 +148,7 @@ Strong<Type> _parseNumber(const String& string, size_t* idx, size_t* line, size_
         _ensureLength(string, idx, 1);
         (*idx)++;
         (*character)++;
-        fragment = string.parseNumber(*idx, &consumed);
+        fragment = string.toInteger(*idx, &consumed);
         (*idx) += consumed;
         (*character) += consumed;
         while (fragment > 1) {
@@ -160,7 +160,7 @@ Strong<Type> _parseNumber(const String& string, size_t* idx, size_t* line, size_
         _ensureLength(string, idx, 1);
         (*idx)++;
         (*character)++;
-        exponent = pow(10, string.parseNumber(*idx, &consumed));
+        exponent = pow(10, string.toInteger(*idx, &consumed));
         (*idx) += consumed;
         (*character) += consumed;
     }
@@ -184,7 +184,7 @@ Strong<Type> _parseString(const String& string, size_t* idx, size_t* line, size_
     
     Data<uint16_t> stringBytes;
 
-    while (string.getLength() > *idx && string[*idx] != '"') {
+    while (string.length() > *idx && string[*idx] != '"') {
         
         switch (string[*idx]) {
             case '\b':
@@ -225,7 +225,7 @@ Strong<Type> _parseString(const String& string, size_t* idx, size_t* line, size_
                     case 'U': {
                         _ensureLength(string, idx, 4);
                         String code = string.substring(*idx + 1, 4);
-                        stringBytes.append(Endian::toSystemVariant(code.getHexData()->as<uint16_t>()->getItemAtIndex(0), Endian::Variant::big));
+                        stringBytes.append(Endian::toSystemVariant(code.hexData()->as<uint16_t>()->itemAtIndex(0), Endian::Variant::big));
                         (*idx) += 4;
                         (*character) += 4;
                         break;
@@ -246,7 +246,7 @@ Strong<Type> _parseString(const String& string, size_t* idx, size_t* line, size_
     (*idx)++;
     (*character)++;
     
-    return Strong<String>(stringBytes, Endian::getSystemVariant()).as<Type>();
+    return Strong<String>(stringBytes, Endian::systemVariant()).as<Type>();
     
 }
 
@@ -320,12 +320,12 @@ Strong<String> JSON::stringify(const Type &data) {
     
     Strong<String> result;
     
-    switch (data.getKind()) {
+    switch (data.kind()) {
         case Type::Kind::dictionary: {
             result->append("{");
             auto dictionary = data.as<Dictionary<Type, Type>>();
-            result->append(String::join(dictionary.getKeys()->map<String>([dictionary](Type& key) {
-                if (key.getKind() != Type::Kind::string) throw EncoderTypeException();
+            result->append(String::join(dictionary.keys()->map<String>([dictionary](Type& key) {
+                if (key.kind() != Type::Kind::string) throw EncoderTypeException();
                 Strong<String> result;
                 result->append(stringify(key));
                 result->append(":");
@@ -345,10 +345,10 @@ Strong<String> JSON::stringify(const Type &data) {
             break;
         }
         case Type::Kind::string: {
-            auto bytes = data.as<String>().getUTF16Data(Endian::getSystemVariant());
+            auto bytes = data.as<String>().UTF16Data(Endian::systemVariant());
             result->append("\"");
-            for (size_t idx = 0 ; idx < bytes->getCount() ; idx++) {
-                auto byte = bytes->getItemAtIndex(idx);
+            for (size_t idx = 0 ; idx < bytes->count() ; idx++) {
+                auto byte = bytes->itemAtIndex(idx);
                 switch (byte) {
                     case '\b':
                         result->append("\\b");
@@ -387,15 +387,15 @@ Strong<String> JSON::stringify(const Type &data) {
             break;
         }
         case Type::Kind::number: {
-            switch (data.as<Number<uint64_t>>().getSubType()) {
+            switch (data.as<Number<uint64_t>>().subType()) {
                 case boolean:
-                    result->append(data.as<Boolean>().getValue() ? "true" : "false");
+                    result->append(data.as<Boolean>().value() ? "true" : "false");
                     break;
                 case integer:
-                    result->append(String::format("%lld", data.as<Integer>().getValue()));
+                    result->append(String::format("%lld", data.as<Integer>().value()));
                     break;
                 case floatingPoint: {
-                    double value = data.as<Float>().getValue();
+                    double value = data.as<Float>().value();
                     std::ostringstream stream;
                     stream << value;
                     result->append(stream.str().c_str());

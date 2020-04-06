@@ -37,9 +37,9 @@ namespace fart::types {
         
     public:
         Array() : _hash(0), _hashIsDirty(true) {}
-        Array(const Array<T>& other) : _storage(other._storage.getItems(), other._storage.getCount()), _hash(0), _hashIsDirty(true) {
-            for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
-                _storage.getItemAtIndex(idx)->retain();
+        Array(const Array<T>& other) : _storage(other._storage.items(), other._storage.count()), _hash(0), _hashIsDirty(true) {
+            for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
+                _storage.itemAtIndex(idx)->retain();
             }
         }
         
@@ -50,21 +50,21 @@ namespace fart::types {
         }
         
         virtual ~Array() {
-            for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
-                _storage.getItemAtIndex(idx)->release();
+            for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
+                _storage.itemAtIndex(idx)->release();
             }
         }
         
-        const size_t getCount() const {
-            return _storage.getCount();
+        const size_t count() const {
+            return _storage.count();
         }
         
-        Strong<T> getItemAtIndex(size_t index) const noexcept(false) {
-            return Strong<T>(_storage.getItemAtIndex(index));
+        Strong<T> itemAtIndex(size_t index) const noexcept(false) {
+            return Strong<T>(_storage.itemAtIndex(index));
         }
         
         Strong<T> operator[](const size_t index) const noexcept(false) {
-            return this->getItemAtIndex(index);
+            return this->itemAtIndex(index);
         }
         
         void append(Strong<T> item) {
@@ -94,7 +94,7 @@ namespace fart::types {
         }
         
         const ssize_t indexOf(const T& item) const {
-            for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
+            for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
                 if (*_storage[idx] == item) return idx;
             }
             return -1;
@@ -102,15 +102,15 @@ namespace fart::types {
         
         template<typename F>
         void forEach(const F& todo) const {
-            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
-                todo(this->getItemAtIndex(idx));
+            for (size_t idx = 0 ; idx < this->count() ; idx++) {
+                todo(this->itemAtIndex(idx));
             }
         }
                 
         template<typename R, typename F>
         R reduceIndex(R initial, const F& todo) const {
             R result = initial;
-            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
+            for (size_t idx = 0 ; idx < this->count() ; idx++) {
                 result = todo(result, idx);
             }
             return result;
@@ -119,7 +119,7 @@ namespace fart::types {
         template<typename R, typename F>
         R reduce(R initial, const F& todo) const {
             return this->reduceIndex(initial, [this,todo](R current, const size_t idx) {
-                return todo(current, this->getItemAtIndex(idx));
+                return todo(current, this->itemAtIndex(idx));
             });
         }
         
@@ -135,8 +135,8 @@ namespace fart::types {
         template<typename F>
         Strong<Array<T>> filter(const F& todo) const {
             Strong<Array<T>> result;
-            for (size_t idx = 0 ; idx < getCount() ; idx++) {
-                const T& item = getItemAtIndex(idx);
+            for (size_t idx = 0 ; idx < count() ; idx++) {
+                const T& item = itemAtIndex(idx);
                 if (todo(item)) result->append(item);
             }
             return result;
@@ -144,8 +144,8 @@ namespace fart::types {
         
         template<typename F>
         const bool some(const F& todo) const {
-            for (size_t idx = 0 ; idx < this->getCount() ; idx++) {
-                if (todo(this->getItemAtIndex(idx))) return true;
+            for (size_t idx = 0 ; idx < this->count() ; idx++) {
+                if (todo(this->itemAtIndex(idx))) return true;
             }
             return false;
         }
@@ -153,21 +153,21 @@ namespace fart::types {
         Strong<Array<T>> subarray(size_t index, size_t length) const {
             Strong<Array<T>> result;
             for (size_t idx = index ; idx < index + length ; idx++) {
-                result->append(getItemAtIndex(idx));
+                result->append(itemAtIndex(idx));
             }
             return result;
         }
         
         Strong<Array<T>> subarray(size_t index) const {
-            return subarray(index, getCount() - index);
+            return subarray(index, count() - index);
         }
         
-        const uint64_t getHash() const override {
+        const uint64_t hash() const override {
             return _hashMutex.lockedValue([this]() {
                 if (_hashIsDirty) {
                     _hash = 5381;
-                    for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
-                        _hash = ((_hash << 5) + _hash) + _storage[idx]->getHash(); /* hash * 33 + c */
+                    for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
+                        _hash = ((_hash << 5) + _hash) + _storage[idx]->hash(); /* hash * 33 + c */
                     }
                     _hashIsDirty = false;
                 }
@@ -175,13 +175,13 @@ namespace fart::types {
             });
         }
         
-        virtual const Kind getKind() const override {
+        virtual const Kind kind() const override {
             return Kind::array;
         }
         
         bool operator==(const Array<T>& other) const {
             if (!Type::operator==(other)) return false;
-            for (size_t idx = 0 ; idx < _storage.getCount() ; idx++) {
+            for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
                 if (*_storage[idx] != *other[idx]) return false;
             }
             return true;

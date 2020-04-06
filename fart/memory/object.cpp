@@ -75,7 +75,7 @@ void Object::release() const {
     if (destroy) delete this;
 }
 
-size_t Object::getRetainCount() const {
+size_t Object::retainCount() const {
     return _mutex.lockedValue([this]() {
         return this->_retainCount;
     });
