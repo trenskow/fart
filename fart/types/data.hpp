@@ -30,7 +30,8 @@ namespace fart::types {
     enum IncludeSeparator {
         none,
         prefix,
-        suffix
+        suffix,
+        both
     };
     
     template<typename T = uint8_t>
@@ -200,7 +201,17 @@ namespace fart::types {
                 ssize_t idx = 0;
                 while (result->count() < max - 1) {
                     if (!separators.some([this,&idx,&result,&includeSeparator](const Data<T>& separator) {
-                        ssize_t next = indexOf(separator, idx + (includeSeparator == prefix ? separator.count() : 0));
+                        ssize_t next;
+                        switch (includeSeparator) {
+                            case none:
+                            case suffix:
+                                next = indexOf(separator, idx);
+                                break;
+                            case prefix:
+                            case both:
+                                next = indexOf(separator, idx + separator.count());
+                                break;
+                        }
                         if (next == -1) return false;
                         switch (includeSeparator) {
                             case none:
@@ -208,7 +219,8 @@ namespace fart::types {
                                 result->append(subdata(idx, next - idx));
                                 break;
                             case suffix:
-                                result->append(subdata(idx, next + separator.count()));
+                            case both:
+                                result->append(subdata(idx, next - idx + separator.count()));
                                 break;
                         }
                         switch (includeSeparator) {
@@ -217,6 +229,7 @@ namespace fart::types {
                                 idx = next + separator.count();
                                 break;
                             case prefix:
+                            case both:
                                 idx = next;
                                 break;
                         }
