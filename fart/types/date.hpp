@@ -396,6 +396,22 @@ namespace fart::types {
             });
         }
         
+        bool operator==(const Date& other) const {
+            return this->to(TimeZone::utc)->getSeconds() == other.to(TimeZone::utc)->getSeconds();
+        }
+        
+        bool operator!=(const Date& other) const {
+            return !(*this == other);
+        }
+        
+        bool operator>(const Date& other) const {
+            return this->to(TimeZone::utc)->getSeconds() > other.to(TimeZone::utc)->getSeconds();
+        }
+        
+        bool operator<(const Date& other) const {
+            return this->to(TimeZone::utc)->getSeconds() < other.to(TimeZone::utc)->getSeconds();
+        }
+        
     };
     
 }
