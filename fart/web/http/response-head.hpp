@@ -12,7 +12,7 @@
 #include "./head.hpp"
 #include "../message.hpp"
 
-namespace fart::network::web::http {
+namespace fart::web::http {
     
     class ResponseHead : public Head {
         

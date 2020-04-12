@@ -9,7 +9,7 @@
 #ifndef version_h
 #define version_h
 
-namespace fart::network::web::http {
+namespace fart::web::http {
     
     enum Version {
         HTTP1_0 = 0,

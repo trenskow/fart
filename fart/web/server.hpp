@@ -12,12 +12,14 @@
 #include <thread>
 
 #include "./message.hpp"
-#include "../socket.hpp"
-#include "../../memory/object.hpp"
+#include "../io/sockets/socket.hpp"
+#include "../memory/object.hpp"
 
-using namespace fart::exceptions::network::web;
+using namespace fart::io::sockets;
 
-namespace fart::network::web {
+using namespace fart::exceptions::web;
+
+namespace fart::web {
     
     template<class Request, class Response>
     class Server : public Object {

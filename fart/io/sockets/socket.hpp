@@ -11,13 +11,13 @@
 
 #include <arpa/inet.h>
 
-#include "../memory/object.hpp"
-#include "../memory/strong.hpp"
-#include "../memory/weak.hpp"
-#include "../threading/thread.hpp"
-#include "../threading/mutex.hpp"
-#include "../types/data.hpp"
-#include "../types/data.hpp"
+#include "../../memory/object.hpp"
+#include "../../memory/strong.hpp"
+#include "../../memory/weak.hpp"
+#include "../../threading/thread.hpp"
+#include "../../threading/mutex.hpp"
+#include "../../types/data.hpp"
+#include "../../types/data.hpp"
 #include "./endpoint.hpp"
 
 #define BUFFER_SIZE 16384
@@ -26,7 +26,7 @@ using namespace fart::memory;
 using namespace fart::threading;
 using namespace std;
 
-namespace fart::network {
+namespace fart::io::sockets {
     
     enum SocketState {
         SocketStateClosed = 0,

@@ -34,17 +34,30 @@ namespace fart {
         
         namespace io {
             
-            namespace fs {
+            namespace sockets {
                 
-                class CannotResolveFilenameException: public Exception {
+                class AddressAlreadyInUseException : public Exception {
+                    
+                    uint16_t _port;
                     
                 public:
                     
-                    const char * description() const override {
-                        return "Cannot resolve filename.";
+                    AddressAlreadyInUseException(uint16_t port) : _port(port) {};
+                    AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
+                    
+                    virtual const char* description() const {
+                        return "Port already in use.";
+                    }
+                    
+                    const uint16_t port() const {
+                        return _port;
                     }
                     
                 };
+
+            }
+            
+            namespace fs {
                 
                 class CannotOpenFileException: public Exception {
                     
@@ -78,6 +91,15 @@ namespace fart {
                     
                 };
                 
+                class FileModeException: public Exception {
+                    
+                public:
+                    
+                    const char * description() const override {
+                        return "Operation not allowed in file's mode.";
+                    }
+                    
+                };
             }
             
         }
@@ -274,26 +296,7 @@ namespace fart {
 
         }
 
-        namespace network {
-
-            class AddressAlreadyInUseException : public Exception {
-                
-                uint16_t _port;
-                
-            public:
-                
-                AddressAlreadyInUseException(uint16_t port) : _port(port) {};
-                AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
-                
-                virtual const char* description() const {
-                    return "Port already in use.";
-                }
-                
-                const uint16_t port() const {
-                    return _port;
-                }
-                
-            };
+        namespace web {
 
             class UrlDecodingException : public Exception {
                 
@@ -314,42 +317,38 @@ namespace fart {
                 
             };
 
-            namespace web {
+            class DataIncompleteException : public Exception {
+                
+                virtual const char* description() const {
+                    return "Data is incomplete.";
+                }
+                
+            };
 
-                class DataIncompleteException : public Exception {
-                    
-                    virtual const char* description() const {
-                        return "Data is incomplete.";
-                    }
-                    
-                };
+            class DataMalformedException : public Exception {
+                
+                virtual const char* description() const {
+                    return "Data is malformed.";
+                }
+                
+            };
 
-                class DataMalformedException : public Exception {
-                    
-                    virtual const char* description() const {
-                        return "Data is malformed.";
-                    }
-                    
-                };
+            class MethodNotSupportedException : public Exception {
+                
+                virtual const char* description() const {
+                    return "Method is not supported.";
+                }
+                
+            };
 
-                class MethodNotSupportedException : public Exception {
-                    
-                    virtual const char* description() const {
-                        return "Method is not supported.";
-                    }
-                    
-                };
+            class VersionNotSupportedException : public Exception {
+                
+                virtual const char* description() const {
+                    return "Version is not supported.";
+                }
+                
+            };
 
-                class VersionNotSupportedException : public Exception {
-                    
-                    virtual const char* description() const {
-                        return "Version is not supported.";
-                    }
-                    
-                };
-
-            }
-            
         }
         
     }

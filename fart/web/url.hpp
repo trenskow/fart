@@ -9,16 +9,16 @@
 #ifndef url_hpp
 #define url_hpp
 
-#include "../../memory/object.hpp"
-#include "../../memory/strong.hpp"
-#include "../../types/string.hpp"
-#include "../../exceptions/exception.hpp"
+#include "../memory/object.hpp"
+#include "../memory/strong.hpp"
+#include "../types/string.hpp"
+#include "../exceptions/exception.hpp"
 
 using namespace fart::types;
 using namespace fart::memory;
-using namespace fart::exceptions::network;
+using namespace fart::exceptions::web;
 
-namespace fart::network::web {
+namespace fart::web {
     
     class Url : public Object {
                 

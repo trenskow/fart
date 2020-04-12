@@ -9,18 +9,18 @@
 #ifndef message_hpp
 #define message_hpp
 
-#include "../../memory/object.hpp"
-#include "../../memory/strong.hpp"
-#include "../../types/string.hpp"
-#include "../../types/data.hpp"
-#include "../../types/dictionary.hpp"
-#include "../../exceptions/exception.hpp"
+#include "../memory/object.hpp"
+#include "../memory/strong.hpp"
+#include "../types/string.hpp"
+#include "../types/data.hpp"
+#include "../types/dictionary.hpp"
+#include "../exceptions/exception.hpp"
 
 using namespace fart::types;
 using namespace fart::memory;
-using namespace fart::exceptions::network::web;
+using namespace fart::exceptions::web;
 
-namespace fart::network::web {
+namespace fart::web {
     
     class MessageHead : public Object {
         

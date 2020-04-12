@@ -14,7 +14,7 @@
 #include "./response-head.hpp"
 #include "../server.hpp"
 
-namespace fart::network::web::http {
+namespace fart::web::http {
     
     class HTTPServer : public Server<RequestHead, ResponseHead> {
         

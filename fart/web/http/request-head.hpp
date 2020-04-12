@@ -14,9 +14,9 @@
 #include "../url.hpp"
 
 using namespace fart::types;
-using namespace fart::network::web;
+using namespace fart::web;
 
-namespace fart::network::web::http {
+namespace fart::web::http {
                 
     class RequestHead : public Head {
         

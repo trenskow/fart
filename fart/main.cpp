@@ -13,8 +13,9 @@
 using namespace fart::memory;
 using namespace fart::types;
 using namespace fart::exceptions;
-using namespace fart::network;
-using namespace fart::network::web::http;
+using namespace fart::io::fs;
+using namespace fart::io::sockets;
+using namespace fart::web::http;
 using namespace fart::serialization;
 
 int main(int argc, const char * argv[]) {
@@ -23,9 +24,7 @@ int main(int argc, const char * argv[]) {
     
     try {
         
-        JSON::stringify(Date().as<Type>())->withCString([](const char* json) {
-            printf("%s\n", json);
-        });
+        File("~/Desktop/test.json", fart::io::fs::File::asWrite).write<uint8_t>(JSON::stringify(Date().as<Type>())->UTF8Data());
         
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.description(), exception.size());

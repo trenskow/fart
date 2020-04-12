@@ -11,15 +11,15 @@
 
 #include <sys/socket.h>
 
-#include "../memory/object.hpp"
-#include "../types/string.hpp"
-#include "../threading/mutex.hpp"
+#include "../../memory/object.hpp"
+#include "../../types/string.hpp"
+#include "../../threading/mutex.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
 using namespace fart::threading;
 
-namespace fart::network {
+namespace fart::io::sockets {
     
     enum EndpointType {
         EndpointTypeIPv4 = 0,

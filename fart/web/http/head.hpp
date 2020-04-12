@@ -9,18 +9,18 @@
 #ifndef head_hpp
 #define head_hpp
 
-#include "../../../memory/object.hpp"
-#include "../../../memory/strong.hpp"
-#include "../../../types/data.hpp"
-#include "../../../types/string.hpp"
-#include "../../../types/array.hpp"
+#include "../../memory/object.hpp"
+#include "../../memory/strong.hpp"
+#include "../../types/data.hpp"
+#include "../../types/string.hpp"
+#include "../../types/array.hpp"
 #include "./version.hpp"
 #include "../message.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
 
-namespace fart::network::web::http {
+namespace fart::web::http {
     
     class Head : public MessageHead {
         
