@@ -24,7 +24,6 @@ int main(int argc, const char * argv[]) {
     
     try {
         
-        File("~/Desktop/test.json", fart::io::fs::File::asWrite).write<uint8_t>(JSON::stringify(Date().as<Type>())->UTF8Data());
         
     } catch (memory::AllocationException exception) {
         printf("%s (%zu bytes)\n", exception.description(), exception.size());

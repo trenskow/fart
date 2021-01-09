@@ -113,19 +113,21 @@ namespace fart::io::fs {
         
         template<typename T = uint8_t>
         Strong<Data<T>> read(size_t count) {
-            return _mutex.lockedValue([this,count](){
+            return this->_mutex.lockedValue([this,count](){
                 if (this->_mode == asWrite) throw FileModeException();
-                size_t toRead = math::max(sizeof(T) * count, this->_size - this->_position);
-                this->_position += toRead;
-                return Data<T>::fromCBuffer([this,toRead](void* buffer, size_t length){
+                size_t toRead = math::min(sizeof(T) * count, this->_size - this->_position);
+                auto read = Data<T>::fromCBuffer([this,toRead](void* buffer, size_t length){
                     fread(buffer, sizeof(T), length / sizeof(T), this->_stream);
+                    return length;
                 }, toRead);
+                this->_position += toRead;
+                return read;
             });
         }
         
         template<typename T>
         const T read() {
-            return _mutex.lockedValue([this](){
+            return this->_mutex.lockedValue([this](){
                 this->_position += sizeof(T);
                 if (this->_position > this->_size) throw PositionIsOutsideFileRange(this->_position);
                 T result;
@@ -136,14 +138,18 @@ namespace fart::io::fs {
         
         template<typename T = uint8_t>
         Strong<Data<T>> readToEnd() {
-            return _mutex.lockedValue([this](){
-                return read(this->_size / sizeof(T) - this->_position / sizeof(T));
+            Strong<Data<T>> buffer;
+            this->_mutex.locked([this,&buffer](){
+                while (this->_position < this->_size) {
+                    buffer->append(this->read(16384));
+                }
             });
+            return buffer;
         }
         
         template<typename T = uint8_t>
         void write(const Data<T>& data) {
-            _mutex.locked([this,&data](){
+            this->_mutex.locked([this,&data](){
                 if (this->_mode == asRead) throw FileModeException();
                 this->_position += data.count() * sizeof(T);
                 this->_size = math::max(this->_position, this->_size);
