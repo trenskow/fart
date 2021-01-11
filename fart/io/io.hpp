@@ -6,10 +6,10 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef io_h
-#define io_h
+#ifndef io_hpp
+#define io_hpp
 
 #include "fs/fs.hpp"
 #include "sockets/sockets.hpp"
 
-#endif /* io_h */
+#endif /* io_hpp */

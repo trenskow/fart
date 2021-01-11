@@ -6,11 +6,11 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef threading_h
-#define threading_h
+#ifndef threading_hpp
+#define threading_hpp
 
 #include "./mutex.hpp"
 #include "./thread.hpp"
 #include "./semaphore.hpp"
 
-#endif /* threading_h */
+#endif /* threading_hpp */

@@ -6,11 +6,11 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef web_h
-#define web_h
+#ifndef web_hpp
+#define web_hpp
 
 #include "./message.hpp"
 #include "./url.hpp"
 #include "./http/http.hpp"
 
-#endif /* web_h */
+#endif /* web_hpp */

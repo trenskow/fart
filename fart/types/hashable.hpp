@@ -14,16 +14,39 @@
 using namespace fart::exceptions;
 
 namespace fart::types {
-    
-    class Hashable {
-        
-    public:
-        virtual const uint64_t hash() const {
-            throw NotImplementedException();
-        };
-        
-    };
-    
+
+	class Hashable {
+
+	public:
+
+		class Builder {
+
+		public:
+
+			Builder() : _hash(5381) { }
+
+			template<typename T>
+			Builder& add(T value) {
+				_hash = ((_hash << 5) + _hash) + (uint64_t)value;
+				return *this;
+			}
+
+			operator uint64_t() {
+				return _hash;
+			}
+
+		private:
+
+			uint64_t _hash;
+
+		};
+
+		virtual const uint64_t hash() const {
+			throw NotImplementedException();
+		};
+
+	};
+
 }
 
 #endif /* hashable_hpp */

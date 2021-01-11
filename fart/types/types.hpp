@@ -6,8 +6,8 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef types_h
-#define types_h
+#ifndef types_hpp
+#define types_hpp
 
 #include "./hashable.hpp"
 #include "./type.hpp"
@@ -19,5 +19,6 @@
 #include "./null.hpp"
 #include "./duration.hpp"
 #include "./date.hpp"
+#include "./key-value-pair.hpp"
 
-#endif /* types_h */
+#endif /* types_hpp */

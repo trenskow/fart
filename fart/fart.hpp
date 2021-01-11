@@ -6,8 +6,8 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef fart_
-#define fart_
+#ifndef fart_hpp
+#define fart_hpp
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
@@ -23,4 +23,5 @@
 #include "./io/io.hpp"
 
 #pragma GCC visibility pop
-#endif
+
+#endif /* fart_hpp */

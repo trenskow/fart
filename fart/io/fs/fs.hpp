@@ -6,9 +6,9 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef fs_h
-#define fs_h
+#ifndef fs_hpp
+#define fs_hpp
 
 #include "file.hpp"
 
-#endif /* fs_h */
+#endif /* fs_hpp */

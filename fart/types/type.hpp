@@ -13,53 +13,66 @@
 
 #include "../memory/object.hpp"
 #include "./hashable.hpp"
+#include "../exceptions/exception.hpp"
 
 using namespace fart::memory;
+using namespace fart::exceptions::types;
 
 namespace fart::types {
-        
-    class Type : public Object, public Hashable {
-        
-    public:
-        
-        enum class Kind : uint8_t {
-            data,
-            string,
-            number,
-            array,
-            dictionary,
-            date,
-            null
-        };
-        
-        virtual const Kind kind() const {
-            throw NotImplementedException();
-        }
-        
-        virtual bool operator==(const Type& other) const {
-            if (this->kind() != other.kind()) return false;
-            return this->hash() == other.hash();
-        }
-        
-        virtual bool operator==(const Type* other) const {
-            if (other == nullptr) return false;
-            return *this == *other;
-        }
-        
-        bool operator!=(const Type& other) const {
-            return !(*this == other);
-        }
-        
-        bool operator!=(const Type* other) const {
-            return !(*this == other);
-        }
-        
-        template<class T>
-        T& as() const {
-            return (T&)*this;
-        }
-        
-    };
+
+	class Type : public Object, public Hashable {
+
+	public:
+
+		enum class Kind : uint8_t {
+			data,
+			string,
+			number,
+			array,
+			dictionary,
+			date,
+			keyValuePair,
+			null
+		};
+
+		virtual const Kind kind() const {
+			throw NotImplementedException();
+		}
+
+		virtual bool operator==(const Type& other) const {
+			if (this->kind() != other.kind()) return false;
+			return this->hash() == other.hash();
+		}
+
+		virtual bool operator==(const Type* other) const {
+			if (other == nullptr) return false;
+			return *this == *other;
+		}
+
+		bool operator!=(const Type& other) const {
+			return !(*this == other);
+		}
+
+		bool operator!=(const Type* other) const {
+			return !(*this == other);
+		}
+
+		const bool is(Kind kind) const {
+			return kind == this->kind();
+		}
+
+		template<class T>
+		T& as() const {
+			return (T&)*this;
+		}
+
+		template<class T>
+		T& as(Kind kind) const {
+			if (!this->is(kind)) throw TypeConversionException();
+			return this->as<T>();
+		}
+
+	};
 
 }
 

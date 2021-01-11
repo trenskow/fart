@@ -16,66 +16,66 @@
 using namespace std;
 
 namespace fart::threading {
-        
-    class Thread {
-        
-    private:
-        
-        function<void()> _startCallback;
-        
-        pthread_t _thread;
-        bool _isDetached;
-        Mutex _mutex;
-        
-        void _start() {
-            _mutex.locked([this]() {
-                _isDetached = true;
-            });
-            _startCallback();
-            _mutex.locked([this]() {
-                _isDetached = false;
-                _startCallback = nullptr;
-            });
-        }
-        
-    public:
-        Thread() : _isDetached(false) {};
-        
-        ~Thread() {
-            join();
-        }
-        
-        void detach(function<void()> startCallback) {
-            _mutex.locked([this,startCallback]() {
-                
-                if (_isDetached) {
-                    // Handle error;
-                    return;
-                }
-                
-                _startCallback = startCallback;
-                
-                pthread_create(&_thread, nullptr, [](void* ctx) {
-                    ((Thread *)ctx)->_start();
-                    pthread_exit(nullptr);
-                    return (void *)0;
-                }, this);
 
-            });
-        }
-        
-        void join() const {
-            pthread_t thread = _mutex.lockedValue([this](){ return _thread; });
-            pthread_join(thread, nullptr);
-        }
-        
-        const bool isDetached() const {
-            return _mutex.lockedValue([this]() {
-                return _isDetached;
-            });
-        }
-        
-    };
+	class Thread {
+
+	private:
+
+		function<void()> _startCallback;
+
+		pthread_t _thread;
+		bool _isDetached;
+		Mutex _mutex;
+
+		void _start() {
+			_mutex.locked([this]() {
+				_isDetached = true;
+			});
+			_startCallback();
+			_mutex.locked([this]() {
+				_isDetached = false;
+				_startCallback = nullptr;
+			});
+		}
+
+	public:
+		Thread() : _isDetached(false) {};
+
+		~Thread() {
+			join();
+		}
+
+		void detach(function<void()> startCallback) {
+			_mutex.locked([this,startCallback]() {
+
+				if (_isDetached) {
+					// Handle error;
+					return;
+				}
+
+				_startCallback = startCallback;
+
+				pthread_create(&_thread, nullptr, [](void* ctx) {
+					((Thread *)ctx)->_start();
+					pthread_exit(nullptr);
+					return (void *)0;
+				}, this);
+
+			});
+		}
+
+		void join() const {
+			pthread_t thread = _mutex.lockedValue([this](){ return _thread; });
+			pthread_join(thread, nullptr);
+		}
+
+		const bool isDetached() const {
+			return _mutex.lockedValue([this]() {
+				return _isDetached;
+			});
+		}
+
+	};
 
 }
 

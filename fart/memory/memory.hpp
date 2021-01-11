@@ -6,11 +6,11 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef memory_h
-#define memory_h
+#ifndef memory_hpp
+#define memory_hpp
 
 #include "./object.hpp"
 #include "./strong.hpp"
 #include "./weak.hpp"
 
-#endif /* memory_h */
+#endif /* memory_hpp */

@@ -6,9 +6,9 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef serialization_h
-#define serialization_h
+#ifndef serialization_hpp
+#define serialization_hpp
 
 #include "json.hpp"
 
-#endif /* serialization_h */
+#endif /* serialization_hpp */

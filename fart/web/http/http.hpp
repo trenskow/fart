@@ -6,8 +6,8 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef http_h
-#define http_h
+#ifndef http_hpp
+#define http_hpp
 
 #include "./head.hpp"
 #include "./request-head.hpp"
@@ -15,22 +15,22 @@
 #include "../server.hpp"
 
 namespace fart::web::http {
-    
-    class HTTPServer : public Server<RequestHead, ResponseHead> {
-        
-    public:
-        HTTPServer(uint16_t port, function<void(const HTTPRequest& request, HTTPResponse& response)> requestHandler) : Server(port, requestHandler) {}
-        
-    protected:
-        
-        virtual void postProcess(const Message<RequestHead>& request, Socket &socket) const {
-            if (!request.hasHeader("connection") || *request.headerValue("connection") != String("keep-alive")) {
-                socket.close();
-            }
-        }
-        
-    };
-    
+
+	class HTTPServer : public Server<RequestHead, ResponseHead> {
+
+	public:
+		HTTPServer(uint16_t port, function<void(const HTTPRequest& request, HTTPResponse& response)> requestHandler) : Server(port, requestHandler) {}
+
+	protected:
+
+		virtual void postProcess(const Message<RequestHead>& request, Socket &socket) const {
+			if (!request.hasHeader("connection") || *request.headerValue("connection") != String("keep-alive")) {
+				socket.close();
+			}
+		}
+
+	};
+
 }
 
-#endif /* http_h */
+#endif /* http_hpp */

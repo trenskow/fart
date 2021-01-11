@@ -13,24 +13,24 @@
 
 namespace fart::types {
 
-    class Null: public Type {
-        
-    public:
-        virtual const Kind kind() const {
-            return Kind::null;
-        }
-        
-        virtual bool operator==(const Type& other) const {
-            return other.kind() == Kind::null;
-        }
-        
-        virtual bool operator==(const Type* other) const {
-            if (other == nullptr) return true;
-            return Type::operator==(other);
-        }
-        
-    };
-    
+	class Null: public Type {
+
+	public:
+		virtual const Kind kind() const {
+			return Kind::null;
+		}
+
+		virtual bool operator==(const Type& other) const {
+			return other.kind() == Kind::null;
+		}
+
+		virtual bool operator==(const Type* other) const {
+			if (other == nullptr) return true;
+			return Type::operator==(other);
+		}
+
+	};
+
 }
 
 #endif /* null_hpp */

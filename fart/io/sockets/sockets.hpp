@@ -6,10 +6,10 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef sockets_h
-#define sockets_h
+#ifndef sockets_hpp
+#define sockets_hpp
 
 #include "./socket.hpp"
 #include "./endpoint.hpp"
 
-#endif /* sockets_h */
+#endif /* sockets_hpp */

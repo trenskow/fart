@@ -6,9 +6,9 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef system_h
-#define system_h
+#ifndef system_hpp
+#define system_hpp
 
 #include "endian.h"
 
-#endif /* system_h */
+#endif /* system_hpp */

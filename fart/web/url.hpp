@@ -19,29 +19,29 @@ using namespace fart::memory;
 using namespace fart::exceptions::web;
 
 namespace fart::web {
-    
-    class Url : public Object {
-                
-    public:
-        
-        static Strong<String> decode(const String& url) {
-            Strong<String> result;
-            for (size_t idx = 0 ; idx < url.length() ; idx++) {
-                uint32_t chr = url[idx];
-                if (chr == '+') chr = ' ';
-                else if (chr == '%') {
-                    if (idx >= url.length() - 2) throw UrlDecodingException(chr);
-                    chr = url.substring(idx + 1, 2)->hexData()->itemAtIndex(0);
-                    idx += 2;
-                }
-                result->append(chr);
-            }
-            return result;
-        }
 
-        
-    };
-    
+	class Url : public Object {
+
+	public:
+
+		static Strong<String> decode(const String& url) {
+			Strong<String> result;
+			for (size_t idx = 0 ; idx < url.length() ; idx++) {
+				uint32_t chr = url[idx];
+				if (chr == '+') chr = ' ';
+				else if (chr == '%') {
+					if (idx >= url.length() - 2) throw UrlDecodingException(chr);
+					chr = url.substring(idx + 1, 2)->hexData()->itemAtIndex(0);
+					idx += 2;
+				}
+				result->append(chr);
+			}
+			return result;
+		}
+
+
+	};
+
 }
 
 #endif /* url_hpp */

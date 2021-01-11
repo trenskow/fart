@@ -6,25 +6,25 @@
 //  Copyright © 2020 Kristian Trenskow. All rights reserved.
 //
 
-#ifndef math_h
-#define math_h
+#ifndef math_hpp
+#define math_hpp
 
 namespace fart::tools {
-    
-    namespace math {
-        
-        template<typename T>
-        inline const T max(T a, T b) {
-            return a > b ? a : b;
-        }
-        
-        template<typename T>
-        inline const T min(T a, T b) {
-            return a < b ? a : b;
-        }
 
-    }
-    
+	namespace math {
+
+		template<typename T>
+		inline const T max(T a, T b) {
+			return a > b ? a : b;
+		}
+
+		template<typename T>
+		inline const T min(T a, T b) {
+			return a < b ? a : b;
+		}
+
+	}
+
 }
 
-#endif /* math_h */
+#endif /* math_hpp */
