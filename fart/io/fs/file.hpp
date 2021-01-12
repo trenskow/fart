@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <wordexp.h>
 #include <cstring>
+#include <unistd.h>
 
 #include "../../memory/object.hpp"
 #include "../../exceptions/exception.hpp"
@@ -58,6 +59,12 @@ namespace fart::io::fs {
 			current,
 			end
 		};
+
+		static const bool exists(const String& filename) {
+			return filename.mapCString<bool>([](const char* filename){
+				return access(filename, F_OK) == 0;
+			});
+		}
 
 		static Strong<String> expand(const String& filename) {
 			return filename.mapCString<Strong<String>>([](const char* filename) {
