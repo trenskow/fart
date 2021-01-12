@@ -60,7 +60,7 @@ namespace fart::io::fs {
 			end
 		};
 
-		static const bool exists(const String& filename) {
+		static bool exists(const String& filename) {
 			return filename.mapCString<bool>([](const char* filename){
 				return access(filename, F_OK) == 0;
 			});
