@@ -24,7 +24,7 @@ namespace fart::types {
 		KeyValuePair(const Key& key, const Value& value) : _key(key), _value(value) {}
 		KeyValuePair(const KeyValuePair<Key, Value>& other) : KeyValuePair(other._key, other._value) {}
 
-		virtual const Kind kind() const {
+		virtual Kind kind() const {
 			return Kind::keyValuePair;
 		}
 
@@ -32,7 +32,7 @@ namespace fart::types {
 			return *this->_key == other._key && *this->_value == other._value;
 		}
 
-		virtual const uint64_t hash() const {
+		virtual uint64_t hash() const {
 			return Hashable::Builder()
 			.add(this->_key->hash())
 			.add(this->_value->hash());

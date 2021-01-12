@@ -49,18 +49,16 @@ namespace fart::io::sockets {
 
 		Socket(bool isUDP = false) : _isUDP(isUDP), _socket(-1), _state(SocketState::closed), _localEndpoint(nullptr), _remoteEndpoint(nullptr) {}
 
-		Socket(const Socket& other) : _isUDP(other._isUDP), _socket(other._socket), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {}
+		Socket(const Socket& other) : _isUDP(other._isUDP), _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {}
 
-		Socket(Socket&& other) : _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {
-			printf("Move\n");
-		}
+		Socket(Socket&& other) : _isUDP(other._isUDP), _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) { }
 
 		virtual ~Socket() {
 			close();
 			_closeCallback.callback = nullptr;
 		}
 
-		virtual const uint64_t hash() const {
+		virtual uint64_t hash() const {
 			return _mutex.lockedValue([this]() {
 				return _socket;
 			});
@@ -162,8 +160,7 @@ namespace fart::io::sockets {
 			_mutex.locked([this]() {
 				_state = SocketState::connected;
 			});
-			_read([this]() {
-			}, readCallback);
+			_read([]() {}, readCallback);
 		}
 
 		void connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, const Endpoint&)> readCallback) {
@@ -207,11 +204,11 @@ namespace fart::io::sockets {
 
 		}
 
-		const size_t send(const Data<uint8_t>& data) const {
+		size_t send(const Data<uint8_t>& data) const {
 			return ::send(_socket, data.items(), data.count(), 0);
 		}
 
-		const size_t sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {
+		size_t sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {
 			return 0;
 		}
 
@@ -239,13 +236,13 @@ namespace fart::io::sockets {
 			});
 		}
 
-		const bool isUDP() const {
+		bool isUDP() const {
 			return _mutex.lockedValue([this]() {
 				return this->_isUDP;
 			});
 		}
 
-		const SocketState socketState() const {
+		SocketState socketState() const {
 			return _mutex.lockedValue([this]() {
 				return this->_state;
 			});

@@ -81,7 +81,7 @@ namespace fart::io::sockets {
 
 		virtual ~Endpoint() {}
 
-		const EndpointType type() const {
+		EndpointType type() const {
 			return _mutex.lockedValue([this]() {
 				if (this->_storage.ss_family == AF_INET) return EndpointType::IPv4;
 				return EndpointType::IPv6;
@@ -109,7 +109,7 @@ namespace fart::io::sockets {
 
 		}
 
-		const uint16_t port() const {
+		uint16_t port() const {
 			return _mutex.lockedValue([this]() {
 				switch (this->type()) {
 					case EndpointType::IPv4:

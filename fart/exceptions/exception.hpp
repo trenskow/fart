@@ -47,7 +47,7 @@ namespace fart::exceptions {
 					return "Port already in use.";
 				}
 
-				const uint16_t port() const {
+				uint16_t port() const {
 					return _port;
 				}
 
@@ -79,7 +79,7 @@ namespace fart::exceptions {
 					_position = position;
 				}
 
-				const ssize_t position() const {
+				ssize_t position() const {
 					return _position;
 				}
 
@@ -116,11 +116,11 @@ namespace fart::exceptions {
 				this->_character = character;
 			}
 
-			const size_t line() const {
+			size_t line() const {
 				return this->_line;
 			}
 
-			const size_t character() const {
+			size_t character() const {
 				return this->_character;
 			}
 
@@ -152,7 +152,7 @@ namespace fart::exceptions {
 			AllocationException(const size_t size) : _size(size) {}
 			AllocationException(const AllocationException& other) : _size(other._size) {}
 
-			const size_t size() const {
+			size_t size() const {
 				return _size;
 			}
 
@@ -193,7 +193,7 @@ namespace fart::exceptions {
 			DecoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
 			DecoderException(const DecoderException& other) : _characterIndex(other._characterIndex) {}
 
-			const size_t characterIndex() const {
+			size_t characterIndex() const {
 				return _characterIndex;
 			}
 
@@ -211,7 +211,7 @@ namespace fart::exceptions {
 		public:
 			EncoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
 
-			const size_t characterIndex() const {
+			size_t characterIndex() const {
 				return _characterIndex;
 			}
 
@@ -241,7 +241,7 @@ namespace fart::exceptions {
 			OutOfBoundException(const size_t index) : _index(index) {}
 			OutOfBoundException(const OutOfBoundException& other) : _index(other._index) {}
 
-			const size_t index() const {
+			size_t index() const {
 				return _index;
 			}
 
@@ -265,7 +265,7 @@ namespace fart::exceptions {
 				return "Key was not found";
 			}
 
-			const T& key() const {
+			T& key() const {
 				return _key;
 			}
 
@@ -285,7 +285,7 @@ namespace fart::exceptions {
 				return "Item not found.";
 			}
 
-			const T& item() const {
+			T& item() const {
 				return _item;
 			}
 
@@ -318,7 +318,7 @@ namespace fart::exceptions {
 				return "Cannot decode character.";
 			}
 
-			const uint8_t character() const {
+			uint8_t character() const {
 				return _character;
 			}
 

@@ -14,7 +14,6 @@
 #include "../threading/mutex.hpp"
 #include "../memory/strong.hpp"
 #include "./type.hpp"
-#include "./comparable.hpp"
 
 using namespace fart::memory;
 using namespace fart::threading;
@@ -34,7 +33,7 @@ namespace fart::types {
 
 	private:
 
-		Array(const Data<T*>& other) : _hash(0), _hashIsDirty(true), _storage(other) {
+		Array(const Data<T*>& other) : _storage(other), _hash(0), _hashIsDirty(true) {
 			for (size_t idx = 0 ; idx < this->_storage.count() ; idx++) {
 				this->_storage.itemAtIndex(idx)->retain();
 			}
@@ -45,22 +44,22 @@ namespace fart::types {
 		mutable bool _hashIsDirty;
 		Mutex _hashMutex;
 
-		static void _insertionSort(Array& array) {
+		static void _insertionSort(Array& array, function<bool(const T& item1, const T& items2)> comparer) {
 			size_t sortedIdx = 0;
 			while (sortedIdx < array.count() - 1) {
 				sortedIdx++;
 				for (ssize_t idx = sortedIdx - 1 ; idx >= 0 ; idx--) {
-					if ((T&)array[idx] > (T&)array[idx + 1]) array.swapItemAtIndexes(idx + 1, idx);
+					if (comparer((T&)array[idx], (T&)array[idx + 1])) array.swapItemAtIndexes(idx + 1, idx);
 				}
 			}
 		}
 
-		static void _quickSort(Array& array, size_t offset, size_t count) {
+		static void _quickSort(Array& array, size_t offset, size_t count, function<bool(const T& item1, const T& items2)> comparer) {
 			if (count == 0) return;
 			size_t pivot = count - 1;
 			size_t idx = 0;
 			while (idx < pivot) {
-				if ((T&)array[offset + idx] > (T&)array[offset + pivot]) {
+				if (comparer((T&)array[offset + idx], (T&)array[offset + pivot])) {
 					if (idx == pivot - 1) {
 						array.swapItemAtIndexes(offset + idx, offset + pivot);
 					} else {
@@ -72,8 +71,8 @@ namespace fart::types {
 					idx++;
 				}
 			}
-			if (pivot > 0) _quickSort(array, offset, pivot);
-			_quickSort(array, offset + pivot + 1, count - (pivot + 1));
+			if (pivot > 0) _quickSort(array, offset, pivot, comparer);
+			_quickSort(array, offset + pivot + 1, count - (pivot + 1), comparer);
 		}
 
 	public:
@@ -94,7 +93,7 @@ namespace fart::types {
 			}
 		}
 
-		Array(size_t capacity) : _hash(0), _hashIsDirty(true), _storage(capacity) {}
+		Array(size_t capacity) : _storage(capacity), _hash(0), _hashIsDirty(true) {}
 
 		virtual ~Array() {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
@@ -102,7 +101,7 @@ namespace fart::types {
 			}
 		}
 
-		const size_t count() const {
+		size_t count() const {
 			return _storage.count();
 		}
 
@@ -143,7 +142,7 @@ namespace fart::types {
 			_storage.replace(heapItem, index)->release();
 		}
 
-		const ssize_t indexOf(const T& item) const {
+		ssize_t indexOf(const T& item) const {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
 				if (*_storage[idx] == item) return idx;
 			}
@@ -158,7 +157,7 @@ namespace fart::types {
 
 		template<typename R, typename F>
 		R reduce(R initial, F todo) const {
-			return this->_storage.reduce(initial, [&todo,&initial](R result, T* item, size_t idx) {
+			return this->_storage.reduce(initial, [&todo](R result, T* item, size_t idx) {
 				return todo(result, *item, idx);
 			});
 		}
@@ -177,7 +176,7 @@ namespace fart::types {
 			}));
 		}
 
-		const bool some(function<bool(T& value)> todo) const {
+		bool some(function<bool(T& value)> todo) const {
 			return this->_storage.some([&todo](T* item) {
 				return todo(*item);
 			});
@@ -206,15 +205,15 @@ namespace fart::types {
 			_storage = result;
 		}
 
-		const void moveItemAtIndex(size_t srcIndex, size_t dstIndex) noexcept(false) {
+		void moveItemAtIndex(size_t srcIndex, size_t dstIndex) noexcept(false) {
 			this->_storage.moveItemAtIndex(srcIndex, dstIndex);
 		}
 
-		const void swapItemAtIndexes(size_t index1, size_t index2) noexcept(false) {
+		void swapItemAtIndexes(size_t index1, size_t index2) noexcept(false) {
 			this->_storage.swapItemsAtIndexes(index1, index2);
 		}
 
-		const void insertItemAtIndex(const T& item, size_t dstIndex) noexcept(false) {
+		void insertItemAtIndex(const T& item, size_t dstIndex) noexcept(false) {
 			if (dstIndex > this->count()) throw OutOfBoundException(dstIndex);
 			Strong<T> heapItem = item;
 			heapItem->retain();
@@ -224,12 +223,16 @@ namespace fart::types {
 			});
 		}
 
-		void sort() {
-			if (this->count() <= 10) _insertionSort(*this);
-			else _quickSort(*this, 0, this->count());
+		void sort(function<bool(const T& item1, const T& item2)> comparer) {
+			if (this->count() <= 10) _insertionSort(*this, comparer);
+			else _quickSort(*this, 0, this->count(), comparer);
 		}
 
-		const uint64_t hash() const override {
+		void sort() {
+			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
+		}
+
+		uint64_t hash() const override {
 			return _hashMutex.lockedValue([this]() {
 				if (_hashIsDirty) {
 					Hashable::Builder builder;
@@ -243,7 +246,7 @@ namespace fart::types {
 			});
 		}
 
-		virtual const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::array;
 		}
 

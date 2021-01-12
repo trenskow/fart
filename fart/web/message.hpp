@@ -107,11 +107,11 @@ namespace fart::web {
 
 		virtual ~Message() {}
 
-		const bool hasHeader(const String& key) const {
+		bool hasHeader(const String& key) const {
 			return _headers.hasKey(key);
 		}
 
-		const bool hasHeader(const char* key) const {
+		bool hasHeader(const char* key) const {
 			return _headers.hasKey(String(key));
 		}
 

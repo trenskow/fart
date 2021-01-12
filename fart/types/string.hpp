@@ -72,7 +72,7 @@ namespace fart::types {
 
 		template<typename F>
 		static Strong<String> fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
-			return Strong<String>(Data<uint8_t>::fromCBuffer([&todo,&size](void* buffer, size_t length) {
+			return Strong<String>(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
 				return todo((char*)buffer, length);
 			}));
 		}
@@ -194,7 +194,7 @@ namespace fart::types {
 			}), separator._store));
 		}
 
-		const int64_t toInteger(size_t startIndex = 0, size_t* consumed = nullptr) const {
+		int64_t toInteger(size_t startIndex = 0, size_t* consumed = nullptr) const {
 			if (_store.count() <= startIndex) throw DecoderException(startIndex);
 			if (_store[startIndex] != '-' && (_store[startIndex] < '0' || _store[startIndex] > '9')) throw DecoderException(startIndex);
 			int64_t multiplier = 1;
@@ -222,11 +222,11 @@ namespace fart::types {
 			return Strong<String>(_store.subdata(offset, length));
 		}
 
-		virtual const uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return _store.hash();
 		}
 
-		virtual const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::string;
 		}
 
@@ -239,7 +239,7 @@ namespace fart::types {
 			return *this == String(other);
 		}
 
-		const uint32_t operator[](size_t idx) const {
+		uint32_t operator[](size_t idx) const {
 			return _store[idx];
 		}
 
@@ -256,7 +256,7 @@ namespace fart::types {
 		public:
 			virtual ~CaseComparitor() {}
 
-			virtual const uint32_t transform(uint32_t value) const {
+			virtual uint32_t transform(uint32_t value) const {
 				switch (_comparison) {
 					case Comparison::ComparisonCaseInsensitive:
 						if (value >= 'A' && value <= 'Z') return value - ('A' - 'a');
@@ -418,14 +418,14 @@ namespace fart::types {
 
 		}
 
-		static const uint8_t _valueFromHex(uint8_t chr, size_t idx) noexcept(false) {
+		static uint8_t _valueFromHex(uint8_t chr, size_t idx) noexcept(false) {
 			if (chr >= 'a' && chr <= 'f') return chr - 32;
 			if (chr >= 'A' && chr <= 'F') return chr - 'A' + 10;
 			else if (chr >= '0' && chr <= '9') return chr - '0';
 			else throw DecoderException(idx);
 		}
 
-		static const uint8_t _valueToHex(uint8_t value, size_t idx) noexcept(false) {
+		static uint8_t _valueToHex(uint8_t value, size_t idx) noexcept(false) {
 			if (value < 10) return 'A' + value;
 			else if (value < 16) return '0' + (value - 10);
 			else throw EncoderException(idx);

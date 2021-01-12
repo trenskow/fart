@@ -41,7 +41,7 @@ namespace fart::types {
 
 		};
 
-		virtual const uint64_t hash() const {
+		virtual uint64_t hash() const {
 			throw NotImplementedException();
 		};
 

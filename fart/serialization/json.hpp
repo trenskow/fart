@@ -398,13 +398,13 @@ namespace fart::serialization {
 				}
 				case Type::Kind::number: {
 					switch (data.as<Number<uint64_t>>().subType()) {
-						case NumberSubType::boolean:
+						case Subtype::boolean:
 							result->append(data.as<Boolean>().value() ? "true" : "false");
 							break;
-						case NumberSubType::integer:
+						case Subtype::integer:
 							result->append(String::format("%lld", data.as<Integer>().value()));
 							break;
-						case NumberSubType::floatingPoint: {
+						case Subtype::floatingPoint: {
 							double value = data.as<Float>().value();
 							std::ostringstream stream;
 							stream << value;

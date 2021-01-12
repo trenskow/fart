@@ -51,7 +51,7 @@ namespace fart::web::http {
 
 	protected:
 
-		static const Version parseVersion(String& version) {
+		static Version parseVersion(String& version) {
 			if (version == "HTTP/1.0") return Version::HTTP1_0;
 			else if (version == "HTTP/1.1") return Version::HTTP1_1;
 			throw VersionNotSupportedException();

@@ -69,7 +69,7 @@ namespace fart::threading {
 			pthread_join(thread, nullptr);
 		}
 
-		const bool isDetached() const {
+		bool isDetached() const {
 			return _mutex.lockedValue([this]() {
 				return _isDetached;
 			});

@@ -10,28 +10,27 @@
 #define number_hpp
 
 #include "./type.hpp"
-#include "./comparable.hpp"
 
 namespace fart::types {
 
-	enum class NumberSubType {
+	enum class Subtype {
 		boolean,
 		floatingPoint,
 		integer
 	};
 
 	template<typename T>
-	class Number : public Type{
+	class Number : public Type {
 
 	private:
-		NumberSubType _subType;
 		T _value;
+		Subtype _subType;
 
 	public:
 
-		Number() : _value(0) {}
-		Number(const T value, const NumberSubType subType = NumberSubType::integer) : _value(value), _subType(subType) {}
-		Number(const Number<T>& other, const NumberSubType subType = NumberSubType::integer) : Number(other._value, subType) {}
+		Number() : _value(0), _subType(Subtype::floatingPoint) {}
+		Number(const T value, const Subtype subType = Subtype::integer) : _value(value), _subType(subType) {}
+		Number(const Number<T>& other, const Subtype subType = Subtype::integer) : Number(other._value, subType) {}
 		template<typename N>
 		Number(const Number<N>& other) : _value(other.value()), _subType(other.subType()) {}
 		virtual ~Number() {}
@@ -49,24 +48,24 @@ namespace fart::types {
 			return _value;
 		}
 
-		const NumberSubType subType() const {
+		Subtype subType() const {
 			return _subType;
 		}
 
-		virtual const uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return (uint64_t)_value;
 		}
 
-		virtual const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::number;
 		}
 
-		const bool operator==(const Number<T>& other) const {
+		bool operator==(const Number<T>& other) const {
 			if (!Type::operator==(other)) return false;
 			return _value == other._value;
 		}
 
-		const bool operator>(const Number<T>& other) const {
+		bool operator>(const Number<T>& other) const {
 			return _value > other._value;
 		}
 
@@ -75,14 +74,14 @@ namespace fart::types {
 	class Boolean: public Number<bool> {
 
 	public:
-		Boolean(const bool value) : Number(value, NumberSubType::boolean) {}
+		Boolean(const bool value) : Number(value, Subtype::boolean) {}
 		virtual ~Boolean() {}
 	};
 
 	class Float: public Number<double> {
 
 	public:
-		Float(const double value) : Number(value, NumberSubType::floatingPoint) {}
+		Float(const double value) : Number(value, Subtype::floatingPoint) {}
 		virtual ~Float() {}
 
 	};
@@ -90,7 +89,7 @@ namespace fart::types {
 	class Integer: public Number<int64_t> {
 
 	public:
-		Integer(const int64_t value) : Number(value, NumberSubType::integer) {}
+		Integer(const int64_t value) : Number(value, Subtype::integer) {}
 		virtual ~Integer() {}
 
 	};

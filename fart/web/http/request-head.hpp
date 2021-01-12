@@ -51,11 +51,11 @@ namespace fart::web::http {
 
 		virtual ~RequestHead() {}
 
-		const Version version() const {
+		Version version() const {
 			return _version;
 		}
 
-		const Method method() const {
+		Method method() const {
 			return _method;
 		}
 

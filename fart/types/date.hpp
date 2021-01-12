@@ -65,7 +65,7 @@ namespace fart::types {
 
 		mutable Mutex _mutex;
 
-		static const uint16_t daysInMonth(Month month, bool isLeapYear = false) {
+		static uint16_t daysInMonth(Month month, bool isLeapYear = false) {
 			switch (month) {
 				case Month::january: return 31;
 				case Month::february: return isLeapYear ? 29 : 28;
@@ -82,7 +82,7 @@ namespace fart::types {
 			}
 		}
 
-		static const int64_t _daysFromEpoch(int64_t y, unsigned m, unsigned d) noexcept {
+		static int64_t _daysFromEpoch(int64_t y, unsigned m, unsigned d) noexcept {
 			y -= m <= 2;
 			const int64_t era = (y >= 0 ? y : y-399) / 400;
 			const unsigned yoe = static_cast<unsigned>(y - era * 400);      // [0, 399]
@@ -131,7 +131,7 @@ namespace fart::types {
 			return epoch;
 		}
 
-		static const bool isLeapYear(int64_t year) {
+		static bool isLeapYear(int64_t year) {
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 		}
 
@@ -228,7 +228,7 @@ namespace fart::types {
 
 		virtual ~Date() {}
 
-		const int64_t year() const {
+		int64_t year() const {
 			return this->_mutex.lockedValue([this](){
 				int64_t year;
 				_components(this->_time.days(), &year, nullptr, nullptr);
@@ -236,7 +236,7 @@ namespace fart::types {
 			});
 		}
 
-		const Month month() const {
+		Month month() const {
 			return this->_mutex.lockedValue([this](){
 				uint8_t month;
 				_components(this->_time.days(), nullptr, &month, nullptr);
@@ -244,7 +244,7 @@ namespace fart::types {
 			});
 		}
 
-		const int16_t day() const {
+		int16_t day() const {
 			return this->_mutex.lockedValue([this](){
 				uint8_t day;
 				_components(this->_time.days(), nullptr, nullptr, &day);
@@ -252,7 +252,7 @@ namespace fart::types {
 			});
 		}
 
-		const Weekday weekday() const {
+		Weekday weekday() const {
 			return this->_mutex.lockedValue([this](){
 				return static_cast<Weekday>(((int64_t)this->_time.days() + static_cast<int64_t>(_epochWeekday)) % daysInWeek);
 			});
@@ -266,23 +266,23 @@ namespace fart::types {
 			});
 		}
 
-		const bool isLeapYear() {
+		bool isLeapYear() {
 			return Date::isLeapYear(this->year());
 		}
 
-		const uint8_t hours() const {
+		uint8_t hours() const {
 			return this->durationSinceMidnight() / Duration::hour();
 		}
 
-		const uint8_t minutes() const {
+		uint8_t minutes() const {
 			return (this->durationSinceMidnight().seconds() - (this->hours() * Duration::hour())) / Duration::minute();
 		}
 
-		const uint8_t seconds() const {
+		uint8_t seconds() const {
 			return (this->durationSinceMidnight().seconds()) - (this->hours() * Duration::hour()) - (this->minutes() * Duration::minute());
 		}
 
-		const uint32_t microseconds() const {
+		uint32_t microseconds() const {
 			return this->_mutex.lockedValue([this](){
 				return (this->_time.seconds() - floor(this->_time.seconds())) * 1000000;
 			});
@@ -334,11 +334,11 @@ namespace fart::types {
 			});
 		}
 
-		const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::date;
 		}
 
-		virtual const uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return this->_mutex.lockedValue([this](){
 				double hash = this->_time.seconds();
 				return *((uint64_t*)&hash);

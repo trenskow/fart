@@ -35,7 +35,7 @@ namespace fart::types {
 			null
 		};
 
-		virtual const Kind kind() const {
+		virtual Kind kind() const {
 			throw NotImplementedException();
 		}
 
@@ -57,7 +57,7 @@ namespace fart::types {
 			return !(*this == other);
 		}
 
-		const bool is(Kind kind) const {
+		bool is(Kind kind) const {
 			return kind == this->kind();
 		}
 

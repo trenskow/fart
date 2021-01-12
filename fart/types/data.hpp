@@ -46,7 +46,7 @@ namespace fart::types {
 		public:
 			virtual ~Comparitor() {}
 
-			virtual const T transform(T value) const {
+			virtual T transform(T value) const {
 				return value;
 			}
 
@@ -59,7 +59,7 @@ namespace fart::types {
 			return Strong<Data<T>>((T*)buffer, length);
 		}
 
-		Data(const T* items, size_t count) : _store(nullptr), _storeCount(0), _count(0), _hash(0), _hashIsDirty(true) {
+		Data(const T* items, size_t count) : _store(nullptr), _count(0), _storeCount(0), _hash(0), _hashIsDirty(true) {
 			append(items, count);
 		}
 
@@ -110,7 +110,7 @@ namespace fart::types {
 			});
 		}
 
-		const void moveItemAtIndex(size_t srcIndex, size_t dstIndex) noexcept(false) {
+		void moveItemAtIndex(size_t srcIndex, size_t dstIndex) noexcept(false) {
 
 			if (srcIndex == dstIndex) return;
 
@@ -137,7 +137,7 @@ namespace fart::types {
 
 		}
 
-		const void swapItemsAtIndexes(size_t index1, size_t index2) noexcept(false) {
+		void swapItemsAtIndexes(size_t index1, size_t index2) noexcept(false) {
 
 			if (index1 == index2) return;
 
@@ -154,7 +154,7 @@ namespace fart::types {
 
 		}
 
-		const void insertItemsAtIndex(const T* items, size_t count, size_t dstIndex) noexcept(false) {
+		void insertItemsAtIndex(const T* items, size_t count, size_t dstIndex) noexcept(false) {
 			_mutex.locked([&items,&dstIndex,&count,this](){
 				if (dstIndex > this->_count) throw OutOfBoundException(dstIndex);
 				_ensureStoreSize(this->_count + count);
@@ -166,7 +166,7 @@ namespace fart::types {
 			});
 		}
 
-		const void insertItemAtIndex(T item, size_t dstIndex) noexcept(false) {
+		void insertItemAtIndex(T item, size_t dstIndex) noexcept(false) {
 			this->insertItemsAtIndex(&item, 1, dstIndex);
 		}
 
@@ -193,7 +193,7 @@ namespace fart::types {
 			return itemAtIndex(index);
 		}
 
-		const ssize_t indexOf(const Data<T>& other, const size_t offset = 0) const {
+		ssize_t indexOf(const Data<T>& other, const size_t offset = 0) const {
 			return _mutex.lockedValue([this,other,offset]() {
 				for (size_t hidx = offset ; hidx < this->_count ; hidx++) {
 					bool found = true;
@@ -209,7 +209,7 @@ namespace fart::types {
 			});
 		}
 
-		const ssize_t indexOf(const T other, const size_t offset = 0) const {
+		ssize_t indexOf(const T other, const size_t offset = 0) const {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
@@ -259,7 +259,7 @@ namespace fart::types {
 			});
 		};
 
-		const size_t copy(void* bytes, size_t count, size_t offset = 0) {
+		size_t copy(void* bytes, size_t count, size_t offset = 0) {
 			return _mutex.lockedValue([this,bytes,&count,&offset](){
 				ssize_t toCopy = tools::math::max<ssize_t>(0, tools::math::min<ssize_t>(count, (ssize_t)_count - (ssize_t)offset));
 				memcpy(bytes, _store, sizeof(T) * count);
@@ -384,7 +384,7 @@ namespace fart::types {
 			});
 		}
 
-		const bool some(function<bool(T item)> todo) const {
+		bool some(function<bool(T item)> todo) const {
 			return this->_mutex.lockedValue([&todo,this]() {
 				for (size_t idx = 0 ; idx < this->_count ; idx++) {
 					if (todo(this->_store[idx])) return true;
@@ -393,7 +393,7 @@ namespace fart::types {
 			});
 		}
 
-		virtual const uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return _mutex.lockedValue([this]() {
 				if (_hashIsDirty) {
 					Hashable::Builder builder;
@@ -407,7 +407,7 @@ namespace fart::types {
 			});
 		}
 
-		virtual const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::data;
 		}
 

@@ -35,11 +35,11 @@ namespace fart::web::http {
 
 		virtual ~ResponseHead() {}
 
-		const Version version() const {
+		Version version() const {
 			return _version;
 		}
 
-		const Status status() const {
+		Status status() const {
 			return _status;
 		}
 

@@ -50,7 +50,7 @@ namespace fart::types {
 			return _values;
 		}
 
-		const bool hasKey(const Key& key) const {
+		bool hasKey(const Key& key) const {
 			return _keys.indexOf(key) > -1;
 		}
 
@@ -77,7 +77,7 @@ namespace fart::types {
 			return get(key);
 		}
 
-		const size_t count() const {
+		size_t count() const {
 			return _keys.count();
 		}
 
@@ -97,6 +97,16 @@ namespace fart::types {
 			return this->transformValue<Value>(key, [](Value& value) {
 				return value;
 			});
+		}
+
+		Strong<Dictionary<Key, Value>> filter(function<bool(const Key& key, const Value& value)> todo) {
+			Dictionary<Key, Value> result;
+			for (size_t idx = 0 ; idx < this->_keys.count() ; idx++) {
+				Strong<Key> key = this->_keys[idx];
+				Strong<Value> value = this->_values[idx];
+				if (todo(key, value)) result.set(key, value);
+			}
+			return result;
 		}
 
 		template<typename OtherKey>
@@ -119,13 +129,13 @@ namespace fart::types {
 			return result;
 		}
 
-		virtual const uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return Hashable::Builder()
 			.add(_keys.hash())
 			.add(_values.hash());
 		}
 
-		virtual const Kind kind() const override {
+		virtual Kind kind() const override {
 			return Kind::dictionary;
 		}
 

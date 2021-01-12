@@ -16,7 +16,7 @@ namespace fart::types {
 	class Null: public Type {
 
 	public:
-		virtual const Kind kind() const {
+		virtual Kind kind() const {
 			return Kind::null;
 		}
 
