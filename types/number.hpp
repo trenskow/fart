@@ -9,6 +9,8 @@
 #ifndef number_hpp
 #define number_hpp
 
+#include <type_traits>
+
 #include "./type.hpp"
 
 namespace fart::types {
@@ -19,20 +21,48 @@ namespace fart::types {
 		integer
 	};
 
+	class Boolean;
+	class Float;
+	class Integer;
+
 	template<typename T>
 	class Number : public Type {
 
 	private:
+		Subtype _subtype;
 		T _value;
-		Subtype _subType;
 
 	public:
 
-		Number() : _value(0), _subType(Subtype::floatingPoint) {}
-		Number(const T value, const Subtype subType = Subtype::integer) : _value(value), _subType(subType) {}
+		static T getValue(const Number<T>& number) {
+			switch (number.subType()) {
+				case Subtype::integer:
+					return (T)number.as<Integer>().value();
+				case Subtype::floatingPoint:
+					return (T)number.as<Float>().value();
+				case Subtype::boolean:
+					return (T)(number.as<Boolean>().value() != 0);
+			}
+		}
+
+		static T getValue(const Type& value) noexcept(false) {
+			if (!value.is(Type::Kind::number)) throw TypeConversionException();
+			return Number<uint64_t>::getValue(value.as<Number<uint64_t>>());
+		}
+
+		static bool is(const Type& value) {
+			if (!value.is(Type::Kind::number)) return false;
+			if (std::is_same<T, bool>::value) return value.as<Number<uint64_t>>().subType() == Subtype::boolean;
+			if (std::is_same<T, double>::value) return value.as<Number<uint64_t>>().subType() == Subtype::floatingPoint;
+			if (std::is_same<T, float>::value) return value.as<Number<uint64_t>>().subType() == Subtype::floatingPoint;
+			return value.as<Number<uint64_t>>().subType() == Subtype::integer;
+		}
+
+		Number() : _value(0), _subtype(Subtype::floatingPoint) {}
+		Number(const T value, const Subtype subType = Subtype::integer) : _subtype(subType), _value(value) {}
 		Number(const Number<T>& other, const Subtype subType = Subtype::integer) : Number(other._value, subType) {}
 		template<typename N>
-		Number(const Number<N>& other) : _value(other.value()), _subType(other.subType()) {}
+		Number(const Number<N>& other) : _subtype(other.subType()), _value(other.value()) {}
 		virtual ~Number() {}
 
 		operator T() const {
@@ -44,12 +74,12 @@ namespace fart::types {
 			return Number<N>(_value);
 		}
 
-		const T value() const {
+		T value() const {
 			return _value;
 		}
 
 		Subtype subType() const {
-			return _subType;
+			return _subtype;
 		}
 
 		virtual uint64_t hash() const override {
@@ -60,6 +90,10 @@ namespace fart::types {
 			return Kind::number;
 		}
 
+		bool is(Subtype subtype) const {
+			return _subtype == subtype;
+		}
+
 		bool operator==(const Number<T>& other) const {
 			if (!Type::operator==(other)) return false;
 			return _value == other._value;
@@ -67,6 +101,10 @@ namespace fart::types {
 
 		bool operator>(const Number<T>& other) const {
 			return _value > other._value;
+		}
+
+		operator T() {
+			return value();
 		}
 
 	};

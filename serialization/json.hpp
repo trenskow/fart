@@ -32,13 +32,17 @@ namespace fart::serialization {
 
 	private:
 
-		static void _ensureLength(const String& string, size_t* idx, size_t length) {
-			if (string.length() < *idx + length) {
+		inline static bool _hasLength(const String& string, size_t* idx, size_t length) {
+			return *idx + length <= string.length();
+		}
+
+		inline static void _ensureLength(const String& string, size_t* idx, size_t length) {
+			if (!_hasLength(string, idx, length)) {
 				throw JSONUnexpectedEndOfDataException();
 			}
 		}
 
-		static void _ensureData(const String& string, size_t* idx) {
+		inline static void _ensureData(const String& string, size_t* idx) {
 			return _ensureLength(string, idx, 1);
 		}
 
@@ -148,27 +152,31 @@ namespace fart::serialization {
 			double exponent = 1;
 
 			(*idx) += consumed;
-			(*character) += consumed;;
+			(*character) += consumed;
 
-			if (string[*idx] == '.') {
-				_ensureLength(string, idx, 1);
-				(*idx)++;
-				(*character)++;
-				fragment = string.toInteger(*idx, &consumed);
-				(*idx) += consumed;
-				(*character) += consumed;
-				while (fragment > 1) {
-					fragment /= 10;
+			if (_hasLength(string, idx, 1)) {
+
+				if (string[*idx] == '.') {
+					_ensureLength(string, idx, 1);
+					(*idx)++;
+					(*character)++;
+					fragment = string.toInteger(*idx, &consumed);
+					(*idx) += consumed;
+					(*character) += consumed;
+					while (fragment > 1) {
+						fragment /= 10;
+					}
 				}
-			}
 
-			if (string[*idx] == 'e' || string[*idx] == 'E') {
-				_ensureLength(string, idx, 1);
-				(*idx)++;
-				(*character)++;
-				exponent = pow(10, string.toInteger(*idx, &consumed));
-				(*idx) += consumed;
-				(*character) += consumed;
+				if (string[*idx] == 'e' || string[*idx] == 'E') {
+					_ensureLength(string, idx, 1);
+					(*idx)++;
+					(*character)++;
+					exponent = pow(10, string.toInteger(*idx, &consumed));
+					(*idx) += consumed;
+					(*character) += consumed;
+				}
+
 			}
 
 			const double value = (full + fragment) * exponent * multiplier;
@@ -324,6 +332,27 @@ namespace fart::serialization {
 			size_t character = 0;
 			return _parse(string, &idx, &line, &character);
 
+		}
+
+		static bool isStringifiable(const Type& data) {
+			switch (data.kind()) {
+				case Type::Kind::dictionary: {
+					const Dictionary<Type, Type>& dictionary = data.as<Dictionary<Type, Type>>();
+					return dictionary.keys()->are(Type::Kind::string) && isStringifiable(dictionary.values());
+				}
+				case Type::Kind::array: {
+					return data.as<Array<Type>>().every([](const Type& data) {
+						return isStringifiable(data);
+					});
+				}
+				case Type::Kind::string:
+				case Type::Kind::number:
+				case Type::Kind::null:
+				case Type::Kind::date:
+					return true;
+				default:
+					return false;
+			}
 		}
 
 		static Strong<String> stringify(const Type& data) {

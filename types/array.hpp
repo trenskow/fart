@@ -148,6 +148,10 @@ namespace fart::types {
 			}
 			return -1;
 		}
+		
+		bool contains(const T& item) const {
+			return this->indexOf(item) > -1;
+		}
 
 		void forEach(function<void(T& value)> todo) const {
 			this->_storage.forEach([&todo](T* item) {
@@ -172,13 +176,25 @@ namespace fart::types {
 
 		Strong<Array<T>> filter(function<bool(T& value, size_t idx)> todo) const {
 			return Strong<Array<T>>(this->_storage.filter([&todo](T* item, size_t idx) {
-				return *todo(*item, idx);
+				return todo(*item, idx);
 			}));
 		}
 
 		bool some(function<bool(T& value)> todo) const {
 			return this->_storage.some([&todo](T* item) {
 				return todo(*item);
+			});
+		}
+
+		bool every(function<bool(T& value)> todo) const {
+			return this->_storage.every([&todo](T* item) {
+				return todo(*item);
+			});
+		}
+
+		bool are(Type::Kind kind) const {
+			return this->every([&kind](const T& value) {
+				return value.is(kind);
 			});
 		}
 
@@ -192,6 +208,22 @@ namespace fart::types {
 
 		Strong<Array<T>> reversed() const {
 			return Strong<Array<T>>(this->_storage.reversed());
+		}
+
+		Strong<Array<T>> unique() const {
+			Strong<Array<T>> result;
+			this->forEach([&result](const T& value) {
+				if (!result->contains(value)) result->append(value);
+			});
+			return result;
+		}
+
+		Strong<Array<T>> nonUnique() const {
+			Strong<Array<T>> result(*this);
+			this->unique()->forEach([&result](const T& item) {
+				result->removeItem(item);
+			});
+			return result;
 		}
 
 		void randomize() {

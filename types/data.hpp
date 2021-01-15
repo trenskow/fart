@@ -393,6 +393,15 @@ namespace fart::types {
 			});
 		}
 
+		bool every(function<bool(T item)> todo, bool def = true) const {
+			return this->_mutex.lockedValue([&todo,&def,this]() {
+				if (this->_count == 0) return def;
+				return !this->some([&todo](const T item) {
+					return !todo(item);
+				});
+			});
+		}
+
 		virtual uint64_t hash() const override {
 			return _mutex.lockedValue([this]() {
 				if (_hashIsDirty) {
