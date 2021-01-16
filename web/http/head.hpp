@@ -39,7 +39,7 @@ namespace fart::web::http {
 
 			if (parts.count() != 3) throw DataMalformedException();
 
-			_parts = parts.map<String>([](const Data<uint8_t>& current, const size_t idx) {
+			_parts = parts.map<String>([](const Data<uint8_t>& current) {
 				return Strong<String>(current);
 			});
 

@@ -349,7 +349,7 @@ namespace fart::serialization {
 				case Type::Kind::dictionary: {
 					result->append("{");
 					auto dictionary = data.as<Dictionary<Type, Type>>();
-					result->append(String::join(dictionary.keys()->map<String>([dictionary](const Type& key, const size_t idx) {
+					result->append(String::join(dictionary.keys()->map<String>([dictionary](const Type& key) {
 						if (key.kind() != Type::Kind::string) throw EncoderTypeException();
 						Strong<String> result;
 						result->append(stringify(key));
@@ -363,7 +363,7 @@ namespace fart::serialization {
 				case Type::Kind::array: {
 					Array<Type>& array = data.as<Array<Type>>();
 					result->append("[");
-					result->append(String::join(array.map<String>([](const Type& item, const size_t idx) {
+					result->append(String::join(array.map<String>([](const Type& item) {
 						return stringify(item);
 					}), ","));
 					result->append("]");

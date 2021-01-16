@@ -276,19 +276,10 @@ namespace fart::exceptions {
 		template<class T>
 		class NotFoundException : public Exception {
 
-			const T& _item;
-
 		public:
-
-			NotFoundException(const T& item) : _item(item) {}
-			NotFoundException(const NotFoundException<T>& other) : _item(other._item) {}
 
 			virtual const char* description() const override {
 				return "Item not found.";
-			}
-
-			T& item() const {
-				return _item;
 			}
 
 		};

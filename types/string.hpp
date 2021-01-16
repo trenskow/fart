@@ -165,22 +165,22 @@ namespace fart::types {
 		}
 
 		Strong<Array<String>> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			return _store.split(separator._store, includeSeparator, max)->map<String>([](const Data<uint32_t>& current, const size_t idx) {
+			return _store.split(separator._store, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return Strong<String>(current);
 			});
 		}
 
 		Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			auto stores = separators.map<Data<uint32_t>>([](const String& current, const size_t idx) {
+			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
 				return current._store;
 			});
-			return _store.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current, const size_t idx) {
+			return _store.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return String(current);
 			});
 		}
 
 		static Strong<String> join(Array<String>& strings) {
-			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current, const size_t idx) {
+			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._store;
 			})));
 		}
@@ -191,7 +191,7 @@ namespace fart::types {
 		}
 
 		static Strong<String> join(Array<String>& strings, String& separator) {
-			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current, const size_t idx) {
+			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._store;
 			}), separator._store));
 		}

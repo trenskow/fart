@@ -44,6 +44,10 @@ namespace fart::types {
 
 	public:
 
+		typedef function<bool(T item1, T item2)> Comparer;
+		typedef function<bool(T item)> Tester;
+		typedef function<bool(T item, const size_t idx)> TesterIndex;
+
 		static const size_t blockSize = 4096;
 
 		class Comparitor : public Object {
@@ -368,42 +372,67 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Data<T>> filter(function<bool(T item, size_t idx)> todo) const {
-			return this->_mutex.lockedValue([&todo,this]() {
+		Strong<Data<T>> filter(TesterIndex test) const {
+			return this->_mutex.lockedValue([&test,this]() {
 				Strong<Data<T>> result;
 				for (size_t idx = 0 ; idx < this->_count ; idx++) {
-					if (todo(this->_store[idx], idx)) result->append(this->_store[idx]);
+					if (test(this->_store[idx], idx)) result->append(this->_store[idx]);
+				}
+				return result;
+			});
+		}
+
+		Strong<Data<T>> filter(Tester test) const {
+			return filter([&test](T item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		template<typename O>
+		Strong<Data<O>> map(function<O(T item, const size_t idx)> transform) const {
+			return this->_mutex.lockedValue([&transform,this]() {
+				Strong<Data<O>> result;
+				for (size_t idx = 0 ; idx < this->_count ; idx++) {
+					result->append(transform(this->_store[idx], idx));
 				}
 				return result;
 			});
 		}
 
 		template<typename O>
-		Strong<Data<O>> map(function<O(T item, size_t idx)> todo) const {
-			return this->_mutex.lockedValue([&todo,this]() {
-				Strong<Data<O>> result;
-				for (size_t idx = 0 ; idx < this->_count ; idx++) {
-					result->append(todo(this->_store[idx], idx));
-				}
-				return result;
+		Strong<Data<O>> map(function<O(T item)> transform) const {
+			return map<O>([&transform](T item, const size_t idx) {
+				return transform(item);
 			});
 		}
 
-		bool some(function<bool(T item)> todo) const {
-			return this->_mutex.lockedValue([&todo,this]() {
+		bool some(TesterIndex test) const {
+			return this->_mutex.lockedValue([&test,this]() {
 				for (size_t idx = 0 ; idx < this->_count ; idx++) {
-					if (todo(this->_store[idx])) return true;
+					if (test(this->_store[idx], idx)) return true;
 				}
 				return false;
 			});
 		}
 
-		bool every(function<bool(T item)> todo, bool def = true) const {
-			return this->_mutex.lockedValue([&todo,&def,this]() {
+		bool some(Tester test) const {
+			return some([&test](T item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		bool every(TesterIndex test, bool def = true) const {
+			return this->_mutex.lockedValue([&test,&def,this]() {
 				if (this->_count == 0) return def;
-				return !this->some([&todo](const T item) {
-					return !todo(item);
+				return !this->some([&test](const T item, const size_t idx) {
+					return !test(item, idx);
 				});
+			});
+		}
+
+		bool every(Tester test, bool def = true) const {
+			return every([&test](T item, const size_t idx) {
+				return test(item);
 			});
 		}
 

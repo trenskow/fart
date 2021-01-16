@@ -73,7 +73,7 @@ namespace fart::web {
 				Data<uint8_t> keyValueSplitter((uint8_t *)": ", 2);
 				Strong<Array<Data<uint8_t>>> parts = current.split(keyValueSplitter);
 				if (parts->count() != 2) throw DataIncompleteException();
-				Strong<Array<String>> strings = parts->map<String>([](const Data<uint8_t>& current, const size_t idx) {
+				Strong<Array<String>> strings = parts->map<String>([](const Data<uint8_t>& current) {
 					return Strong<String>(current);
 				});
 				_headers.set(strings->itemAtIndex(0), strings->itemAtIndex(1));

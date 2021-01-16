@@ -59,10 +59,21 @@ namespace fart::types {
 		}
 
 		Number() : _value(0), _subtype(Subtype::floatingPoint) {}
-		Number(const T value, const Subtype subType = Subtype::integer) : _subtype(subType), _value(value) {}
+
+		Number(const T value, const Subtype subType) : _subtype(subType), _value(value) {}
+
+		Number(const T value) : _value(value) {
+			if (std::is_same<T, bool>::value) _subtype = Subtype::boolean;
+			if (std::is_same<T, double>::value) _subtype = Subtype::floatingPoint;
+			if (std::is_same<T, float>::value) _subtype = Subtype::floatingPoint;
+			_subtype = Subtype::integer;
+		}
+
 		Number(const Number<T>& other, const Subtype subType = Subtype::integer) : Number(other._value, subType) {}
+
 		template<typename N>
 		Number(const Number<N>& other) : _subtype(other.subType()), _value(other.value()) {}
+
 		virtual ~Number() {}
 
 		operator T() const {

@@ -31,6 +31,12 @@ namespace fart::types {
 
 		friend class Strong<Array<T>>;
 
+	public:
+
+		typedef function<bool(T& item1, T& item2)> Comparer;
+		typedef function<bool(T& item, const size_t idx)> TesterIndex;
+		typedef function<bool(T& item)> Tester;
+
 	private:
 
 		Array(const Data<T*>& other) : _storage(other), _hash(0), _hashIsDirty(true) {
@@ -44,7 +50,7 @@ namespace fart::types {
 		mutable bool _hashIsDirty;
 		Mutex _hashMutex;
 
-		static void _insertionSort(Array& array, function<bool(const T& item1, const T& items2)> comparer) {
+		static void _insertionSort(Array& array, Comparer comparer) {
 			size_t sortedIdx = 0;
 			while (sortedIdx < array.count() - 1) {
 				sortedIdx++;
@@ -54,7 +60,7 @@ namespace fart::types {
 			}
 		}
 
-		static void _quickSort(Array& array, size_t offset, size_t count, function<bool(const T& item1, const T& items2)> comparer) {
+		static void _quickSort(Array& array, size_t offset, size_t count, Comparer comparer) {
 			if (count == 0) return;
 			size_t pivot = count - 1;
 			size_t idx = 0;
@@ -76,7 +82,7 @@ namespace fart::types {
 		}
 
 	public:
-		
+
 		Array() : _hash(0), _hashIsDirty(true) {}
 
 		Array(const Array<T>& other) : Array(other._storage) {}
@@ -130,27 +136,59 @@ namespace fart::types {
 			});
 		}
 
-		void removeItem(const T& item) {
-			ssize_t idx = indexOf(item);
-			if (idx == -1) throw NotFoundException<T>(item);
+		void removeItem(TesterIndex test) noexcept(false) {
+			ssize_t idx = indexOf(test);
+			if (idx == -1) throw NotFoundException<T>();
 			removeItemAtIndex(idx);
 		}
 
-		void replace(const T& item, size_t index) {
+		void removeItem(Tester test) noexcept(false) {
+			return removeItem([&test](T& item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		void removeItem(const T& item1) noexcept(false) {
+			return removeItem([&item1](T& item2) {
+				return item1 == item2;
+			});
+		}
+
+		void replace(const T& item, size_t index) noexcept(false) {
 			Strong<T> heapItem = (T*)&item;
 			heapItem->retain();
 			_storage.replace(heapItem, index)->release();
 		}
 
-		ssize_t indexOf(const T& item) const {
+		ssize_t indexOf(TesterIndex test) const {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-				if (*_storage[idx] == item) return idx;
+				if (test(*_storage[idx], idx)) return idx;
 			}
 			return -1;
 		}
-		
+
+		ssize_t indexOf(Tester test) const {
+			return indexOf([&test](T& item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		ssize_t indexOf(const T& item) const {
+			return indexOf([&item](const T& stored) {
+				return stored == item;
+			});
+		}
+
+		bool contains(TesterIndex test) const {
+			return indexOf(test) > -1;
+		}
+
+		bool contains(Tester test) const {
+			return indexOf(test) > -1;
+		}
+
 		bool contains(const T& item) const {
-			return this->indexOf(item) > -1;
+			return indexOf(item) > -1;
 		}
 
 		void forEach(function<void(T& value)> todo) const {
@@ -167,28 +205,53 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		Strong<Array<R>> map(function<Strong<R>(T& value, const size_t idx)> todo) const {
-			return this->reduce<Strong<Array<R>>>(Strong<Array<R>>(), [&todo](Strong<Array<R>> result, T& value, const size_t idx) {
-				result->append(todo(value, idx));
+		Strong<Array<R>> map(function<Strong<R>(T& item, const size_t idx)> transform) const {
+			return this->reduce<Strong<Array<R>>>(Strong<Array<R>>(), [&transform](Strong<Array<R>> result, T& item, const size_t idx) {
+				result->append(transform(item, idx));
 				return result;
 			});
 		}
 
-		Strong<Array<T>> filter(function<bool(T& value, size_t idx)> todo) const {
-			return Strong<Array<T>>(this->_storage.filter([&todo](T* item, size_t idx) {
-				return todo(*item, idx);
-			}));
-		}
-
-		bool some(function<bool(T& value)> todo) const {
-			return this->_storage.some([&todo](T* item) {
-				return todo(*item);
+		template<typename R>
+		Strong<Array<R>> map(function<Strong<R>(T& value)> transform) const {
+			return map<R>([&transform](T& item, const size_t idx) {
+				return transform(item);
 			});
 		}
 
-		bool every(function<bool(T& value)> todo) const {
-			return this->_storage.every([&todo](T* item) {
-				return todo(*item);
+		Strong<Array<T>> filter(TesterIndex test) const {
+			return Strong<Array<T>>(this->_storage.filter([&test](T* item, const size_t idx) {
+				return test(*item, idx);
+			}));
+		}
+
+		Strong<Array<T>> filter(Tester test) const {
+			return filter([&test](T& item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		bool some(TesterIndex test) const {
+			return this->_storage.some([&test](T* item, const size_t idx) {
+				return test(*item, idx);
+			});
+		}
+
+		bool some(Tester test) const {
+			return some([&test](T& item, const size_t idx) {
+				return test(item);
+			});
+		}
+
+		bool every(TesterIndex test) const {
+			return this->_storage.every([&test](T* item, const size_t idx) {
+				return test(*item, idx);
+			});
+		}
+
+		bool every(Tester test) const {
+			return every([&test](T& item, const size_t idx) {
+				return test(item);
 			});
 		}
 
@@ -210,20 +273,35 @@ namespace fart::types {
 			return Strong<Array<T>>(this->_storage.reversed());
 		}
 
-		Strong<Array<T>> unique() const {
+		Strong<Array<T>> unique(Comparer comparer) const {
 			Strong<Array<T>> result;
-			this->forEach([&result](const T& value) {
-				if (!result->contains(value)) result->append(value);
+			this->forEach([&result,&comparer](T& item1) {
+				if (!result->contains([&item1,&comparer](T& item2) { return comparer(item1, item2); })) {
+					result->append(item1);
+				}
 			});
 			return result;
 		}
 
-		Strong<Array<T>> nonUnique() const {
-			Strong<Array<T>> result(*this);
-			this->unique()->forEach([&result](const T& item) {
-				result->removeItem(item);
-			});
+		Strong<Array<T>> unique() const {
+			return this->unique([](T& item1, T& item2) { return item1 == item2; });
+		}
+
+		Strong<Array<T>> nonUnique(Comparer comparer) const {
+			Strong<Array<T>> result;
+			for (size_t idx1 = 0 ; idx1 < count() ; idx1++) {
+				for (size_t idx2 = idx1 + 1 ; idx2 < count() ; idx2++) {
+					if (comparer(*_storage[idx1], *_storage[idx2])) {
+						result->append(*_storage[idx1]);
+						break;
+					}
+				}
+			}
 			return result;
+		}
+
+		Strong<Array<T>> nonUnique() const {
+			return nonUnique([](const T& item1, const T& item2) { return item1 == item2; });
 		}
 
 		void randomize() {
@@ -255,7 +333,7 @@ namespace fart::types {
 			});
 		}
 
-		void sort(function<bool(const T& item1, const T& item2)> comparer) {
+		void sort(Comparer comparer) {
 			if (this->count() <= 10) _insertionSort(*this, comparer);
 			else _quickSort(*this, 0, this->count(), comparer);
 		}
