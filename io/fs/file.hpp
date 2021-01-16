@@ -9,10 +9,11 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <cstdio>
+#include <stdio.h>
 #include <wordexp.h>
-#include <cstring>
+#include <string.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "../../memory/object.hpp"
 #include "../../exceptions/exception.hpp"
@@ -88,6 +89,31 @@ namespace fart::io::fs {
 					return strlen(buffer);
 				});
 			});
+		}
+
+		static Strong<Array<String>> directoryContent(const String& filename) {
+
+			if (!File::exists(filename)) throw FileNotFoundException();
+
+			DIR* dp;
+			dirent* ep;
+
+			dp = filename.mapCString<dirent*>([](const char* filename) {
+				return opendir(filename);
+			});
+
+			if (dp == nullptr) throw FileNotFoundException();
+
+			Strong<Array<String>> result;
+
+			while ((ep = readdir(dp))) {
+				result->append(ep->d_name);
+			}
+
+			closedir(dp);
+
+			return result;
+
 		}
 
 		File(const String& filename, Mode mode) {

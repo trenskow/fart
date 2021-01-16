@@ -9,6 +9,7 @@
 #ifndef system_hpp
 #define system_hpp
 
-#include "endian.h"
+#include "./endian.hpp"
+#include "./environment.hpp"
 
 #endif /* system_hpp */

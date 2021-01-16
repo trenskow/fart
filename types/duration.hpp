@@ -9,7 +9,7 @@
 #ifndef duration_hpp
 #define duration_hpp
 
-#include <cmath>
+#include <math.h>
 
 #include "../threading/mutex.hpp"
 #include "../memory/strong.hpp"
@@ -83,15 +83,15 @@ namespace fart::types {
 			uint64_t minutes = 0;
 
 			if (parse->length() == 5 && *parse->substring(2, 1) == ":") {
-				hours = parse->substring(0, 2)->toInteger();
-				minutes = parse->substring(3, 2)->toInteger();
+				hours = parse->substring(0, 2)->doubleValue();
+				minutes = parse->substring(3, 2)->doubleValue();
 			}
 			else if (parse->length() == 4) {
-				hours = parse->substring(0, 2)->toInteger();
-				minutes = parse->substring(2, 4)->toInteger();
+				hours = parse->substring(0, 2)->doubleValue();
+				minutes = parse->substring(2, 4)->doubleValue();
 			}
 			else if (parse->length() == 2) {
-				hours = parse->toInteger();
+				hours = parse->doubleValue();
 			}
 			else throw DurationParserException();
 

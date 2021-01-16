@@ -58,7 +58,7 @@ namespace fart::io::sockets {
 			_closeCallback.callback = nullptr;
 		}
 
-		virtual uint64_t hash() const {
+		virtual uint64_t hash() const override {
 			return _mutex.lockedValue([this]() {
 				return _socket;
 			});

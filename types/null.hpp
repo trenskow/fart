@@ -16,15 +16,15 @@ namespace fart::types {
 	class Null: public Type {
 
 	public:
-		virtual Kind kind() const {
+		virtual Kind kind() const override {
 			return Kind::null;
 		}
 
-		virtual bool operator==(const Type& other) const {
+		virtual bool operator==(const Type& other) const override {
 			return other.kind() == Kind::null;
 		}
 
-		virtual bool operator==(const Type* other) const {
+		virtual bool operator==(const Type* other) const override {
 			if (other == nullptr) return true;
 			return Type::operator==(other);
 		}

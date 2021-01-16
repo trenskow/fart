@@ -9,8 +9,8 @@
 #ifndef date_hpp
 #define date_hpp
 
-#include <cmath>
-#include <ctime>
+#include <math.h>
+#include <time.h>
 
 #include "../exceptions/exception.hpp"
 #include "../threading/mutex.hpp"
@@ -162,15 +162,15 @@ namespace fart::types {
 
 				auto datePart = parts->itemAtIndex(0);
 
-				year = datePart->substring(0, 4)->toInteger();
+				year = datePart->substring(0, 4)->doubleValue();
 
 				if (datePart->length() == 8) {
-					month = datePart->substring(4, 2)->toInteger();
-					day = datePart->substring(6, 2)->toInteger();
+					month = datePart->substring(4, 2)->doubleValue();
+					day = datePart->substring(6, 2)->doubleValue();
 				}
 				else if (datePart->length() == 10) {
-					month = datePart->substring(5, 2)->toInteger();
-					day = datePart->substring(8, 2)->toInteger();
+					month = datePart->substring(5, 2)->doubleValue();
+					day = datePart->substring(8, 2)->doubleValue();
 				}
 				else throw ISO8601Exception();
 
@@ -194,19 +194,19 @@ namespace fart::types {
 
 						auto hmsComponentParts = timeComponentsSubParts->itemAtIndex(0);
 
-						hours = hmsComponentParts->substring(0, 2)->toInteger();
+						hours = hmsComponentParts->substring(0, 2)->doubleValue();
 
 						if (hmsComponentParts->length() == 6) {
-							minutes = hmsComponentParts->substring(2, 2)->toInteger();
-							seconds = hmsComponentParts->substring(4, 2)->toInteger();
+							minutes = hmsComponentParts->substring(2, 2)->doubleValue();
+							seconds = hmsComponentParts->substring(4, 2)->doubleValue();
 						}
 						else if (timeComponentsPart->length() == 8) {
-							minutes = hmsComponentParts->substring(3, 2)->toInteger();
-							seconds = hmsComponentParts->substring(6, 2)->toInteger();
+							minutes = hmsComponentParts->substring(3, 2)->doubleValue();
+							seconds = hmsComponentParts->substring(6, 2)->doubleValue();
 						}
 
 						if (timeComponentsSubParts->count() > 1) {
-							microseconds = timeComponentsSubParts->itemAtIndex(1)->toInteger();
+							microseconds = timeComponentsSubParts->itemAtIndex(1)->doubleValue();
 						}
 
 					} else throw ISO8601Exception();

@@ -9,8 +9,8 @@
 #ifndef data_hpp
 #define data_hpp
 
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 #include "../threading/mutex.hpp"
 #include "../exceptions/exception.hpp"
@@ -36,6 +36,11 @@ namespace fart::types {
 
 	template<typename T = uint8_t>
 	class Data : public Type {
+
+		template<class A>
+		friend class Array;
+
+		friend class String;
 
 	public:
 

@@ -12,8 +12,7 @@
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
-#include "./tools/tools.hpp"
-#include "./system/system.hpp"
+#include "./tools/math.hpp"
 #include "./exceptions/exceptions.hpp"
 #include "./threading/threading.hpp"
 #include "./types/types.hpp"
@@ -21,6 +20,7 @@
 #include "./web/web.hpp"
 #include "./serialization/serialization.hpp"
 #include "./io/io.hpp"
+#include "./system/system.hpp"
 
 #pragma GCC visibility pop
 

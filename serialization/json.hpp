@@ -20,7 +20,7 @@
 #include "../types/dictionary.hpp"
 #include "../types/duration.hpp"
 #include "../types/date.hpp"
-#include "../system/endian.h"
+#include "../system/endian.hpp"
 
 using namespace fart::memory;
 using namespace fart::types;
@@ -36,17 +36,17 @@ namespace fart::serialization {
 			return *idx + length <= string.length();
 		}
 
-		inline static void _ensureLength(const String& string, size_t* idx, size_t length) {
+		inline static void _ensureLength(const String& string, size_t* idx, size_t length, size_t line, size_t character) {
 			if (!_hasLength(string, idx, length)) {
-				throw JSONUnexpectedEndOfDataException();
+				throw JSONMalformedException(line, character);
 			}
 		}
 
-		inline static void _ensureData(const String& string, size_t* idx) {
-			return _ensureLength(string, idx, 1);
+		inline static void _ensureData(const String& string, size_t* idx, size_t line, size_t character) {
+			return _ensureLength(string, idx, 1, line, character);
 		}
 
-		static void _offsetWhiteSpaces(const String& string, size_t* idx, size_t* line, size_t* character) {
+		static void _offsetWhiteSpaces(const String& string, size_t* idx, size_t* line, size_t* character, bool ensure = true) {
 
 			// First we ignore any whitespaces.
 			while (string.length() > *idx && (string[*idx] == 0x20 || string[*idx] == 0x09 || string[*idx] == 0x0A || string[*idx] == 0x0D)) {
@@ -59,18 +59,18 @@ namespace fart::serialization {
 				(*idx)++;
 			}
 
-			_ensureData(string, idx);
+			if (ensure) _ensureData(string, idx, *line, *character);
 
 		}
 
-		static Strong<Type> _parseDictionary(const String& string, size_t* idx, size_t* line, size_t* character) {
+		static Strong<Type> _parseDictionary(const String& string, size_t* idx, size_t* line, size_t* character, size_t level) {
 
 			if (string[*idx] != '{') throw JSONMalformedException(*line, *character);
 
 			(*idx)++;
 			(*character)++;
 
-			_ensureData(string, idx);
+			_ensureData(string, idx, *line, *character);
 
 			Strong<Dictionary<String, Type>> result;
 
@@ -89,7 +89,7 @@ namespace fart::serialization {
 				(*idx)++;
 				(*character)++;
 				_offsetWhiteSpaces(string, idx, line, character);
-				Strong<Type> value = _parse(string, idx, line, character);
+				Strong<Type> value = _parse(string, idx, line, character, level + 1);
 				result->set(key, value);
 				_offsetWhiteSpaces(string, idx, line, character);
 				if (string[*idx] != ',' && string[*idx] != '}') throw JSONMalformedException(*line, *character);
@@ -102,14 +102,14 @@ namespace fart::serialization {
 
 		}
 
-		static Strong<Type> _parseArray(const String& string, size_t* idx, size_t* line, size_t* character) {
+		static Strong<Type> _parseArray(const String& string, size_t* idx, size_t* line, size_t* character, size_t level) {
 
 			if (string[*idx] != '[') throw JSONMalformedException(*line, *character);
 
 			(*idx)++;
 			(*character)++;
 
-			_ensureData(string, idx);
+			_ensureData(string, idx, *line, *character);
 
 			Strong<Array<Type>> result;
 
@@ -122,7 +122,7 @@ namespace fart::serialization {
 					(*character)++;
 					_offsetWhiteSpaces(string, idx, line, character);
 				} else if (result->count() > 0) throw JSONMalformedException(*line, *character);
-				result->append(_parse(string, idx, line, character));
+				result->append(_parse(string, idx, line, character, level + 1));
 				_offsetWhiteSpaces(string, idx, line, character);
 				if (string[*idx] != ',' && string[*idx] != ']') throw JSONMalformedException(*line, *character);
 			}
@@ -136,56 +136,18 @@ namespace fart::serialization {
 
 		static Strong<Type> _parseNumber(const String& string, size_t* idx, size_t* line, size_t* character) {
 
-			size_t consumed;
+			size_t consumed = 0;
 
-			double multiplier = 1;
-
-			if (string[*idx] == '-') {
-				multiplier = -1;
-				_ensureLength(string, idx, 1);
-				(*idx)++;
-				(*character)++;
+			double value;
+			try {
+				value = string.doubleValue(*idx, &consumed, false);
+				(*idx) += consumed;
+				(*character) += consumed;
+			} catch (DecoderException exception) {
+				throw JSONMalformedException(*line, *character + exception.characterIndex());
 			}
 
-			double full = string.toInteger(*idx, &consumed);
-			double fragment = 0;
-			double exponent = 1;
-
-			(*idx) += consumed;
-			(*character) += consumed;
-
-			if (_hasLength(string, idx, 1)) {
-
-				if (string[*idx] == '.') {
-					_ensureLength(string, idx, 1);
-					(*idx)++;
-					(*character)++;
-					fragment = string.toInteger(*idx, &consumed);
-					(*idx) += consumed;
-					(*character) += consumed;
-					while (fragment > 1) {
-						fragment /= 10;
-					}
-				}
-
-				if (string[*idx] == 'e' || string[*idx] == 'E') {
-					_ensureLength(string, idx, 1);
-					(*idx)++;
-					(*character)++;
-					exponent = pow(10, string.toInteger(*idx, &consumed));
-					(*idx) += consumed;
-					(*character) += consumed;
-				}
-
-			}
-
-			const double value = (full + fragment) * exponent * multiplier;
-
-			if (fragment == 0) {
-				return Strong<Integer>(value).as<Type>();
-			}
-
-			return Strong<Number<double>>(value).as<Type>();
+			return Strong<Float>(value).as<Type>();
 
 		}
 
@@ -198,7 +160,10 @@ namespace fart::serialization {
 
 			Data<uint16_t> stringBytes;
 
-			while (string.length() > *idx && string[*idx] != '"') {
+			do {
+
+				if (string.length() == *idx) throw JSONMalformedException(*line, *character);
+				if (string[*idx] == '"') break;
 
 				switch (string[*idx]) {
 					case '\b':
@@ -210,7 +175,7 @@ namespace fart::serialization {
 					case '\\':
 						(*idx)++;
 						(*character)++;
-						_ensureData(string, idx);
+						_ensureData(string, idx, *line, *character);
 						switch (string[*idx]) {
 							case 'b':
 								stringBytes.append('\b');
@@ -236,8 +201,8 @@ namespace fart::serialization {
 							case '/':
 								stringBytes.append('/');
 								break;
-							case 'U': {
-								_ensureLength(string, idx, 4);
+							case 'u': {
+								_ensureLength(string, idx, 4, *line, *character);
 								String code = string.substring(*idx + 1, 4);
 								stringBytes.append(Endian::toSystemVariant(code.hexData()->as<uint16_t>()->itemAtIndex(0), Endian::Variant::big));
 								(*idx) += 4;
@@ -249,13 +214,14 @@ namespace fart::serialization {
 						}
 						break;
 					default:
+						if (string[*idx] <= 0x0f) throw JSONMalformedException(*line, *character);
 						stringBytes.append(string[*idx]);
 				}
 
 				(*idx)++;
 				(*character)++;
 
-			}
+			} while (true);
 
 			(*idx)++;
 			(*character)++;
@@ -272,7 +238,7 @@ namespace fart::serialization {
 
 			switch (string[*idx]) {
 				case 't':
-					_ensureLength(string, idx, 4);
+					_ensureLength(string, idx, 4, *line, *character);
 					if (*string.substring(*idx, 4) != trueLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
@@ -280,7 +246,7 @@ namespace fart::serialization {
 					(*character) += 4;
 					return Strong<Boolean>(true).as<Type>();
 				case 'f':
-					_ensureLength(string, idx, 5);
+					_ensureLength(string, idx, 5, *line, *character);
 					if (*string.substring(*idx, 5) != falseLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
@@ -288,7 +254,7 @@ namespace fart::serialization {
 					(*character) += 5;
 					return Strong<Boolean>(false).as<Type>();
 				case 'n':
-					_ensureLength(string, idx, 4);
+					_ensureLength(string, idx, 4, *line, *character);
 					if (*string.substring(*idx, 4) != nullLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
@@ -300,14 +266,20 @@ namespace fart::serialization {
 			}
 		}
 
-		static Strong<Type> _parse(const String& string, size_t* idx, size_t* line, size_t* character) {
+		static Strong<Type> _parse(const String& string, size_t* idx, size_t* line, size_t* character, size_t level) {
+
+			// Maliciously deeply nested JSON could trigger stack overflow.
+			if (level > 32) throw JSONMalformedException(*line, *character);
+
 			_offsetWhiteSpaces(string, idx, line, character);
+
 			uint32_t chr = string[*idx];
+
 			switch (chr) {
 				case '{':
-					return _parseDictionary(string, idx, line, character);
+					return _parseDictionary(string, idx, line, character, level);
 				case '[':
-					return _parseArray(string, idx, line, character);
+					return _parseArray(string, idx, line, character, level);
 				case '"':
 					return _parseString(string, idx, line, character);
 				case 'n':
@@ -321,6 +293,7 @@ namespace fart::serialization {
 					}
 					throw JSONMalformedException(*line, *character);
 			}
+
 		}
 
 	public:
@@ -330,7 +303,20 @@ namespace fart::serialization {
 			size_t idx = 0;
 			size_t line = 0;
 			size_t character = 0;
-			return _parse(string, &idx, &line, &character);
+
+			Strong<Type> result = nullptr;
+
+			try {
+				result = _parse(string, &idx, &line, &character, 0);
+			} catch (DecoderException exception) {
+				throw JSONMalformedException(line, character + exception.characterIndex());
+			}
+
+			_offsetWhiteSpaces(string, &idx, &line, &character, false);
+
+			if (string.length() > idx) throw DecoderException(idx);
+
+			return result;
 
 		}
 

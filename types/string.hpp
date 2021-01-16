@@ -9,10 +9,10 @@
 #ifndef string_hpp
 #define string_hpp
 
-#include <cstdio>
-#include <cstdarg>
+#include <stdio.h>
+#include <stdarg.h>
 
-#include "../system/endian.h"
+#include "../system/endian.hpp"
 #include "../memory/strong.hpp"
 #include "../exceptions/exception.hpp"
 #include "./data.hpp"
@@ -40,7 +40,9 @@ namespace fart::types {
 		}
 
 		String(const char* string) noexcept(false) : String() {
-			_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
+			if (string != nullptr) {
+				_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
+			}
 		}
 
 		String(const Data<uint8_t>& data) noexcept(false) : String() {
@@ -157,7 +159,7 @@ namespace fart::types {
 			_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 		}
 
-		Strong<Array<String>> split(const char *separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Strong<Array<String>> split(const char* separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			String sep(separator);
 			return split(sep, includeSeparator, max);
 		}
@@ -183,7 +185,7 @@ namespace fart::types {
 			})));
 		}
 
-		static Strong<String> join(Array<String>& strings, const char *seperator) {
+		static Strong<String> join(Array<String>& strings, const char* seperator) {
 			String sep(seperator);
 			return String::join(strings, sep);
 		}
@@ -194,28 +196,108 @@ namespace fart::types {
 			}), separator._store));
 		}
 
-		int64_t toInteger(size_t startIndex = 0, size_t* consumed = nullptr) const {
-			if (_store.count() <= startIndex) throw DecoderException(startIndex);
-			if (_store[startIndex] != '-' && (_store[startIndex] < '0' || _store[startIndex] > '9')) throw DecoderException(startIndex);
-			int64_t multiplier = 1;
-			int64_t result = 0;
-			size_t idx;
-			for (idx = startIndex ; idx < length() ; idx++) {
-				if (idx == startIndex && _store[idx] == '-') {
-					multiplier = -1;
-					continue;
+		double doubleValue(const size_t startIndex = 0, size_t* consumed = nullptr, bool allowLeadingZero = true) const {
+
+			double integerMultiplier = 1;
+			bool integerMultiplierParsed = false;
+			bool integerHadLeadingZero = false;
+			bool integerHadDigits = false;
+			ssize_t integerStartIndex = -1;
+			double fractionMultiplier = 10;
+			bool fractionHadDigits = false;
+			ssize_t fractionStartIndex = -1;
+			double exponentMultiplier = 1;
+			bool exponentMultiplierParsed = false;
+			bool exponentHadDigits = false;
+			ssize_t exponentStartIndex = -1;
+
+			double integer = 0;
+			double fraction = 0;
+			double exponent = 0;
+
+			size_t idx = startIndex;
+			while (idx < length()) {
+
+				uint32_t chr = _store[idx];
+
+				if (chr == '+' || chr == '-') {
+
+					if (fractionStartIndex != -1 && exponentStartIndex == -1) throw DecoderException(idx);
+					if (exponentStartIndex == -1 && integerMultiplierParsed) throw DecoderException(idx);
+					if (exponentStartIndex != -1 && exponentMultiplierParsed) throw DecoderException(idx);
+
+					if (exponentStartIndex != -1) {
+						if (exponentHadDigits) throw DecoderException(idx);
+						exponentMultiplier = chr == '+' ? 1 : -1;
+						exponentMultiplierParsed = true;
+					}
+					else {
+						if (integerHadDigits) throw DecoderException(idx);
+						integerMultiplier = chr == '+' ? 1 : -1;
+						integerMultiplierParsed = true;
+					}
+
 				}
-				if (idx == startIndex && _store[idx] == '+') continue;
-				uint32_t character = _store[idx];
-				if (character < '0' || character > '9') break;
-				result = result * 10 + (character - '0');
+
+				else if (chr == '.') {
+					if (!integerHadDigits) throw DecoderException(idx);
+					if (exponentStartIndex != -1 || fractionStartIndex != -1) throw DecoderException(idx);
+					fractionStartIndex = idx;
+				}
+
+				else if (chr == 'e' || chr == 'E') {
+					if (exponentStartIndex != -1) throw DecoderException(idx);
+					exponentStartIndex = idx;
+				}
+
+				else if (chr >= '0' && chr <= '9') {
+
+					if (exponentStartIndex != -1 && !exponentHadDigits) exponentHadDigits = true;
+					else if (fractionStartIndex != -1 && !fractionHadDigits) fractionHadDigits = true;
+					else if (!integerHadDigits) {
+						integerHadDigits = true;
+						integerHadLeadingZero = chr == '0';
+					}
+
+					double value = chr - '0';
+
+					if (exponentStartIndex != -1) {
+						exponent = exponent * 10 + value;
+					} else if (fractionStartIndex != -1) {
+						fraction = fraction + (value / fractionMultiplier);
+						fractionMultiplier *= 10;
+					} else {
+						integer = integer * 10 + value;
+					}
+
+				} else {
+					break;
+				}
+
+				idx++;
+
 			}
+
 			if (consumed != nullptr) *consumed = idx - startIndex;
-			return result * multiplier;
+
+			if (exponentStartIndex != -1 && !exponentHadDigits) throw DecoderException(exponentStartIndex);
+			if (fractionStartIndex != -1 && !fractionHadDigits) throw DecoderException(fractionStartIndex);
+			if (!integerHadDigits) throw DecoderException(startIndex);
+
+			double result = ((integer * integerMultiplier) + fraction) * (pow(10, exponent) * exponentMultiplier);
+
+			if (!allowLeadingZero && integer != 0 && integerHadLeadingZero) throw DecoderException(integerStartIndex);
+
+			return result;
+
 		}
 
 		ssize_t indexOf(const String& other, size_t offset = 0) const {
 			return this->_store.indexOf(other._store, offset);
+		}
+
+		ssize_t indexOf(const uint32_t chr) const {
+			return this->_store.indexOf(chr);
 		}
 
 		Strong<String> substring(size_t offset, ssize_t length = -1) const {
@@ -275,6 +357,12 @@ namespace fart::types {
 
 		};
 
+		enum class DoublePart {
+			integer = 0,
+			fraction,
+			exponent
+		};
+
 		Data<uint32_t> _store;
 		Strong<CaseComparitor> _caseComparitor;
 
@@ -284,9 +372,15 @@ namespace fart::types {
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 
+			size_t offset = 0;
+
+			if (length > 2 && buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF) {
+				offset += 3;
+			}
+
 			Strong<Data<uint32_t>> ret;
 
-			for (size_t idx = 0 ; idx < length ; idx++) {
+			for (size_t idx = offset ; idx < length ; idx++) {
 
 				const uint8_t firstByte = buffer[0];
 				uint32_t codePoint = 0;

@@ -264,7 +264,7 @@ namespace fart::types {
 			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		uint64_t hash() const override {
+		virtual uint64_t hash() const override {
 			return _hashMutex.lockedValue([this]() {
 				if (_hashIsDirty) {
 					Hashable::Builder builder;

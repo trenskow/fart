@@ -9,8 +9,8 @@
 #ifndef exception_hpp
 #define exception_hpp
 
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 namespace fart::exceptions {
 
@@ -24,7 +24,7 @@ namespace fart::exceptions {
 	public:
 		NotImplementedException() {}
 
-		virtual const char* description() const {
+		virtual const char* description() const override {
 			return "Not implemented.";
 		}
 
@@ -43,7 +43,7 @@ namespace fart::exceptions {
 				AddressAlreadyInUseException(uint16_t port) : _port(port) {};
 				AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
 
-				virtual const char* description() const {
+				virtual const char* description() const override {
 					return "Port already in use.";
 				}
 
@@ -61,7 +61,7 @@ namespace fart::exceptions {
 
 			public:
 
-				const char * description() const override {
+				virtual const char* description() const override {
 					return "Cannot open file.";
 				}
 
@@ -83,7 +83,7 @@ namespace fart::exceptions {
 					return _position;
 				}
 
-				const char * description() const override {
+				virtual const char* description() const override {
 					return "Position is outside file range.";
 				}
 
@@ -93,11 +93,22 @@ namespace fart::exceptions {
 
 			public:
 
-				const char * description() const override {
+				virtual const char* description() const override {
 					return "Operation not allowed in file's mode.";
 				}
 
 			};
+
+			class FileNotFoundException: public Exception {
+
+			public:
+
+				virtual const char* description() const override {
+					return "File does not exists.";
+				}
+
+			};
+
 		}
 
 	}
@@ -124,17 +135,8 @@ namespace fart::exceptions {
 				return this->_character;
 			}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "JSON is malformed.";
-			}
-
-		};
-
-		class JSONUnexpectedEndOfDataException: public Exception {
-
-		public:
-			virtual const char* description() const {
-				return "Unexpected end of JSON data.";
 			}
 
 		};
@@ -156,7 +158,7 @@ namespace fart::exceptions {
 				return _size;
 			}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Cannot allocate memory.";
 			}
 
@@ -169,7 +171,7 @@ namespace fart::exceptions {
 		class TypeConversionException : public Exception {
 
 		public:
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Could not convert to type.";
 			}
 
@@ -178,7 +180,7 @@ namespace fart::exceptions {
 		class ISO8601Exception : public Exception {
 
 		public:
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Not a valid ISO 8601 string";
 			}
 
@@ -197,7 +199,7 @@ namespace fart::exceptions {
 				return _characterIndex;
 			}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Cannot decode character";
 			}
 
@@ -215,7 +217,7 @@ namespace fart::exceptions {
 				return _characterIndex;
 			}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Cannot encode character";
 			}
 
@@ -226,7 +228,7 @@ namespace fart::exceptions {
 		public:
 			EncoderTypeException() {}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Cannot encode type.";
 			}
 
@@ -245,7 +247,7 @@ namespace fart::exceptions {
 				return _index;
 			}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Index is out of bounds.";
 			}
 
@@ -261,7 +263,7 @@ namespace fart::exceptions {
 			KeyNotFoundException(T key) : _key(key) {};
 			KeyNotFoundException(const KeyNotFoundException<T>& other) : _key(other._key) {}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Key was not found";
 			}
 
@@ -281,7 +283,7 @@ namespace fart::exceptions {
 			NotFoundException(const T& item) : _item(item) {}
 			NotFoundException(const NotFoundException<T>& other) : _item(other._item) {}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Item not found.";
 			}
 
@@ -295,7 +297,7 @@ namespace fart::exceptions {
 
 		public:
 
-			const char * description() const override {
+			virtual const char* description() const override {
 				return "Could not parse duration";
 			}
 
@@ -314,7 +316,7 @@ namespace fart::exceptions {
 			UrlDecodingException(uint8_t chr) : _character(chr) {};
 			UrlDecodingException(const UrlDecodingException& other) : _character(other._character) {}
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Cannot decode character.";
 			}
 
@@ -326,7 +328,7 @@ namespace fart::exceptions {
 
 		class DataIncompleteException : public Exception {
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Data is incomplete.";
 			}
 
@@ -334,7 +336,7 @@ namespace fart::exceptions {
 
 		class DataMalformedException : public Exception {
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Data is malformed.";
 			}
 
@@ -342,7 +344,7 @@ namespace fart::exceptions {
 
 		class MethodNotSupportedException : public Exception {
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Method is not supported.";
 			}
 
@@ -350,7 +352,7 @@ namespace fart::exceptions {
 
 		class VersionNotSupportedException : public Exception {
 
-			virtual const char* description() const {
+			virtual const char* description() const override {
 				return "Version is not supported.";
 			}
 
