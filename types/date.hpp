@@ -340,8 +340,10 @@ namespace fart::types {
 
 		virtual uint64_t hash() const override {
 			return this->_mutex.lockedValue([this](){
-				double hash = this->_time.seconds();
-				return *((uint64_t*)&hash);
+				double seconds = this->_time.seconds();
+				uint64_t hash;
+				memcpy(&hash, &seconds, sizeof(uint64_t));
+				return hash;
 			});
 		}
 

@@ -38,6 +38,8 @@ namespace fart::types {
 					return (T)number.as<Number<double>>().value();
 				case Subtype::boolean:
 					return (T)(number.as<Number<bool>>().value() != 0);
+				default:
+					throw TypeConversionException();
 			}
 		}
 

@@ -343,6 +343,7 @@ namespace fart::types {
 				switch (_comparison) {
 					case Comparison::ComparisonCaseInsensitive:
 						if (value >= 'A' && value <= 'Z') return value - ('A' - 'a');
+						return value;
 					default:
 						return value;
 				}
