@@ -84,7 +84,7 @@ namespace fart::web {
 				size_t length;
 
 				try { length = _headers["content-length"]->doubleValue(); }
-				catch (DecoderException) { throw DataMalformedException(); }
+				catch (const DecoderException) { throw DataMalformedException(); }
 
 				if (parts->count() < 2) throw DataIncompleteException();
 

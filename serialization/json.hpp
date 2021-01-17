@@ -143,7 +143,7 @@ namespace fart::serialization {
 				value = string.doubleValue(*idx, &consumed, false);
 				(*idx) += consumed;
 				(*character) += consumed;
-			} catch (DecoderException exception) {
+			} catch (const DecoderException exception) {
 				throw JSONMalformedException(*line, *character + exception.characterIndex());
 			}
 
@@ -310,7 +310,7 @@ namespace fart::serialization {
 
 			try {
 				result = _parse(string, &idx, &line, &character, 0);
-			} catch (DecoderException exception) {
+			} catch (const DecoderException exception) {
 				throw JSONMalformedException(line, character + exception.characterIndex());
 			}
 

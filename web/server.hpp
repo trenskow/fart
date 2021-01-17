@@ -59,9 +59,9 @@ namespace fart::web {
 
 			try {
 				request = Strong<Message<Request>>(_backbuffer);
-			} catch (DataIncompleteException) {
+			} catch (const DataIncompleteException) {
 				return;
-			} catch (DataMalformedException) {
+			} catch (const DataMalformedException) {
 				socket.close();
 			}
 

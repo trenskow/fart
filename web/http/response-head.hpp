@@ -28,7 +28,7 @@ namespace fart::web::http {
 		ResponseHead(Data<uint8_t>& data) : Head(data) {
 			_version = parseVersion((*_parts)[0]);
 			try { _status = (Status)(*_parts)[1]->doubleValue(); }
-			catch (DecoderException) { throw DataMalformedException(); }
+			catch (const DecoderException) { throw DataMalformedException(); }
 		}
 
 		ResponseHead(const ResponseHead& other) : _version(other._version), _status(other._status) {}
