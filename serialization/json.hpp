@@ -147,6 +147,8 @@ namespace fart::serialization {
 				throw JSONMalformedException(*line, *character + exception.characterIndex());
 			}
 
+			if (round(value) == value) return Strong<Integer>(value).as<Type>();
+
 			return Strong<Float>(value).as<Type>();
 
 		}

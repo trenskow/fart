@@ -297,7 +297,7 @@ namespace fart::types {
 					}
 				}
 			}
-			return result;
+			return result->unique(comparer);
 		}
 
 		Strong<Array<T>> nonUnique() const {
