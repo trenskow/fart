@@ -21,10 +21,6 @@ namespace fart::types {
 		integer
 	};
 
-	class Boolean;
-	class Float;
-	class Integer;
-
 	template<typename T>
 	class Number : public Type {
 
@@ -37,11 +33,11 @@ namespace fart::types {
 		static T getValue(const Number<T>& number) {
 			switch (number.subType()) {
 				case Subtype::integer:
-					return (T)number.as<Integer>().value();
+					return (T)number.as<Number<int64_t>>().value();
 				case Subtype::floatingPoint:
-					return (T)number.as<Float>().value();
+					return (T)number.as<Number<double>>().value();
 				case Subtype::boolean:
-					return (T)(number.as<Boolean>().value() != 0);
+					return (T)(number.as<Number<bool>>().value() != 0);
 			}
 		}
 
