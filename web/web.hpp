@@ -6,6 +6,9 @@
 //  Copyright © 2019 Kristian Trenskow. All rights reserved.
 //
 
+#ifndef FART_NO_IO
+#ifndef FART_NO_SOCKETS
+#ifndef FART_NO_WEB
 #ifndef web_hpp
 #define web_hpp
 
@@ -14,3 +17,7 @@
 #include "./http/http.hpp"
 
 #endif /* web_hpp */
+#endif /* FART_NO_WEB */
+#endif /* FART_NO_SOCKETS */
+#endif /* FART_NO_WEB */
+

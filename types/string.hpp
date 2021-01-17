@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "../system/endian.hpp"
 #include "../memory/strong.hpp"

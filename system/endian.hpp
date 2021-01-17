@@ -11,8 +11,6 @@
 
 #include <stdint.h>
 
-static uint32_t _endianTest = 0x00000001;
-
 namespace fart::system {
 
 	class Endian {
