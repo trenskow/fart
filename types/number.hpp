@@ -21,12 +21,9 @@ namespace fart::types {
 		integer
 	};
 
-	template<typename T>
-	class Number;
-
-	typedef Number<bool> Boolean;
-	typedef Number<double> Float;
-	typedef Number<int64_t> Integer;
+	class Boolean;
+	class Float;
+	class Integer;
 
 	template<typename T>
 	class Number : public Type {
@@ -120,6 +117,29 @@ namespace fart::types {
 		operator T() {
 			return value();
 		}
+
+	};
+
+	class Boolean: public Number<bool> {
+
+	public:
+		Boolean(const bool value) : Number(value, Subtype::boolean) {}
+		virtual ~Boolean() {}
+	};
+
+	class Float: public Number<double> {
+
+	public:
+		Float(const double value) : Number(value, Subtype::floatingPoint) {}
+		virtual ~Float() {}
+
+	};
+
+	class Integer: public Number<int64_t> {
+
+	public:
+		Integer(const int64_t value) : Number(value, Subtype::integer) {}
+		virtual ~Integer() {}
 
 	};
 
