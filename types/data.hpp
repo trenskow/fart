@@ -21,7 +21,7 @@
 
 using namespace fart::memory;
 using namespace fart::exceptions::types;
-using namespace fart::tools::math;
+using namespace fart::tools;
 
 namespace fart::types {
 
@@ -202,7 +202,7 @@ namespace fart::types {
 			return itemAtIndex(index);
 		}
 
-		ssize_t indexOf(const Data<T>& other, const size_t offset = 0) const {
+		size_t indexOf(const Data<T>& other, const size_t offset = 0) const {
 			return _mutex.lockedValue([this,other,offset]() {
 				for (size_t hidx = offset ; hidx < this->_count ; hidx++) {
 					bool found = true;
@@ -212,13 +212,13 @@ namespace fart::types {
 							break;
 						}
 					}
-					if (found) return (ssize_t)hidx;
+					if (found) return hidx;
 				}
-				return (ssize_t)-1;
+				return NotFound;
 			});
 		}
 
-		ssize_t indexOf(const T other, const size_t offset = 0) const {
+		size_t indexOf(const T other, const size_t offset = 0) const {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
@@ -230,11 +230,9 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Data<T>> subdata(const size_t offset, const ssize_t length = -1) const {
+		Strong<Data<T>> subdata(const size_t offset, const size_t length = NotFound) const {
 			return _mutex.lockedValue([this,offset,length]{
-				ssize_t l = length;
-				if (l < 0) l = _count - offset;
-				return Strong<Data<T>>(&_store[offset], l);
+				return Strong<Data<T>>(&_store[offset], math::min(_count - offset, length));
 			});
 		}
 
@@ -270,19 +268,20 @@ namespace fart::types {
 
 		size_t copy(void* bytes, size_t count, size_t offset = 0) {
 			return _mutex.lockedValue([this,bytes,&count,&offset](){
-				ssize_t toCopy = tools::math::max<ssize_t>(0, tools::math::min<ssize_t>(count, (ssize_t)_count - (ssize_t)offset));
+				if (offset > _count) return 0;
+				count = math::min(count, _count - offset);
 				memcpy(bytes, _store, sizeof(T) * count);
-				return toCopy;
+				return count;
 			});
 		}
 
 		Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return _mutex.lockedValue([this,separators,&includeSeparator,max]() {
 				Strong<Array<Data<T>>> result;
-				ssize_t idx = 0;
+				size_t idx = 0;
 				while (result->count() < max - 1) {
 					if (!separators.some([this,&idx,&result,&includeSeparator](const Data<T>& separator) {
-						ssize_t next;
+						size_t next;
 						switch (includeSeparator) {
 							case IncludeSeparator::none:
 							case IncludeSeparator::suffix:
@@ -293,7 +292,7 @@ namespace fart::types {
 								next = indexOf(separator, idx + separator.count());
 								break;
 						}
-						if (next == -1) return false;
+						if (next == NotFound) return false;
 						switch (includeSeparator) {
 							case IncludeSeparator::none:
 							case IncludeSeparator::prefix:

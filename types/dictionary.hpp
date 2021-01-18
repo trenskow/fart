@@ -32,8 +32,8 @@ namespace fart::types {
 		virtual ~Dictionary() {}
 
 		void set(const Key& key, const Value& value) {
-			ssize_t index = _keys.indexOf(key);
-			if (index > -1) {
+			size_t index = _keys.indexOf(key);
+			if (index != NotFound) {
 				_keys.replace(key, index);
 				_values.replace(value, index);
 			} else {
@@ -51,12 +51,12 @@ namespace fart::types {
 		}
 
 		bool hasKey(const Key& key) const {
-			return _keys.indexOf(key) > -1;
+			return _keys.indexOf(key) != NotFound;
 		}
 
 		Strong<Value> get(const Key& key) const noexcept(false) {
-			ssize_t keyIndex = _keys.indexOf(key);
-			if (keyIndex == -1) {
+			size_t keyIndex = _keys.indexOf(key);
+			if (keyIndex == NotFound) {
 				throw KeyNotFoundException<Key>(key);
 			}
 			return _values[keyIndex];

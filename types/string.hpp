@@ -203,14 +203,14 @@ namespace fart::types {
 			bool integerMultiplierParsed = false;
 			bool integerHadLeadingZero = false;
 			bool integerHadDigits = false;
-			ssize_t integerStartIndex = -1;
+			size_t integerStartIndex = NotFound;
 			double fractionMultiplier = 10;
 			bool fractionHadDigits = false;
-			ssize_t fractionStartIndex = -1;
+			size_t fractionStartIndex = NotFound;
 			double exponentMultiplier = 1;
 			bool exponentMultiplierParsed = false;
 			bool exponentHadDigits = false;
-			ssize_t exponentStartIndex = -1;
+			size_t exponentStartIndex = NotFound;
 
 			double integer = 0;
 			double fraction = 0;
@@ -223,11 +223,11 @@ namespace fart::types {
 
 				if (chr == '+' || chr == '-') {
 
-					if (fractionStartIndex != -1 && exponentStartIndex == -1) throw DecoderException(idx);
-					if (exponentStartIndex == -1 && integerMultiplierParsed) throw DecoderException(idx);
-					if (exponentStartIndex != -1 && exponentMultiplierParsed) throw DecoderException(idx);
+					if (fractionStartIndex != NotFound && exponentStartIndex == NotFound) throw DecoderException(idx);
+					if (exponentStartIndex == NotFound && integerMultiplierParsed) throw DecoderException(idx);
+					if (exponentStartIndex != NotFound && exponentMultiplierParsed) throw DecoderException(idx);
 
-					if (exponentStartIndex != -1) {
+					if (exponentStartIndex != NotFound) {
 						if (exponentHadDigits) throw DecoderException(idx);
 						exponentMultiplier = chr == '+' ? 1 : -1;
 						exponentMultiplierParsed = true;
@@ -242,19 +242,19 @@ namespace fart::types {
 
 				else if (chr == '.') {
 					if (!integerHadDigits) throw DecoderException(idx);
-					if (exponentStartIndex != -1 || fractionStartIndex != -1) throw DecoderException(idx);
+					if (exponentStartIndex != NotFound || fractionStartIndex != NotFound) throw DecoderException(idx);
 					fractionStartIndex = idx;
 				}
 
 				else if (chr == 'e' || chr == 'E') {
-					if (exponentStartIndex != -1) throw DecoderException(idx);
+					if (exponentStartIndex != NotFound) throw DecoderException(idx);
 					exponentStartIndex = idx;
 				}
 
 				else if (chr >= '0' && chr <= '9') {
 
-					if (exponentStartIndex != -1 && !exponentHadDigits) exponentHadDigits = true;
-					else if (fractionStartIndex != -1 && !fractionHadDigits) fractionHadDigits = true;
+					if (exponentStartIndex != NotFound && !exponentHadDigits) exponentHadDigits = true;
+					else if (fractionStartIndex != NotFound && !fractionHadDigits) fractionHadDigits = true;
 					else if (!integerHadDigits) {
 						integerHadDigits = true;
 						integerHadLeadingZero = chr == '0';
@@ -262,9 +262,9 @@ namespace fart::types {
 
 					double value = chr - '0';
 
-					if (exponentStartIndex != -1) {
+					if (exponentStartIndex != NotFound) {
 						exponent = exponent * 10 + value;
-					} else if (fractionStartIndex != -1) {
+					} else if (fractionStartIndex != NotFound) {
 						fraction = fraction + (value / fractionMultiplier);
 						fractionMultiplier *= 10;
 					} else {
@@ -281,8 +281,8 @@ namespace fart::types {
 
 			if (consumed != nullptr) *consumed = idx - startIndex;
 
-			if (exponentStartIndex != -1 && !exponentHadDigits) throw DecoderException(exponentStartIndex);
-			if (fractionStartIndex != -1 && !fractionHadDigits) throw DecoderException(fractionStartIndex);
+			if (exponentStartIndex != NotFound && !exponentHadDigits) throw DecoderException(exponentStartIndex);
+			if (fractionStartIndex != NotFound && !fractionHadDigits) throw DecoderException(fractionStartIndex);
 			if (!integerHadDigits) throw DecoderException(startIndex);
 
 			double result = ((integer * integerMultiplier) + fraction) * (pow(10, exponent) * exponentMultiplier);
@@ -293,15 +293,15 @@ namespace fart::types {
 
 		}
 
-		ssize_t indexOf(const String& other, size_t offset = 0) const {
+		size_t indexOf(const String& other, size_t offset = 0) const {
 			return this->_store.indexOf(other._store, offset);
 		}
 
-		ssize_t indexOf(const uint32_t chr) const {
+		size_t indexOf(const uint32_t chr) const {
 			return this->_store.indexOf(chr);
 		}
 
-		Strong<String> substring(size_t offset, ssize_t length = -1) const {
+		Strong<String> substring(size_t offset, size_t length = NotFound) const {
 			return Strong<String>(_store.subdata(offset, length));
 		}
 

@@ -14,11 +14,15 @@
 #include "../memory/object.hpp"
 #include "./hashable.hpp"
 #include "../exceptions/exception.hpp"
+#include "../tools/math.hpp"
 
 using namespace fart::memory;
 using namespace fart::exceptions::types;
+using namespace fart::tools;
 
 namespace fart::types {
+
+	static const size_t NotFound = math::limit<size_t>();
 
 	class Type : public Object, public Hashable {
 

@@ -54,8 +54,8 @@ namespace fart::types {
 			size_t sortedIdx = 0;
 			while (sortedIdx < array.count() - 1) {
 				sortedIdx++;
-				for (ssize_t idx = sortedIdx - 1 ; idx >= 0 ; idx--) {
-					if (comparer((T&)array[idx], (T&)array[idx + 1])) array.swapItemAtIndexes(idx + 1, idx);
+				for (size_t idx = sortedIdx ; idx > 0 ; idx--) {
+					if (comparer((T&)array[idx - 1], (T&)array[idx])) array.swapItemAtIndexes(idx, idx);
 				}
 			}
 		}
@@ -137,8 +137,8 @@ namespace fart::types {
 		}
 
 		void removeItem(TesterIndex test) noexcept(false) {
-			ssize_t idx = indexOf(test);
-			if (idx == -1) throw NotFoundException<T>();
+			size_t idx = indexOf(test);
+			if (idx == NotFound) throw NotFoundException<T>();
 			removeItemAtIndex(idx);
 		}
 
@@ -160,35 +160,35 @@ namespace fart::types {
 			_storage.replace(heapItem, index)->release();
 		}
 
-		ssize_t indexOf(TesterIndex test) const {
+		size_t indexOf(TesterIndex test) const {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
 				if (test(*_storage[idx], idx)) return idx;
 			}
-			return -1;
+			return NotFound;
 		}
 
-		ssize_t indexOf(Tester test) const {
+		size_t indexOf(Tester test) const {
 			return indexOf([&test](T& item, const size_t idx) {
 				return test(item);
 			});
 		}
 
-		ssize_t indexOf(const T& item) const {
+		size_t indexOf(const T& item) const {
 			return indexOf([&item](const T& stored) {
 				return stored == item;
 			});
 		}
 
 		bool contains(TesterIndex test) const {
-			return indexOf(test) > -1;
+			return indexOf(test) != NotFound;
 		}
 
 		bool contains(Tester test) const {
-			return indexOf(test) > -1;
+			return indexOf(test) != NotFound;
 		}
 
 		bool contains(const T& item) const {
-			return indexOf(item) > -1;
+			return indexOf(item) != NotFound;
 		}
 
 		void forEach(function<void(T& value)> todo) const {

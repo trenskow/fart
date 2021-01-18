@@ -204,9 +204,15 @@ namespace fart::serialization {
 								stringBytes.append('/');
 								break;
 							case 'u': {
-								_ensureLength(string, idx, 4, *line, *character);
+								_ensureLength(string, idx, 5, *line, *character);
 								String code = string.substring(*idx + 1, 4);
-								stringBytes.append(Endian::toSystemVariant(code.hexData()->as<uint16_t>()->itemAtIndex(0), Endian::Variant::big));
+								try {
+									stringBytes.append(Endian::toSystemVariant(code.hexData()->as<uint16_t>()->itemAtIndex(0), Endian::Variant::big));
+								} catch (DecoderException&) {
+									throw JSONMalformedException(*line, *character);
+								} catch (OutOfBoundException&) {
+									throw JSONMalformedException(*line, *character);
+								}
 								(*idx) += 4;
 								(*character) += 4;
 								break;
