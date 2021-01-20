@@ -405,8 +405,9 @@ namespace fart::types {
 			});
 		}
 
-		bool some(TesterIndex test) const {
-			return this->_mutex.lockedValue([&test,this]() {
+		bool some(TesterIndex test, bool def = false) const {
+			return this->_mutex.lockedValue([&test,&def,this]() {
+				if (this->_count == 0) return def;
 				for (size_t idx = 0 ; idx < this->_count ; idx++) {
 					if (test(this->_store[idx], idx)) return true;
 				}
@@ -414,10 +415,10 @@ namespace fart::types {
 			});
 		}
 
-		bool some(Tester test) const {
+		bool some(Tester test, bool def = false) const {
 			return some([&test](T item, const size_t idx) {
 				return test(item);
-			});
+			}, def);
 		}
 
 		bool every(TesterIndex test, bool def = true) const {
@@ -432,7 +433,7 @@ namespace fart::types {
 		bool every(Tester test, bool def = true) const {
 			return every([&test](T item, const size_t idx) {
 				return test(item);
-			});
+			}, def);
 		}
 
 		virtual uint64_t hash() const override {
@@ -466,11 +467,13 @@ namespace fart::types {
 			});
 		}
 
-		void operator=(const Data<T>& other) {
+		Data& operator=(const Data<T>& other) {
+			Type::operator=(other);
 			_mutex.locked([this,other]() {
 				_count = 0;
 				append(other);
 			});
+			return *this;
 		}
 
 		void setComparitor(Comparitor& comparitor) {

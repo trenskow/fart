@@ -45,6 +45,10 @@ namespace fart::types {
 			throw NotImplementedException();
 		};
 
+		Hashable& operator=(const Hashable& other) {
+			return *this;
+		}
+
 	};
 
 }

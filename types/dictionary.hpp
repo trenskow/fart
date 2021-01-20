@@ -42,6 +42,13 @@ namespace fart::types {
 			}
 		}
 
+		void remove(const Key& key) {
+			size_t index = _keys.indexOf(key);
+			if (index == NotFound) throw KeyNotFoundException<Key>(key);
+			_keys.removeItemAtIndex(index);
+			_values.removeItemAtIndex(index);
+		}
+
 		Strong<Array<Key>> keys() const {
 			return _keys;
 		}
@@ -148,6 +155,13 @@ namespace fart::types {
 				}
 			}
 			return true;
+		}
+
+		Dictionary<Key, Value>& operator=(const Dictionary<Key, Value>& other) {
+			Type::operator=(other);
+			_keys = other._keys;
+			_values = other._values;
+			return *this;
 		}
 
 	};

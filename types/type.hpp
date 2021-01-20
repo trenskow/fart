@@ -35,12 +35,17 @@ namespace fart::types {
 			array,
 			dictionary,
 			date,
-			keyValuePair,
 			null
 		};
 
 		virtual Kind kind() const {
 			throw NotImplementedException();
+		}
+
+		Type& operator=(const Type& other) {
+			Object::operator=(other);
+			Hashable::operator=(other);
+			return *this;
 		}
 
 		virtual bool operator==(const Type& other) const {

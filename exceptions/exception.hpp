@@ -273,7 +273,6 @@ namespace fart::exceptions {
 
 		};
 
-		template<class T>
 		class NotFoundException : public Exception {
 
 		public:

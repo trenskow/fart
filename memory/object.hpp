@@ -96,17 +96,20 @@ namespace fart::memory {
 		}
 
 		void release() const {
-			bool destroy = _mutex.lockedValue([this]() {
+			if (_mutex.lockedValue([this]() {
 				this->_retainCount--;
 				return (this->_retainCount == 0);
-			});
-			if (destroy) delete this;
+			})) delete this;
 		}
 
 		size_t retainCount() const {
 			return _mutex.lockedValue([this]() {
 				return this->_retainCount;
 			});
+		}
+
+		Object& operator=(const Object&) {
+			return *this;
 		}
 
 	};

@@ -81,6 +81,12 @@ namespace fart::types {
 			_quickSort(array, offset + pivot + 1, count - (pivot + 1), comparer);
 		}
 
+		void _setHashDirty() const {
+			_hashMutex.locked([this]() {
+				_hashIsDirty = true;
+			});
+		}
+
 	public:
 
 		Array() : _hash(0), _hashIsDirty(true) {}
@@ -124,21 +130,17 @@ namespace fart::types {
 			Strong<T> heapItem = (T*)&item;
 			heapItem->retain();
 			_storage.append(heapItem);
-			_hashMutex.locked([this]() {
-				_hashIsDirty = true;
-			});
+			_setHashDirty();
 		}
 
 		void removeItemAtIndex(size_t index) noexcept(false) {
 			_storage.removeItemAtIndex(index)->release();
-			_hashMutex.locked([this]() {
-				_hashIsDirty = true;
-			});
+			_setHashDirty();
 		}
 
 		void removeItem(TesterIndex test) noexcept(false) {
 			size_t idx = indexOf(test);
-			if (idx == NotFound) throw NotFoundException<T>();
+			if (idx == NotFound) throw NotFoundException();
 			removeItemAtIndex(idx);
 		}
 
@@ -231,28 +233,28 @@ namespace fart::types {
 			});
 		}
 
-		bool some(TesterIndex test) const {
+		bool some(TesterIndex test, bool def = false) const {
 			return this->_storage.some([&test](T* item, const size_t idx) {
 				return test(*item, idx);
-			});
+			}, def);
 		}
 
-		bool some(Tester test) const {
+		bool some(Tester test, bool def = false) const {
 			return some([&test](T& item, const size_t idx) {
 				return test(item);
-			});
+			}, def);
 		}
 
-		bool every(TesterIndex test) const {
+		bool every(TesterIndex test, bool def = true) const {
 			return this->_storage.every([&test](T* item, const size_t idx) {
 				return test(*item, idx);
-			});
+			}, def);
 		}
 
-		bool every(Tester test) const {
+		bool every(Tester test, bool def = true) const {
 			return every([&test](T& item, const size_t idx) {
 				return test(item);
-			});
+			}, def);
 		}
 
 		bool are(Type::Kind kind) const {
@@ -328,9 +330,7 @@ namespace fart::types {
 			Strong<T> heapItem = item;
 			heapItem->retain();
 			_storage.insertItemAtIndex(heapItem, dstIndex);
-			_hashMutex.locked([this]() {
-				_hashIsDirty = true;
-			});
+			_setHashDirty();
 		}
 
 		void sort(Comparer comparer) {
@@ -366,6 +366,21 @@ namespace fart::types {
 				if (*_storage[idx] != *other[idx]) return false;
 			}
 			return true;
+		}
+
+		Array<T>& operator=(const Array<T>& other) {
+			Type::operator=(other);
+			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
+				_storage[idx]->release();
+			}
+			_storage.drain();
+			for (size_t idx = 0 ; idx < other._storage.count() ; idx++) {
+				other._storage[idx]->retain();
+				_storage.append(other._storage[idx]);
+			}
+			_hash = other._hash;
+			_hashIsDirty = other._hashIsDirty;
+			return *this;
 		}
 
 	};

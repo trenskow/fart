@@ -326,9 +326,10 @@ namespace fart::types {
 			return _store[idx];
 		}
 
-		void operator=(const String& other) {
-			_store.drain();
-			_store.append(other._store);
+		String& operator=(const String& other) {
+			Type::operator=(other);
+			_store = other._store;
+			return *this;
 		}
 
 	private:

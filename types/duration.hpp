@@ -101,7 +101,6 @@ namespace fart::types {
 
 		Duration(): _seconds(0) {}
 		Duration(double duration) : _seconds(duration) {}
-		Duration(const Duration& other) : _seconds(other._seconds) {}
 
 		~Duration() {};
 
