@@ -299,7 +299,7 @@ namespace fart::types {
 					}
 				}
 			}
-			if (!flatten) return;
+			if (!flatten) return result;
 			return result->unique(comparer);
 		}
 
