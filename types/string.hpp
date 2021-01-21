@@ -54,7 +54,7 @@ namespace fart::types {
 			_store.append(_decodeUTF16(data.items(), data.count(), endian));
 		}
 
-		String(const Data<uint16_t>& data) noexcept(false) {
+		String(const Data<uint16_t>& data) noexcept(false) : Type() {
 			Strong<Data<uint16_t>> parseData(data);
 			Endian::Variant endian = Endian::Variant::big;
 			if (data.count() > 1) {

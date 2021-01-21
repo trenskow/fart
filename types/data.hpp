@@ -68,7 +68,7 @@ namespace fart::types {
 			return Strong<Data<T>>((T*)buffer, length);
 		}
 
-		Data(const T* items, size_t count) : _store(nullptr), _count(0), _storeCount(0), _hash(0), _hashIsDirty(true) {
+		Data(const T* items, size_t count) : Type(), _store(nullptr), _count(0), _storeCount(0), _hash(0), _hashIsDirty(true) {
 			append(items, count);
 		}
 

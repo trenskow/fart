@@ -28,7 +28,7 @@ namespace fart::types {
 
 	public:
 		Dictionary() {}
-		Dictionary(const Dictionary<Key,Value>& other) : _keys(other._keys), _values(other._values) {}
+		Dictionary(const Dictionary<Key,Value>& other) : Type(other), _keys(other._keys), _values(other._values) {}
 		virtual ~Dictionary() {}
 
 		void set(const Key& key, const Value& value) {

@@ -38,6 +38,9 @@ namespace fart::types {
 			null
 		};
 
+		Type() : Object(), Hashable() { }
+		Type(const Type& other) : Object(other), Hashable(other) { }
+
 		virtual Kind kind() const {
 			throw NotImplementedException();
 		}

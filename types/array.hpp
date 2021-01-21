@@ -89,7 +89,7 @@ namespace fart::types {
 
 	public:
 
-		Array() : _hash(0), _hashIsDirty(true) {}
+		Array() : Type(), _hash(0), _hashIsDirty(true) {}
 
 		Array(const Array<T>& other) : Array(other._storage) {}
 

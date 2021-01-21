@@ -135,6 +135,8 @@ namespace fart::types {
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 		}
 
+		Date(const Date& other) : Type(other), _time(other._time), _timeZone(other._timeZone) { }
+
 		Date() : _timeZone(TimeZone::utc) {
 			_time = Duration::fromSeconds(::time(nullptr));
 		}
@@ -385,6 +387,13 @@ namespace fart::types {
 
 		bool operator<(const Date& other) const {
 			return this->to(TimeZone::utc)->seconds() < other.to(TimeZone::utc)->seconds();
+		}
+
+		Date& operator=(const Date& other) {
+			Type::operator=(other);
+			this->_time = other._time;
+			this->_timeZone = other._timeZone;
+			return *this;
 		}
 
 	};

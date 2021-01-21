@@ -70,7 +70,7 @@ namespace fart::types {
 		Number(const Number<T>& other, const Subtype subType = Subtype::integer) : Number(other._value, subType) {}
 
 		template<typename N>
-		Number(const Number<N>& other) : _subtype(other.subType()), _value(other.value()) {}
+		Number(const Number<N>& other) : Type(), _subtype(other.subType()), _value(other.value()) {}
 
 		virtual ~Number() {}
 
