@@ -286,7 +286,7 @@ namespace fart::types {
 		}
 
 		Strong<Array<T>> unique() const {
-			return this->unique([](T& item1, T& item2) { return item1 == item2; });
+			return this->unique([](const T& item1, const T& item2) { return item1 == item2; });
 		}
 
 		Strong<Array<T>> nonUnique(Comparer comparer) const {
