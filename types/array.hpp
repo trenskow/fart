@@ -289,22 +289,16 @@ namespace fart::types {
 			return this->unique([](T& item1, T& item2) { return item1 == item2; });
 		}
 
-		Strong<Array<T>> nonUnique(Comparer comparer, bool flatten) const {
-			Strong<Array<T>> result;
-			for (size_t idx1 = 0 ; idx1 < count() ; idx1++) {
-				for (size_t idx2 = idx1 + 1 ; idx2 < count() ; idx2++) {
-					if (comparer(*_storage[idx1], *_storage[idx2])) {
-						result->append(*_storage[idx1]);
-						break;
-					}
-				}
-			}
-			if (!flatten) return result;
-			return result->unique(comparer);
+		Strong<Array<T>> nonUnique(Comparer comparer) const {
+			return this->filter([this,&comparer](T& item1) {
+				return this->filter([&comparer,&item1](T& item2) {
+					return comparer(item1, item2);
+				})->count() > 1;
+			});
 		}
 
-		Strong<Array<T>> nonUnique(bool flatten) const {
-			return nonUnique([](const T& item1, const T& item2) { return item1 == item2; }, flatten);
+		Strong<Array<T>> nonUnique() const {
+			return nonUnique([](const T& item1, const T& item2) { return item1 == item2; });
 		}
 
 		void randomize() {
