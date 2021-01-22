@@ -36,23 +36,23 @@ namespace fart::threading {
 			pthread_mutexattr_destroy(&_attr);
 		}
 
-		void lock() const {
+		inline void lock() const {
 			pthread_mutex_lock(&_mutex);
 		}
 
-		void unlock() const {
+		inline void unlock() const {
 			pthread_mutex_unlock(&_mutex);
 		}
 
 		template<typename Func>
-		void locked(Func f) const {
+		inline void locked(Func f) const {
 			lock();
 			f();
 			unlock();
 		}
 
 		template<typename Func>
-		auto lockedValue(Func f) const {
+		inline auto lockedValue(Func f) const {
 			lock();
 			auto ret = f();
 			unlock();

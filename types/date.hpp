@@ -13,7 +13,6 @@
 #include <time.h>
 
 #include "../exceptions/exception.hpp"
-#include "../threading/mutex.hpp"
 #include "type.hpp"
 #include "duration.hpp"
 #include "string.hpp"
@@ -62,8 +61,6 @@ namespace fart::types {
 
 		Duration _time;
 		TimeZone _timeZone;
-
-		mutable Mutex _mutex;
 
 		static uint16_t daysInMonth(Month month, bool isLeapYear = false) {
 			switch (month) {
@@ -231,41 +228,31 @@ namespace fart::types {
 		virtual ~Date() {}
 
 		int64_t year() const {
-			return this->_mutex.lockedValue([this](){
-				int64_t year;
-				_components(this->_time.days(), &year, nullptr, nullptr);
-				return year;
-			});
+			int64_t year;
+			_components(this->_time.days(), &year, nullptr, nullptr);
+			return year;
 		}
 
 		Month month() const {
-			return this->_mutex.lockedValue([this](){
-				uint8_t month;
-				_components(this->_time.days(), nullptr, &month, nullptr);
-				return Month(month);
-			});
+			uint8_t month;
+			_components(this->_time.days(), nullptr, &month, nullptr);
+			return Month(month);
 		}
 
 		int16_t day() const {
-			return this->_mutex.lockedValue([this](){
-				uint8_t day;
-				_components(this->_time.days(), nullptr, nullptr, &day);
-				return day;
-			});
+			uint8_t day;
+			_components(this->_time.days(), nullptr, nullptr, &day);
+			return day;
 		}
 
 		Weekday weekday() const {
-			return this->_mutex.lockedValue([this](){
-				return static_cast<Weekday>(((int64_t)this->_time.days() + static_cast<int64_t>(_epochWeekday)) % daysInWeek);
-			});
+			return static_cast<Weekday>(((int64_t)this->_time.days() + static_cast<int64_t>(_epochWeekday)) % daysInWeek);
 		}
 
 		const Duration durationSinceMidnight() const {
-			return this->_mutex.lockedValue([this](){
-				auto seconds = this->_time.seconds();
-				double daysSeconds = floor(this->_time.days()) * Duration::day();
-				return Duration(seconds - daysSeconds);
-			});
+			auto seconds = this->_time.seconds();
+			double daysSeconds = floor(this->_time.days()) * Duration::day();
+			return Duration(seconds - daysSeconds);
 		}
 
 		bool isLeapYear() {
@@ -285,15 +272,11 @@ namespace fart::types {
 		}
 
 		uint32_t microseconds() const {
-			return this->_mutex.lockedValue([this](){
-				return (this->_time.seconds() - floor(this->_time.seconds())) * 1000000;
-			});
+			return (this->_time.seconds() - floor(this->_time.seconds())) * 1000000;
 		}
 
 		const Duration durationSinceEpoch() const {
-			return this->_mutex.lockedValue([this](){
-				return this->_time;
-			});
+			return this->_time;
 		}
 
 		template<class T = Strong<Duration>>
@@ -302,38 +285,34 @@ namespace fart::types {
 		}
 
 		Strong<Date> to(TimeZone timeZone) const {
-			return this->_mutex.lockedValue([this,&timeZone](){
-				if (this->_timeZone == timeZone) return Strong<Date>(*this);
-				if (timeZone == TimeZone::local) return Strong<Date>(this->_time + _localOffset(), TimeZone::local);
-				return Strong<Date>(this->_time - _localOffset(), TimeZone::utc);
-			});
+			if (this->_timeZone == timeZone) return Strong<Date>(*this);
+			if (timeZone == TimeZone::local) return Strong<Date>(this->_time + _localOffset(), TimeZone::local);
+			return Strong<Date>(this->_time - _localOffset(), TimeZone::utc);
 		}
 
 		Strong<String> toISO8601() const {
-			return this->_mutex.lockedValue([this](){
-				Strong<String> ret;
-				ret->append(String::format("%02lld-%02d-%02dT%02d:%02d:%02d",
-										   this->year(),
-										   this->month(),
-										   this->day(),
-										   this->hours(),
-										   this->minutes(),
-										   this->seconds()));
-				auto microseconds = this->microseconds();
-				if (microseconds != 0) {
-					ret->append(String::format(".%llu", microseconds));
+			Strong<String> ret;
+			ret->append(String::format("%02lld-%02d-%02dT%02d:%02d:%02d",
+									   this->year(),
+									   this->month(),
+									   this->day(),
+									   this->hours(),
+									   this->minutes(),
+									   this->seconds()));
+			auto microseconds = this->microseconds();
+			if (microseconds != 0) {
+				ret->append(String::format(".%llu", microseconds));
+			}
+			switch (this->_timeZone) {
+				case TimeZone::utc:
+					ret->append("Z");
+					break;
+				case TimeZone::local: {
+					ret->append(_localOffset().toString(Duration::ToStringOptions::prefixPositive));
+					break;
 				}
-				switch (this->_timeZone) {
-					case TimeZone::utc:
-						ret->append("Z");
-						break;
-					case TimeZone::local: {
-						ret->append(_localOffset().toString(Duration::ToStringOptions::prefixPositive));
-						break;
-					}
-				}
-				return ret;
-			});
+			}
+			return ret;
 		}
 
 		virtual Kind kind() const override {
@@ -341,12 +320,10 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return this->_mutex.lockedValue([this](){
-				double seconds = this->_time.seconds();
-				uint64_t hash;
-				memcpy(&hash, &seconds, sizeof(uint64_t));
-				return hash;
-			});
+			double seconds = this->_time.seconds();
+			uint64_t hash;
+			memcpy(&hash, &seconds, sizeof(uint64_t));
+			return hash;
 		}
 
 		Strong<Date> operator+(const Duration& duration) const {
@@ -362,15 +339,11 @@ namespace fart::types {
 		}
 
 		void operator+=(const Duration& duration) {
-			this->_mutex.locked([this,&duration](){
-				_time += duration;
-			});
+			_time += duration;
 		}
 
 		void operator-=(const Duration& duration) {
-			this->_mutex.locked([this,&duration](){
-				_time -= duration;
-			});
+			_time -= duration;
 		}
 
 		bool operator==(const Date& other) const {

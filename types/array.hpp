@@ -11,12 +11,10 @@
 
 #include <type_traits>
 
-#include "../threading/mutex.hpp"
 #include "../memory/strong.hpp"
 #include "./type.hpp"
 
 using namespace fart::memory;
-using namespace fart::threading;
 using namespace fart::exceptions::types;
 
 namespace fart::types {
@@ -48,7 +46,6 @@ namespace fart::types {
 		Data<T*> _storage;
 		mutable uint64_t _hash;
 		mutable bool _hashIsDirty;
-		Mutex _hashMutex;
 
 		static void _insertionSort(Array& array, Comparer comparer) {
 			size_t sortedIdx = 0;
@@ -82,9 +79,7 @@ namespace fart::types {
 		}
 
 		void _setHashDirty() const {
-			_hashMutex.locked([this]() {
-				_hashIsDirty = true;
-			});
+			_hashIsDirty = true;
 		}
 
 	public:
@@ -133,9 +128,21 @@ namespace fart::types {
 			_setHashDirty();
 		}
 
+		Strong<Array<T>> appending(const T& item) const {
+			Strong<Array<T>> result(*this);
+			result->append(item);
+			return result;
+		}
+
 		void removeItemAtIndex(size_t index) noexcept(false) {
 			_storage.removeItemAtIndex(index)->release();
 			_setHashDirty();
+		}
+
+		Strong<Array<T>> removingItemAtIndex(size_t index) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItemAtIndex(index);
+			return result;
 		}
 
 		void removeItem(TesterIndex test) noexcept(false) {
@@ -144,10 +151,22 @@ namespace fart::types {
 			removeItemAtIndex(idx);
 		}
 
+		Strong<Array<T>> removingItem(TesterIndex test) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(test);
+			return result;
+		}
+
 		void removeItem(Tester test) noexcept(false) {
 			return removeItem([&test](T& item, const size_t idx) {
 				return test(item);
 			});
+		}
+
+		Strong<Array<T>> removingItem(Tester test) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(test);
+			return result;
 		}
 
 		void removeItem(const T& item1) noexcept(false) {
@@ -156,10 +175,22 @@ namespace fart::types {
 			});
 		}
 
+		Strong<Array<T>> removingItem(const T& item) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(item);
+			return result;
+		}
+
 		void replace(const T& item, size_t index) noexcept(false) {
 			Strong<T> heapItem = (T*)&item;
 			heapItem->retain();
 			_storage.replace(heapItem, index)->release();
+		}
+
+		Strong<Array<T>> replacing(const T& item, size_t idx) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->replace(item, idx);
+			return result;
 		}
 
 		size_t indexOf(TesterIndex test) const {
@@ -191,6 +222,14 @@ namespace fart::types {
 
 		bool contains(const T& item) const {
 			return indexOf(item) != NotFound;
+		}
+
+		Strong<T> first() const noexcept(false) {
+			return Strong<T>(_storage.first());
+		}
+
+		Strong<T> last() const noexcept(false) {
+			return Strong<T>(_storage.last());
 		}
 
 		void forEach(function<void(T& value)> todo) const {
@@ -338,17 +377,15 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return _hashMutex.lockedValue([this]() {
-				if (_hashIsDirty) {
-					Hashable::Builder builder;
-					for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-						builder.add(_storage[idx]->hash());
-					}
-					_hash = builder;
-					_hashIsDirty = false;
+			if (_hashIsDirty) {
+				Hashable::Builder builder;
+				for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
+					builder.add(_storage[idx]->hash());
 				}
-				return _hash;
-			});
+				_hash = builder;
+				_hashIsDirty = false;
+			}
+			return _hash;
 		}
 
 		virtual Kind kind() const override {
@@ -358,7 +395,7 @@ namespace fart::types {
 		bool operator==(const Array<T>& other) const {
 			if (!Type::operator==(other)) return false;
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-				if (*_storage[idx] != *other[idx]) return false;
+				if (!(*_storage[idx] == *other[idx])) return false;
 			}
 			return true;
 		}
