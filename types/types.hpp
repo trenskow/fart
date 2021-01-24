@@ -19,5 +19,6 @@
 #include "./null.hpp"
 #include "./duration.hpp"
 #include "./date.hpp"
+#include "./couple.hpp"
 
 #endif /* types_hpp */

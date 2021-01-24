@@ -450,7 +450,6 @@ namespace fart::serialization {
 
 			return result;
 
-
 		}
 
 	};

@@ -33,7 +33,7 @@ namespace fart::memory {
 
 	private:
 
-		mutable size_t _retainCount;
+		mutable std::atomic<size_t> _retainCount;
 		mutable void** _weakReferences;
 		mutable size_t _weakReferencesSize;
 		mutable size_t _weakReferencesCount;
@@ -90,22 +90,15 @@ namespace fart::memory {
 		}
 
 		void retain() const {
-			_mutex.locked([this]() {
-				this->_retainCount++;
-			});
+			this->_retainCount++;
 		}
 
 		void release() const {
-			if (_mutex.lockedValue([this]() {
-				this->_retainCount--;
-				return (this->_retainCount == 0);
-			})) delete this;
+			if (--this->_retainCount == 0) delete this;
 		}
 
 		size_t retainCount() const {
-			return _mutex.lockedValue([this]() {
-				return this->_retainCount;
-			});
+			return this->_retainCount;
 		}
 
 		Object& operator=(const Object&) {
