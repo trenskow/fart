@@ -11,6 +11,7 @@
 
 #include <assert.h>
 #include <unistd.h>
+#include <atomic>
 
 #include "../threading/mutex.hpp"
 #include "../exceptions/exception.hpp"
