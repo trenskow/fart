@@ -40,12 +40,6 @@ namespace fart::memory {
 		mutable size_t _weakReferencesCount;
 		mutable Mutex _mutex;
 
-		void *operator new(size_t size) noexcept(false) {
-			void *mem = calloc(size, sizeof(uint8_t));
-			if (!mem) throw AllocationException(size);
-			return mem;
-		}
-
 		void addWeakReference(void* weakReference) const {
 			_mutex.locked([this,weakReference]() {
 				if (_weakReferencesSize < _weakReferencesCount + 1) {
@@ -69,7 +63,17 @@ namespace fart::memory {
 			});
 		}
 
+#ifdef FART_ALLOW_MANUAL_HEAP
+	public:
+#else
 	protected:
+#endif
+
+		void *operator new(size_t size) noexcept(false) {
+			void *mem = calloc(size, sizeof(uint8_t));
+			if (!mem) throw AllocationException(size);
+			return mem;
+		}
 
 		void operator delete(void *ptr) throw() {
 			free(ptr);
