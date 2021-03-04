@@ -36,11 +36,6 @@ namespace fart::types {
 	template<typename T = uint8_t>
 	class Data : public Type {
 
-		template<class A>
-		friend class Array;
-
-		friend class String;
-
 	public:
 
 		typedef function<bool(T item1, T item2)> Comparer;
@@ -67,7 +62,7 @@ namespace fart::types {
 			return Strong<Data<T>>((T*)buffer, length);
 		}
 
-		Data(const T* items, size_t count) : Type(), _store(nullptr), _count(0), _storeCount(0), _hash(0), _hashIsDirty(true) {
+		Data(const T* items, size_t count) : Type(), _store(new Store()) {
 			append(items, count);
 		}
 
@@ -77,20 +72,15 @@ namespace fart::types {
 			this->_ensureStoreSize(capacity);
 		}
 
-		Data(const Data<T>& other) : Data(nullptr, 0) {
-			append(other.items(), other.count());
-		}
+		Data(const Data<T>& other) : _store(other._store->retain()) { }
 
 		virtual ~Data() {
-			if (_store != nullptr) {
-				free(_store);
-				_store = nullptr;
-			}
+            _store = _store->release();
 		}
 
 		void append(const T* items, size_t count) {
 			if (!count) return;
-			this->insertItemsAtIndex(items, count, this->_count);
+			this->insertItemsAtIndex(items, count, this->_store->count);
 		}
 
 		inline void append(T element) {
@@ -102,32 +92,42 @@ namespace fart::types {
 		}
 
 		const T removeItemAtIndex(size_t index) noexcept(false) {
-			if (index >= _count) throw OutOfBoundException(index);
-			T element = _store[index];
-			for (size_t idx = index ; idx < _count - 1 ; idx++) {
-				_store[idx] = _store[idx + 1];
+            
+			if (index >= _store->count) throw OutOfBoundException(index);
+            
+            this->ensureStoreOwnership();
+            
+			T element = _store->pointer[index];
+            
+			for (size_t idx = index ; idx < _store->count - 1 ; idx++) {
+				_store->pointer[idx] = _store->pointer[idx + 1];
 			}
-			_count--;
-			_hashIsDirty = true;
+            
+			_store->count--;
+			_store->hashIsDirty = true;
+            
 			return element;
+            
 		}
 
 		void moveItemAtIndex(size_t srcIndex, size_t dstIndex) noexcept(false) {
 
 			if (srcIndex == dstIndex) return;
 
-			if (srcIndex >= _count) throw OutOfBoundException(srcIndex);
-			if (dstIndex >= _count) throw OutOfBoundException(dstIndex);
+			if (srcIndex >= _store->count) throw OutOfBoundException(srcIndex);
+			if (dstIndex >= _store->count) throw OutOfBoundException(dstIndex);
+            
+            this->ensureStoreOwnership();
 
-			T src = _store[srcIndex];
+			T src = _store->pointer[srcIndex];
 
 			if (srcIndex < dstIndex) {
 				for (size_t idx = srcIndex + 1 ; idx <= dstIndex ; idx++) {
-					_store[idx - 1] = _store[idx];
+					_store->pointer[idx - 1] = _store->pointer[idx];
 				}
 			} else {
 				for (size_t idx = srcIndex ; idx > dstIndex ; idx--) {
-					_store[idx] = _store[idx - 1];
+					_store->pointer[idx] = _store->pointer[idx - 1];
 				}
 			}
 
@@ -139,23 +139,31 @@ namespace fart::types {
 
 			if (index1 == index2) return;
 
-			if (index1 >= _count) throw OutOfBoundException(index1);
-			if (index2 >= _count) throw OutOfBoundException(index2);
+			if (index1 >= _store->count) throw OutOfBoundException(index1);
+			if (index2 >= _store->count) throw OutOfBoundException(index2);
+            
+            this->ensureStoreOwnership();
 
-			T reg = _store[index1];
-			_store[index1] = _store[index2];
-			_store[index2] = reg;
+			T reg = _store->pointer[index1];
+			_store->pointer[index1] = _store->pointer[index2];
+			_store->pointer[index2] = reg;
 
 		}
 
 		void insertItemsAtIndex(const T* items, size_t count, size_t dstIndex) noexcept(false) {
-			if (dstIndex > this->_count) throw OutOfBoundException(dstIndex);
-			_ensureStoreSize(this->_count + count);
-			for (size_t idx = this->_count ; idx > dstIndex ; idx--) {
-				_store[idx + count - 1] = _store[idx - 1];
+            
+			if (dstIndex > this->_store->count) throw OutOfBoundException(dstIndex);
+            
+			this->ensureStoreSize(this->_store->count + count);
+            
+			for (size_t idx = this->_store->count ; idx > dstIndex ; idx--) {
+				_store->pointer[idx + count - 1] = _store->pointer[idx - 1];
 			}
-			memcpy(&_store[dstIndex], items, sizeof(T) * count);
-			_count += count;
+            
+			memcpy(&_store->pointer[dstIndex], items, sizeof(T) * count);
+            
+			_store->count += count;
+            
 		}
 
 		void insertItemAtIndex(T item, size_t dstIndex) noexcept(false) {
@@ -163,16 +171,16 @@ namespace fart::types {
 		}
 
 		size_t count() const {
-			return this->_count;
+			return this->_store->count;
 		}
 
 		T itemAtIndex(const size_t index) const noexcept(false) {
-			if (index >= _count) throw OutOfBoundException(index);
-			return _store[index];
+			if (index >= _store->count) throw OutOfBoundException(index);
+			return _store->pointer[index];
 		}
 
 		const T* items() const {
-			return _store;
+			return _store->pointer;
 		}
 
 		T operator[](const size_t index) const noexcept(false) {
@@ -180,20 +188,20 @@ namespace fart::types {
 		}
 
 		T first() const noexcept(false) {
-			if (this->_count == 0) throw NotFoundException();
-			return this->_store[0];
+			if (this->_store->count == 0) throw NotFoundException();
+			return this->_store->pointer[0];
 		}
 
 		T last() const noexcept(false) {
-			if (this->_count == 0) throw NotFoundException();
-			return this->_store[this->_count - 1];
+			if (this->_store->count == 0) throw NotFoundException();
+			return this->_store->pointer[this->_store->count - 1];
 		}
 
 		size_t indexOf(const Data<T>& other, const size_t offset = 0) const {
-			for (size_t hidx = offset ; hidx < this->_count ; hidx++) {
+			for (size_t hidx = offset ; hidx < this->_store->count ; hidx++) {
 				bool found = true;
-				for (size_t nidx = 0 ; nidx < other._count ; nidx++) {
-					if (this->_store[hidx + nidx] != other[nidx]) {
+				for (size_t nidx = 0 ; nidx < other._store->count ; nidx++) {
+					if (this->_store->pointer[hidx + nidx] != other._store->pointer[nidx]) {
 						found = false;
 						break;
 					}
@@ -207,43 +215,55 @@ namespace fart::types {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
-		T replace(T element, const size_t index) const {
-			T removed = _store[index];
-			_store[index] = element;
+		T replace(T element, const size_t index) {
+            this->ensureStoreOwnership();
+			T removed = _store->pointer[index];
+			_store->pointer[index] = element;
 			return removed;
 		}
 
 		Strong<Data<T>> subdata(const size_t offset, const size_t length = NotFound) const {
-			return Strong<Data<T>>(&_store[offset], math::min(_count - offset, length));
+			return Strong<Data<T>>(&_store->pointer[offset], math::min(_store->count - offset, length));
 		}
 
 		Strong<Data<T>> remove(const size_t offset, const size_t length) {
-			if (offset + length > _count) throw OutOfBoundException(offset + length);
-			Strong<Data<uint8_t>> result(&_store[offset], length);
-			size_t moveCount = _count - (offset + length);
+            
+			if (offset + length > _store->count) throw OutOfBoundException(offset + length);
+            
+            this->ensureStoreOwnership();
+            
+			Strong<Data<uint8_t>> result(&_store->pointer[offset], length);
+            
+			size_t moveCount = _store->count - (offset + length);
+            
 			for (size_t idx = 0 ; idx < moveCount ; idx++) {
-				_store[offset + idx] = _store[offset + length + idx];
+				_store->pointer[offset + idx] = _store->pointer[offset + length + idx];
 			}
-			_count -= length;
+            
+			_store->count -= length;
+            
 			return result;
+            
 		}
 
 		Strong<Data<T>> reversed() const {
 			Strong<Data<T>> result;
-			for (size_t idx = this->_count ; idx > 0 ; idx--) {
-				result->append(this->_store[idx - 1]);
+			for (size_t idx = this->_store->count ; idx > 0 ; idx--) {
+				result->append(this->_store->pointer[idx - 1]);
 			}
 			return result;
 		}
 
 		void drain() {
-			_count = 0;
+            _store->release();
+            _store = new Store();
 		};
 
 		size_t copy(void* bytes, size_t count, size_t offset = 0) {
-			if (offset > _count) return 0;
-			count = math::min(count, _count - offset);
-			memcpy(bytes, _store, sizeof(T) * count);
+			if (offset > _store->count) return 0;
+            this->ensureStoreOwnership();
+			count = math::min(count, _store->count - offset);
+			memcpy(bytes, _store->pointer, sizeof(T) * count);
 			return count;
 		}
 
@@ -317,28 +337,28 @@ namespace fart::types {
 
 		template<typename O>
 		Strong<Data<O>> as() {
-			return Strong<Data<O>>((const O*)this->_store, (this->_count * sizeof(T)) / sizeof(O));
+			return Strong<Data<O>>((const O*)this->_store->pointer, (this->_store->count * sizeof(T)) / sizeof(O));
 		}
 
 		void forEach(function<void(T& item)> todo) const {
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				todo(this->_store[idx]);
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				todo(this->_store->pointer[idx]);
 			}
 		}
 
 		template<typename R, typename F>
 		R reduce(R initial, F todo) const {
 			R result = initial;
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				result = todo(result, this->_store[idx], idx);
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				result = todo(result, this->_store->pointer[idx], idx);
 			}
 			return result;
 		}
 
 		Strong<Data<T>> filter(TesterIndex test) const {
 			Strong<Data<T>> result;
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				if (test(this->_store[idx], idx)) result->append(this->_store[idx]);
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				if (test(this->_store->pointer[idx], idx)) result->append(this->_store->pointer[idx]);
 			}
 			return result;
 		}
@@ -366,9 +386,9 @@ namespace fart::types {
 		}
 
 		bool some(TesterIndex test, bool def = false) const {
-			if (this->_count == 0) return def;
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				if (test(this->_store[idx], idx)) return true;
+			if (this->_store->count == 0) return def;
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				if (test(this->_store->pointer[idx], idx)) return true;
 			}
 			return false;
 		}
@@ -380,7 +400,7 @@ namespace fart::types {
 		}
 
 		bool every(TesterIndex test, bool def = true) const {
-			if (this->_count == 0) return def;
+			if (this->_store->count == 0) return def;
 			return !this->some([&test](const T item, const size_t idx) {
 				return !test(item, idx);
 			});
@@ -393,15 +413,15 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			if (_hashIsDirty) {
+			if (_store->hashIsDirty) {
 				Hashable::Builder builder;
-				for (size_t idx = 0 ; idx < _count ; idx++) {
-					builder.add((uint64_t)_comparitor->transform(_store[idx]));
+				for (size_t idx = 0 ; idx < _store->count ; idx++) {
+					builder.add((uint64_t)_comparitor->transform(_store->pointer[idx]));
 				}
-				_hash = builder;
-				_hashIsDirty = false;
+				_store->hash = builder;
+				_store->hashIsDirty = false;
 			}
-			return _hash;
+			return _store->hash;
 		}
 
 		virtual Kind kind() const override {
@@ -410,9 +430,9 @@ namespace fart::types {
 
 		bool operator ==(const Data<T>& other) const {
 			if (!Type::operator==(other)) return false;
-			if (this->_count != other._count) return false;
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				const T lhs = _comparitor->transform(_store[idx]);
+			if (this->_store->count != other._store->count) return false;
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				const T lhs = _comparitor->transform(_store->pointer[idx]);
 				const T rhs = _comparitor->transform(other.itemAtIndex(idx));
 				if (lhs != rhs) return false;
 			}
@@ -420,9 +440,9 @@ namespace fart::types {
 		}
 
 		Data& operator=(const Data<T>& other) {
-			Type::operator=(other);
-			_count = 0;
-			append(other);
+            this->_store->release();
+            this->_store = other._store->retain();
+            Type::operator=(other);
 			return *this;
 		}
 
@@ -431,21 +451,81 @@ namespace fart::types {
 		}
 
 	private:
+        
+        struct Store {
+            
+        public:
+            T* pointer;
+            size_t count;
+            mutable uint64_t hash;
+            mutable bool hashIsDirty;
 
-		T* _store;
-		size_t _count;
-		size_t _storeCount;
-		mutable uint64_t _hash;
-		mutable bool _hashIsDirty;
+            Store(size_t count = 0) : pointer(nullptr), count(0), hash(0), hashIsDirty(true), retainCount(1), storeCount(0) {
+                this->ensureStoreSize(count);
+            }
+            
+            ~Store() {
+                if (this->pointer != nullptr) {
+                    free(this->pointer);
+                }
+            }
+            
+            Store* retain() const {
+                this->retainCount++;
+                return (Store*)this;
+            }
+            
+            Store* release() const {
+                this->retainCount--;
+                if (this->retainCount == 0) {
+                    delete(this);
+                    return nullptr;
+                }
+                return (Store*)this;
+            }
+            
+            Store* own() const {
+                if (this->retainCount == 1) return (Store*)this;
+                this->release();
+                return new Store(*this);
+            }
+            
+            void ensureStoreSize(size_t count) {
+                if (this->storeCount < count) {
+                    this->storeCount = ((((sizeof(T) * count) / blockSize) + 1) * blockSize) / sizeof(T);
+                    this->pointer = (T*) realloc(this->pointer, sizeof(T) * this->storeCount);
+                }
+            }
 
+        private:
+            
+            mutable std::atomic<size_t> retainCount;
+            size_t storeCount;
+
+            Store(const Store& other) : Store() {
+                this->ensureStoreSize(other.count);
+				this->count = other.count;
+				this->hash = other.hash;
+				this->hashIsDirty = other.hashIsDirty;
+                memcpy(this->pointer, other.pointer, sizeof(T) * other.count);
+            }
+            
+        };
+
+		Store* _store;
 		Strong<Comparitor> _comparitor;
 
-		void _ensureStoreSize(size_t count) {
-			if (_storeCount < count) {
-				_storeCount = ((((sizeof(T) * count) / blockSize) + 1) * blockSize) / sizeof(T);
-				_store = (T*) realloc(_store, sizeof(T) * _storeCount);
-			}
-		}
+        void ensureStoreSize(size_t count) {
+            if (this->_store == nullptr) this->_store = new Store(count);
+            else {
+                this->_store = this->_store->own();
+                this->_store->ensureStoreSize(count);
+            }
+        }
+        
+        void ensureStoreOwnership() {
+            this->_store = this->_store->own();
+        }
 
 	};
 
