@@ -35,10 +35,7 @@ namespace fart::types {
 			ComparisonCaseInsensitive
 		};
 
-		String() {
-			_store.setComparitor(_caseComparitor);
-			_caseComparitor->setComparison(Comparison::ComparisonCaseInsensitive);
-		}
+		String() : String(Data<uint32_t>()) {}
 
 		String(const char* string) noexcept(false) : String() {
 			if (string != nullptr) {
@@ -369,8 +366,9 @@ namespace fart::types {
 		Data<uint32_t> _store;
 		Strong<CaseComparitor> _caseComparitor;
 
-		String(const Data<uint32_t>& storage) : String() {
-			_store.append(storage);
+		String(const Data<uint32_t>& store) : _store(store) {
+			_store.setComparitor(_caseComparitor);
+			_caseComparitor->setComparison(Comparison::ComparisonCaseInsensitive);
 		}
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
