@@ -44,17 +44,6 @@ namespace fart::types {
 
 		static const size_t blockSize = 4096;
 
-		class Comparitor : public Object {
-
-		public:
-			virtual ~Comparitor() {}
-
-			virtual T transform(T value) const {
-				return value;
-			}
-
-		};
-
 		template<typename F>
 		static Strong<Data<T>> fromCBuffer(const F& todo, size_t count = blockSize) {
 			T buffer[count];
@@ -418,7 +407,7 @@ namespace fart::types {
 			if (_store->hashIsDirty) {
 				Hashable::Builder builder;
 				for (size_t idx = 0 ; idx < _store->count ; idx++) {
-					builder.add((uint64_t)_comparitor->transform(_store->pointer[idx]));
+					builder.add(_store->pointer[idx]);
 				}
 				_store->hash = builder;
 				_store->hashIsDirty = false;
@@ -434,9 +423,7 @@ namespace fart::types {
 			if (!Type::operator==(other)) return false;
 			if (this->_store->count != other._store->count) return false;
 			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
-				const T lhs = _comparitor->transform(_store->pointer[idx]);
-				const T rhs = _comparitor->transform(other.itemAtIndex(idx));
-				if (lhs != rhs) return false;
+				if (_store->pointer[idx] != other.itemAtIndex(idx)) return false;
 			}
 			return true;
 		}
@@ -446,10 +433,6 @@ namespace fart::types {
 			this->_store = other._store->retain();
 			Type::operator=(other);
 			return *this;
-		}
-
-		void setComparitor(Comparitor& comparitor) {
-			_comparitor = comparitor;
 		}
 
 	private:
@@ -520,7 +503,6 @@ namespace fart::types {
 		};
 
 		Store* _store;
-		Strong<Comparitor> _comparitor;
 
 		void ensureStoreSize(size_t count) {
 			if (this->_store == nullptr) this->_store = new Store(count);

@@ -30,11 +30,6 @@ namespace fart::types {
 
 	public:
 
-		enum class Comparison {
-			ComparisonCaseSensitive = 0,
-			ComparisonCaseInsensitive
-		};
-
 		String() : String(Data<uint32_t>()) {}
 
 		String(const char* string) noexcept(false) : String() {
@@ -101,10 +96,6 @@ namespace fart::types {
 
 			return Strong<String>((const char*)buffer);
 
-		}
-
-		void setComparison(Comparison comparison) {
-			_caseComparitor->setComparison(comparison);
 		}
 
 		size_t length() const {
@@ -332,31 +323,6 @@ namespace fart::types {
 	private:
 		friend class Strong<String>;
 
-		class CaseComparitor : public Data<uint32_t>::Comparitor {
-
-		public:
-			virtual ~CaseComparitor() {}
-
-			virtual uint32_t transform(uint32_t value) const {
-				switch (_comparison) {
-					case Comparison::ComparisonCaseInsensitive:
-						if (value >= 'A' && value <= 'Z') return value - ('A' - 'a');
-						return value;
-					default:
-						return value;
-				}
-			}
-
-			void setComparison(Comparison comparison) {
-				_comparison = comparison;
-			}
-
-		private:
-
-			Comparison _comparison;
-
-		};
-
 		enum class DoublePart {
 			integer = 0,
 			fraction,
@@ -364,12 +330,8 @@ namespace fart::types {
 		};
 
 		Data<uint32_t> _store;
-		Strong<CaseComparitor> _caseComparitor;
 
-		String(const Data<uint32_t>& store) : _store(store) {
-			_store.setComparitor(_caseComparitor);
-			_caseComparitor->setComparison(Comparison::ComparisonCaseInsensitive);
-		}
+		String(const Data<uint32_t>& store) : _store(store) {}
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 
