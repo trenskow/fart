@@ -26,6 +26,7 @@ namespace fart::types {
 	class Array : public Type {
 
 		static_assert(std::is_base_of<Object, T>::value);
+		static_assert(std::is_base_of<Hashable, T>::value);
 
 		friend class Strong<Array<T>>;
 
@@ -42,7 +43,7 @@ namespace fart::types {
 				this->_storage.itemAtIndex(idx)->retain();
 			}
 		}
-		
+
 		Data<T*> _storage;
 		mutable uint64_t _hash;
 		mutable bool _hashIsDirty;
@@ -378,7 +379,7 @@ namespace fart::types {
 
 		virtual uint64_t hash() const override {
 			if (_hashIsDirty) {
-				Hashable::Builder builder;
+				Builder builder;
 				for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
 					builder.add(_storage[idx]->hash());
 				}

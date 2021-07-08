@@ -23,15 +23,20 @@ namespace fart::types {
 
 		public:
 
-			Builder() : _hash(5381) { }
+			inline Builder() : _hash(5381) { }
+
+			inline Builder& add(double value) {
+				_hash = ((_hash << 5) + _hash) + *(uint64_t*)(&value);
+				return *this;
+			}
 
 			template<typename T>
-			Builder& add(T value) {
+			inline Builder& add(const T& value) {
 				_hash = ((_hash << 5) + _hash) + (uint64_t)value;
 				return *this;
 			}
 
-			operator uint64_t() {
+			inline operator uint64_t() {
 				return _hash;
 			}
 

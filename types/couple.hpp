@@ -28,7 +28,7 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return Hashable::Builder()
+			return Builder()
 				.add(_first->hash())
 				.add(_second->hash());
 		}

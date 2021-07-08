@@ -252,7 +252,7 @@ namespace fart::serialization {
 					}
 					(*idx) += 4;
 					(*character) += 4;
-					return Strong<Boolean>(true).as<Type>();
+					return Strong<types::Boolean>(true).as<Type>();
 				case 'f':
 					_ensureLength(string, idx, 5, *line, *character);
 					if (*string.substring(*idx, 5) != falseLiteral) {
@@ -260,7 +260,7 @@ namespace fart::serialization {
 					}
 					(*idx) += 5;
 					(*character) += 5;
-					return Strong<Boolean>(false).as<Type>();
+					return Strong<types::Boolean>(false).as<Type>();
 				case 'n':
 					_ensureLength(string, idx, 4, *line, *character);
 					if (*string.substring(*idx, 4) != nullLiteral) {
@@ -422,7 +422,7 @@ namespace fart::serialization {
 				case Type::Kind::number: {
 					switch (data.as<Number<uint64_t>>().subType()) {
 						case Subtype::boolean:
-							result->append(data.as<Boolean>().value() ? "true" : "false");
+							result->append(data.as<types::Boolean>().value() ? "true" : "false");
 							break;
 						case Subtype::integer:
 							result->append(String::format("%lld", data.as<Integer>().value()));

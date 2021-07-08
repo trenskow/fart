@@ -137,9 +137,9 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return Hashable::Builder()
-			.add(_keys.hash())
-			.add(_values.hash());
+			return Builder()
+				.add(_keys.hash())
+				.add(_values.hash());
 		}
 
 		virtual Kind kind() const override {
