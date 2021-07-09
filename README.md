@@ -11,7 +11,7 @@ It's a pretty comprehensive library, if I must say myself – and new features a
 
 As of time of writing, Fart supports the following.
 
-* Automatic memory management through retain couting.
+* Automatic memory management through retain counting.
   * With support for self-nulling weak references.
 * I/O
   * Socket
@@ -19,19 +19,27 @@ As of time of writing, Fart supports the following.
     * IPv6
   * File system
 * Types
-  * Data (buffer for *non*-memory managed types)
-  * Arrays (buffer for memory managed types)
-  * Strings
+  * String
     * Full Unicode support
     * UTF-8 support
     * UTF-16 support
     * UTF-32 support (internal storage format)
-  * Dictionaries
-  * Couples (Touples)
-  * Dates
-  * Durations
-  * Numbers
+  * Dictionary
+  * Array (buffer for memory managed types)
+    * Backend for Dictionary
+  * Data (buffer for *non*-memory managed types)
+    * Backend for both String and Array
+    * Uses copy-on-write
+  * Couple (Touple)
+  * Date
+    * Full ISO-8601 support
+    * Support for leap year
+    * Can convert to and from UTC and local timezone
+  * Duration
+  * Number
+    * Memory managed wrapper for primitive types
 * JSON serialization/deserialization
+  * Test suites are available through the [fart-json-test](https://github.com/trenskow/fart-json-test) repository.
 * Threading
   * Threads
   * Mutexes
