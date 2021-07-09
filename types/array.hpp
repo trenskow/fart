@@ -101,6 +101,12 @@ namespace fart::types {
 			}
 		}
 
+		Array(T* items, size_t count) : Array() {
+			for (size_t idx = 0; idx < count ; idx++) {
+				append(items[idx]);
+			}
+		}
+
 		Array(size_t capacity) : _storage(capacity), _hash(0), _hashIsDirty(true) {}
 
 		virtual ~Array() {

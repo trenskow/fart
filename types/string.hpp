@@ -19,12 +19,19 @@
 #include "./data.hpp"
 #include "./type.hpp"
 #include "./array.hpp"
+#include "./unicode.hpp"
 
 using namespace fart::system;
 using namespace fart::memory;
 using namespace fart::exceptions;
 
 namespace fart::types {
+
+	static const uint8_t _bigEndianBOM[] = { 0xFE, 0xFF };
+	static const uint8_t _littleEndianBOM[] = { 0xFF, 0xFE };
+
+	static const Data<uint8_t> bigEndianBOM(_bigEndianBOM, 2);
+	static const Data<uint8_t> littleEndianBOM(_littleEndianBOM, 2);
 
 	class String : public Type {
 
@@ -46,22 +53,20 @@ namespace fart::types {
 			_store.append(_decodeUTF16(data.items(), data.count(), endian));
 		}
 
-		String(const Data<uint16_t>& data) noexcept(false) : Type() {
+		String(const Data<uint16_t>& data) noexcept(false) : String() {
 			Strong<Data<uint16_t>> parseData(data);
 			Endian::Variant endian = Endian::Variant::big;
 			if (data.count() > 1) {
-				Data<uint8_t> bom = data.subdata(0, 2)->as<uint8_t>();
-				uint8_t b0 = bom[0];
-				uint8_t b1 = bom[1];
-				if ((b0 == 0xFF || b0 == 0xFE) && (b1 == 0xFF || b1 == 0xFE)) {
-					if (b0 == 0xFE && b1 == 0xFF) endian = system::Endian::Variant::big;
-					else if (b0 == 0xFF && b1 == 0xFE) endian = system::Endian::Variant::little;
-					else throw DecoderException(0);
+				Data<uint8_t> potentialMarker = *data.subdata(0, 2)->as<uint8_t>();
+				if (potentialMarker == bigEndianBOM || potentialMarker == littleEndianBOM) {
+					endian = potentialMarker == bigEndianBOM ? Endian::Variant::big : Endian::Variant::little;
 					parseData = parseData->subdata(2);
 				}
 			}
 			_store.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
 		}
+
+		String(const Data<uint32_t>& store) : _store(store) {}
 
 		String(const String& other) : String(other._store) {}
 
@@ -124,8 +129,12 @@ namespace fart::types {
 			return _encodeUTF8(_store, nullTerminate);
 		}
 
-		Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::Variant::big) const {
-			return _encodeUTF16(_store, endian);
+		Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
+			return _encodeUTF16(_store, endian, includeBOM);
+		}
+
+		Strong<Data<uint32_t>> UTF32Data() const {
+			return Strong<Data<uint32_t>>(this->_store);
 		}
 
 		static Strong<String> fromHex(const Data<uint8_t>& data) {
@@ -293,6 +302,25 @@ namespace fart::types {
 			return Strong<String>(_store.subdata(offset, length));
 		}
 
+		Strong<String> uppercased() const {
+			return Strong<String>(this->_store.map<uint32_t>(Unicode::lowerToUpper));
+		}
+
+		Strong<String> lowercased() const {
+			return Strong<String>(this->_store.map<uint32_t>(Unicode::upperToLower));
+		}
+
+		Strong<String> capitalized() const {
+			Strong<String> result;
+			if (this->length() > 0) {
+				result->append(this->substring(0, 1)->uppercased());
+			}
+			if (this->length() > 1) {
+				result->append(this->substring(1)->lowercased());
+			}
+			return result;
+		}
+
 		virtual uint64_t hash() const override {
 			return _store.hash();
 		}
@@ -330,8 +358,6 @@ namespace fart::types {
 		};
 
 		Data<uint32_t> _store;
-
-		String(const Data<uint32_t>& store) : _store(store) {}
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 
@@ -449,9 +475,13 @@ namespace fart::types {
 
 		}
 
-		static Strong<Data<uint16_t>> _encodeUTF16(const Data<uint32_t> &buffer, Endian::Variant endian) noexcept(false) {
+		static Strong<Data<uint16_t>> _encodeUTF16(const Data<uint32_t> &buffer, Endian::Variant endian, bool includeBOM) noexcept(false) {
 
 			Strong<Data<uint16_t>> ret;
+
+			if (includeBOM) {
+				ret->append((endian == Endian::Variant::big ? bigEndianBOM : littleEndianBOM).as<uint16_t>());
+			}
 
 			for (size_t idx = 0 ; idx < buffer.count() ; idx++) {
 
@@ -473,6 +503,18 @@ namespace fart::types {
 
 			return ret;
 
+		}
+
+		static Strong<Data<uint32_t>> _decodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
+			return buffer.map<uint32_t>([&endian](uint32_t character) {
+				return Endian::convert(character, endian, Endian::systemVariant());
+			});
+		}
+
+		static Strong<Data<uint32_t>> _encodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
+			return buffer.map<uint32_t>([&endian](uint32_t character) {
+				return Endian::convert(character, Endian::systemVariant(), endian);
+			});
 		}
 
 		static uint8_t _valueFromHex(uint8_t chr, size_t idx) noexcept(false) {

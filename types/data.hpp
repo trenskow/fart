@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "../exceptions/exception.hpp"
 #include "../memory/strong.hpp"
@@ -59,6 +60,15 @@ namespace fart::types {
 
 		Data(size_t capacity) : Data() {
 			this->_ensureStoreSize(capacity);
+		}
+
+		Data(size_t count, ...) : Data() {
+			va_list args;
+			va_start(args, count);
+			for (size_t idx = 0 ; idx < count ; idx++) {
+				append(va_arg(args, T));
+			}
+			va_end(args);
 		}
 
 		Data(const Data<T>& other) : _store(other._store->retain()) { }
@@ -327,7 +337,7 @@ namespace fart::types {
 		}
 
 		template<typename O>
-		Strong<Data<O>> as() {
+		Strong<Data<O>> as() const {
 			return Strong<Data<O>>((const O*)this->_store->pointer, (this->_store->count * sizeof(T)) / sizeof(O));
 		}
 
@@ -363,8 +373,8 @@ namespace fart::types {
 		template<typename O>
 		Strong<Data<O>> map(function<O(T item, const size_t idx)> transform) const {
 			Strong<Data<O>> result;
-			for (size_t idx = 0 ; idx < this->_count ; idx++) {
-				result->append(transform(this->_store[idx], idx));
+			for (size_t idx = 0 ; idx < this->_store->count ; idx++) {
+				result->append(transform(this->_store->pointer[idx], idx));
 			}
 			return result;
 		}
@@ -372,6 +382,22 @@ namespace fart::types {
 		template<typename O>
 		Strong<Data<O>> map(function<O(T item)> transform) const {
 			return map<O>([&transform](T item, const size_t idx) {
+				return transform(item);
+			});
+		}
+
+		template<typename O>
+		Strong<Array<O>> mapToArray(function<O(T item, const size_t idx)> transform) const {
+			Strong<Array<O>> result;
+			for (size_t idx = 0 ; idx < this->_store->count; idx++) {
+				result->append(transform(this->_store->pointer[idx], idx));
+			}
+			return result;
+		}
+
+		template<typename O>
+		Strong<Array<O>> mapToArray(function<O(T item)> transform) const {
+			return mapToArray<O>([&transform](T item, const size_t idx) {
 				return transform(item);
 			});
 		}
