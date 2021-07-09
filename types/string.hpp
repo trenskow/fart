@@ -157,6 +157,16 @@ namespace fart::types {
 			_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 		}
 
+		Strong<String> appending(const String& other) const {
+			return Strong<String>(this->_store.appending(other._store));
+		}
+
+		Strong<Array<String>> split() const {
+			return _store.split()->map<String>([](Data<uint32_t>& data) {
+				return Strong<String>(data);
+			});
+		}
+
 		Strong<Array<String>> split(const char* separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			String sep(separator);
 			return split(sep, includeSeparator, max);
@@ -311,14 +321,7 @@ namespace fart::types {
 		}
 
 		Strong<String> capitalized() const {
-			Strong<String> result;
-			if (this->length() > 0) {
-				result->append(this->substring(0, 1)->uppercased());
-			}
-			if (this->length() > 1) {
-				result->append(this->substring(1)->lowercased());
-			}
-			return result;
+			return this->substring(0, 1)->uppercased()->appending(this->substring(1)->lowercased());
 		}
 
 		virtual uint64_t hash() const override {

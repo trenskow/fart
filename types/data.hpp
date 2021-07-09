@@ -90,6 +90,12 @@ namespace fart::types {
 			append(data.items(), data.count());
 		}
 
+		Strong<Data> appending(const Data<T>& other) const {
+			Strong<Data> result = *this;
+			result->append(other);
+			return result;
+		}
+
 		const T removeItemAtIndex(size_t index) noexcept(false) {
 
 			if (index >= _store->count) throw OutOfBoundException(index);
@@ -266,6 +272,12 @@ namespace fart::types {
 			count = math::min(count, _store->count - offset);
 			memcpy(bytes, _store->pointer, sizeof(T) * count);
 			return count;
+		}
+
+		Strong<Array<Data<T>>> split() const {
+			return this->mapToArray<Data<T>>([](T item) {
+				return Strong<Data<T>>(&item, 1);
+			});
 		}
 
 		Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
