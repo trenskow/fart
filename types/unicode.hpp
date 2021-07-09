@@ -1,10 +1,13 @@
 //
-//  data.hpp
+//  unicode.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 17/08/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Created by Kristian Trenskow on 09/07/2021.
+//  Copyright © 2021 Kristian Trenskow. All rights reserved.
 //
+
+#ifndef unicode_hpp
+#define unicode_hpp
 
 namespace fart::types {
 
@@ -202,3 +205,5 @@ namespace fart::types {
 	};
 
 }
+
+#endif /* unicode_hpp */
