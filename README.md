@@ -1,9 +1,9 @@
-FART
+Fart
 ----
 
-Fart (because I'm without imagination) is my own "standard library" for C++.
+Fart is my own "standard library" for C++.
 
-# What is FART?
+# What is Fart?
 
 It's a pretty comprehensive library, if I must say myself – and new features are constantly being added, as I need them.
 
@@ -40,7 +40,7 @@ As of time of writing, Fart supports the following.
 
 ## Why
 
-Because I love the interoperability of C++ – but I f***ng hate the C++ standard library!
+Because I love the interoperability of C++ – but I f***ng hate the C++ standard library! It's a necessary evil – thereby it's name.
 
 ## How to Use
 
