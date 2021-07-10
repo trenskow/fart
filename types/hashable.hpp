@@ -30,6 +30,10 @@ namespace fart::types {
 				return *this;
 			}
 
+			inline Builder& add(float value) {
+				return this->add((double)value);
+			}
+
 			template<typename T>
 			inline Builder& add(const T& value) {
 				_hash = ((_hash << 5) + _hash) + (uint64_t)value;

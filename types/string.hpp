@@ -41,16 +41,16 @@ namespace fart::types {
 
 		String(const char* string) noexcept(false) : String() {
 			if (string != nullptr) {
-				_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
+				_storage.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 			}
 		}
 
 		String(const Data<uint8_t>& data) noexcept(false) : String() {
-			_store.append(_decodeUTF8(data.items(), data.count()));
+			_storage.append(_decodeUTF8(data.items(), data.count()));
 		}
 
 		String(const Data<uint16_t>& data, Endian::Variant endian) noexcept(false) : String() {
-			_store.append(_decodeUTF16(data.items(), data.count(), endian));
+			_storage.append(_decodeUTF16(data.items(), data.count(), endian));
 		}
 
 		String(const Data<uint16_t>& data) noexcept(false) : String() {
@@ -63,12 +63,12 @@ namespace fart::types {
 					parseData = parseData->subdata(2);
 				}
 			}
-			_store.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
+			_storage.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
 		}
 
-		String(const Data<uint32_t>& store) : _store(store) {}
+		String(const Data<uint32_t>& store) : _storage(store) {}
 
-		String(const String& other) : String(other._store) {}
+		String(const String& other) : String(other._storage) {}
 
 		template<typename F>
 		static Strong<String> fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
@@ -104,7 +104,7 @@ namespace fart::types {
 		}
 
 		size_t length() const {
-			return _store.count();
+			return _storage.count();
 		}
 
 		template<typename F>
@@ -126,15 +126,15 @@ namespace fart::types {
 		}
 
 		Strong<Data<uint8_t>> UTF8Data(bool nullTerminate = false) const {
-			return _encodeUTF8(_store, nullTerminate);
+			return _encodeUTF8(_storage, nullTerminate);
 		}
 
 		Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
-			return _encodeUTF16(_store, endian, includeBOM);
+			return _encodeUTF16(_storage, endian, includeBOM);
 		}
 
 		Strong<Data<uint32_t>> UTF32Data() const {
-			return Strong<Data<uint32_t>>(this->_store);
+			return Strong<Data<uint32_t>>(this->_storage);
 		}
 
 		static Strong<String> fromHex(const Data<uint8_t>& data) {
@@ -142,27 +142,27 @@ namespace fart::types {
 		}
 
 		Strong<Data<uint8_t>> hexData() const {
-			return _encodeHex(_store);
+			return _encodeHex(_storage);
 		}
 
 		void append(const String& other) {
-			_store.append(other._store);
+			_storage.append(other._storage);
 		}
 
 		void append(const uint32_t character) {
-			_store.append(character);
+			_storage.append(character);
 		}
 
 		void append(const char* string) {
-			_store.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
+			_storage.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 		}
 
 		Strong<String> appending(const String& other) const {
-			return Strong<String>(this->_store.appending(other._store));
+			return Strong<String>(this->_storage.appending(other._storage));
 		}
 
 		Strong<Array<String>> split() const {
-			return _store.split()->map<String>([](Data<uint32_t>& data) {
+			return _storage.split()->map<String>([](Data<uint32_t>& data) {
 				return Strong<String>(data);
 			});
 		}
@@ -173,23 +173,23 @@ namespace fart::types {
 		}
 
 		Strong<Array<String>> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			return _store.split(separator._store, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
+			return _storage.split(separator._storage, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return Strong<String>(current);
 			});
 		}
 
 		Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
-				return current._store;
+				return current._storage;
 			});
-			return _store.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
+			return _storage.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return String(current);
 			});
 		}
 
 		static Strong<String> join(Array<String>& strings) {
 			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
-				return current._store;
+				return current._storage;
 			})));
 		}
 
@@ -200,8 +200,8 @@ namespace fart::types {
 
 		static Strong<String> join(Array<String>& strings, String& separator) {
 			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
-				return current._store;
-			}), separator._store));
+				return current._storage;
+			}), separator._storage));
 		}
 
 		double doubleValue(const size_t startIndex = 0, size_t* consumed = nullptr, bool allowLeadingZero = true) const {
@@ -226,7 +226,7 @@ namespace fart::types {
 			size_t idx = startIndex;
 			while (idx < length()) {
 
-				uint32_t chr = _store[idx];
+				uint32_t chr = _storage[idx];
 
 				if (chr == '+' || chr == '-') {
 
@@ -301,23 +301,23 @@ namespace fart::types {
 		}
 
 		size_t indexOf(const String& other, size_t offset = 0) const {
-			return this->_store.indexOf(other._store, offset);
+			return this->_storage.indexOf(other._storage, offset);
 		}
 
 		size_t indexOf(const uint32_t chr) const {
-			return this->_store.indexOf(chr);
+			return this->_storage.indexOf(chr);
 		}
 
 		Strong<String> substring(size_t offset, size_t length = NotFound) const {
-			return Strong<String>(_store.subdata(offset, length));
+			return Strong<String>(_storage.subdata(offset, length));
 		}
 
 		Strong<String> uppercased() const {
-			return Strong<String>(this->_store.map<uint32_t>(Unicode::lowerToUpper));
+			return Strong<String>(this->_storage.map<uint32_t>(Unicode::lowerToUpper));
 		}
 
 		Strong<String> lowercased() const {
-			return Strong<String>(this->_store.map<uint32_t>(Unicode::upperToLower));
+			return Strong<String>(this->_storage.map<uint32_t>(Unicode::upperToLower));
 		}
 
 		Strong<String> capitalized() const {
@@ -325,7 +325,7 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return _store.hash();
+			return _storage.hash();
 		}
 
 		virtual Kind kind() const override {
@@ -334,7 +334,7 @@ namespace fart::types {
 
 		virtual bool operator==(const String& other) const {
 			if (!Type::operator==(other)) return false;
-			return _store == other._store;
+			return _storage == other._storage;
 		}
 
 		bool operator==(const char* other) const {
@@ -342,16 +342,17 @@ namespace fart::types {
 		}
 
 		uint32_t operator[](size_t idx) const {
-			return _store[idx];
+			return _storage[idx];
 		}
 
 		String& operator=(const String& other) {
 			Type::operator=(other);
-			_store = other._store;
+			_storage = other._storage;
 			return *this;
 		}
 
 	private:
+
 		friend class Strong<String>;
 
 		enum class DoublePart {
@@ -360,7 +361,7 @@ namespace fart::types {
 			exponent
 		};
 
-		Data<uint32_t> _store;
+		Data<uint32_t>::Primitive _storage;
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 

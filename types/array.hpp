@@ -38,15 +38,32 @@ namespace fart::types {
 
 	private:
 
-		Array(const Data<T*>& other) : _storage(other), _hash(0), _hashIsDirty(true) {
+		template<typename S>
+		class Storage: public Data<S> {
+
+		public:
+
+			Storage() : Data<S>() {}
+
+			Storage(const Storage& other) : Data<S>(other) { }
+
+			virtual ~Storage() { }
+
+		protected:
+
+			virtual inline uint64_t hashForItem(const S& item) const override {
+				return item->hash();
+			}
+
+		};
+
+		Array(const Storage<T*>& other) : _storage(other) {
 			for (size_t idx = 0 ; idx < this->_storage.count() ; idx++) {
 				this->_storage.itemAtIndex(idx)->retain();
 			}
 		}
 
-		Data<T*> _storage;
-		mutable uint64_t _hash;
-		mutable bool _hashIsDirty;
+		Storage<T*> _storage;
 
 		static void _insertionSort(Array& array, Comparer comparer) {
 			size_t sortedIdx = 0;
@@ -79,13 +96,9 @@ namespace fart::types {
 			_quickSort(array, offset + pivot + 1, count - (pivot + 1), comparer);
 		}
 
-		void _setHashDirty() const {
-			_hashIsDirty = true;
-		}
-
 	public:
 
-		Array() : Type(), _hash(0), _hashIsDirty(true) {}
+		Array() : Type() {}
 
 		Array(const Array<T>& other) : Array(other._storage) {}
 
@@ -107,7 +120,7 @@ namespace fart::types {
 			}
 		}
 
-		Array(size_t capacity) : _storage(capacity), _hash(0), _hashIsDirty(true) {}
+		Array(size_t capacity) : _storage(capacity) {}
 
 		virtual ~Array() {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
@@ -132,7 +145,6 @@ namespace fart::types {
 			Strong<T> heapItem = (T*)&item;
 			heapItem->retain();
 			_storage.append(heapItem);
-			_setHashDirty();
 		}
 
 		Strong<Array<T>> appending(const T& item) const {
@@ -143,7 +155,6 @@ namespace fart::types {
 
 		void removeItemAtIndex(size_t index) noexcept(false) {
 			_storage.removeItemAtIndex(index)->release();
-			_setHashDirty();
 		}
 
 		Strong<Array<T>> removingItemAtIndex(size_t index) const noexcept(false) {
@@ -371,7 +382,6 @@ namespace fart::types {
 			Strong<T> heapItem = item;
 			heapItem->retain();
 			_storage.insertItemAtIndex(heapItem, dstIndex);
-			_setHashDirty();
 		}
 
 		void sort(Comparer comparer) {
@@ -384,15 +394,7 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			if (_hashIsDirty) {
-				Builder builder;
-				for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-					builder.add(_storage[idx]->hash());
-				}
-				_hash = builder;
-				_hashIsDirty = false;
-			}
-			return _hash;
+			return this->_storage.hash();
 		}
 
 		virtual Kind kind() const override {
@@ -417,8 +419,6 @@ namespace fart::types {
 				other._storage[idx]->retain();
 				_storage.append(other._storage[idx]);
 			}
-			_hash = other._hash;
-			_hashIsDirty = other._hashIsDirty;
 			return *this;
 		}
 

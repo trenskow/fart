@@ -39,6 +39,26 @@ namespace fart::types {
 
 	public:
 
+		class Primitive: public Data {
+
+		public:
+
+			Primitive() : Data() {}
+			Primitive(const T* items, size_t count) : Data(items, count) {}
+			Primitive(size_t capacity) : Data(capacity) {}
+			Primitive(const Primitive& other) : Data(other) {}
+			Primitive(const Data& other) : Data(other) {}
+
+			virtual ~Primitive() {}
+
+		protected:
+
+			virtual inline uint64_t hashForItem(const T& item) const override {
+				return item;
+			}
+
+		};
+
 		typedef function<bool(T item1, T item2)> Comparer;
 		typedef function<bool(T item)> Tester;
 		typedef function<bool(T item, const size_t idx)> TesterIndex;
@@ -445,7 +465,7 @@ namespace fart::types {
 			if (_store->hashIsDirty) {
 				Hashable::Builder builder;
 				for (size_t idx = 0 ; idx < _store->count ; idx++) {
-					builder.add(_store->pointer[idx]);
+					builder.add(this->hashForItem(_store->pointer[idx]));
 				}
 				_store->hash = builder;
 				_store->hashIsDirty = false;
@@ -471,6 +491,12 @@ namespace fart::types {
 			this->_store = other._store->retain();
 			Type::operator=(other);
 			return *this;
+		}
+
+	protected:
+
+		virtual inline uint64_t hashForItem(const T& item) const {
+			return 0;
 		}
 
 	private:
