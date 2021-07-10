@@ -361,7 +361,7 @@ namespace fart::types {
 			return this->filter([this,&comparer](T& item1) {
 				return this->filter([&comparer,&item1](T& item2) {
 					return comparer(item1, item2);
-				})->count() > 1;
+				}).count() > 1;
 			});
 		}
 
