@@ -95,7 +95,7 @@ namespace fart::types {
 
 		Data(Data<T>&& other) : Type(std::move(other)) {
 			if (this->_store != nullptr) {
-				this->_store = this->_store->release();
+				Store::release(&this->_store);
 			}
 			this->_store = other._store;
 			other->_store = nullptr;
@@ -291,7 +291,7 @@ namespace fart::types {
 		}
 
 		void drain() {
-			this->_store = this->_store->release();
+			Store::release(&this->_store);
 			_store = new Store();
 		};
 
