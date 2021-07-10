@@ -104,6 +104,7 @@ namespace fart::memory {
 		}
 
 		Strong<T>& operator =(Strong<T>&& other) {
+			this->_setObject(nullptr);
 			this->_object = other._object;
 			other._object = nullptr;
 			return *this;
