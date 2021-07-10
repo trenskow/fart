@@ -120,7 +120,7 @@ namespace fart::types {
 
 			if (index >= _store->count) throw OutOfBoundException(index);
 
-			this->ensureStoreOwnership();
+			this->_ensureStoreOwnership();
 
 			T element = _store->pointer[index];
 
@@ -179,7 +179,7 @@ namespace fart::types {
 
 			if (dstIndex > this->_store->count) throw OutOfBoundException(dstIndex);
 
-			this->ensureStoreSize(this->_store->count + count);
+			this->_ensureStoreSize(this->_store->count + count);
 
 			for (size_t idx = this->_store->count ; idx > dstIndex ; idx--) {
 				_store->pointer[idx + count - 1] = _store->pointer[idx - 1];
@@ -243,7 +243,7 @@ namespace fart::types {
 		}
 
 		T replace(T element, const size_t index) {
-			this->ensureStoreOwnership();
+			this->_ensureStoreOwnership();
 			T removed = _store->pointer[index];
 			_store->pointer[index] = element;
 			return removed;
@@ -257,7 +257,7 @@ namespace fart::types {
 
 			if (offset + length > _store->count) throw OutOfBoundException(offset + length);
 
-			this->ensureStoreOwnership();
+			this->_ensureStoreOwnership();
 
 			Strong<Data<uint8_t>> result(&_store->pointer[offset], length);
 
@@ -568,7 +568,7 @@ namespace fart::types {
 
 		Store* _store;
 
-		void ensureStoreSize(size_t count) {
+		void _ensureStoreSize(size_t count) {
 			if (this->_store == nullptr) this->_store = new Store(count);
 			else {
 				this->_store = this->_store->own();
@@ -576,7 +576,7 @@ namespace fart::types {
 			}
 		}
 
-		void ensureStoreOwnership() {
+		void _ensureStoreOwnership() {
 			this->_store = this->_store->own();
 		}
 
