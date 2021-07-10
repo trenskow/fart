@@ -84,6 +84,7 @@ namespace fart::memory {
 		Object() : _retainCount(0), _weakReferences(nullptr), _weakReferencesSize(0), _weakReferencesCount(0) {}
 
 		Object(const Object& other) : Object() {}
+		Object(Object&& other) { }
 
 		virtual ~Object() {
 			_mutex.locked([this]() {
@@ -107,6 +108,10 @@ namespace fart::memory {
 		}
 
 		Object& operator=(const Object&) {
+			return *this;
+		}
+
+		Object& operator=(Object&& other) {
 			return *this;
 		}
 

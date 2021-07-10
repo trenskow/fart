@@ -70,6 +70,8 @@ namespace fart::types {
 
 		String(const String& other) : String(other._storage) {}
 
+		String(String&& other) : _storage(std::move(other._storage)) { }
+
 		template<typename F>
 		static Strong<String> fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
 			return Strong<String>(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
@@ -348,6 +350,12 @@ namespace fart::types {
 		String& operator=(const String& other) {
 			Type::operator=(other);
 			_storage = other._storage;
+			return *this;
+		}
+
+		String& operator=(String&& other) {
+			Type::operator=(std::move(other));
+			_storage = std::move(other._storage);
 			return *this;
 		}
 

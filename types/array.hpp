@@ -45,10 +45,22 @@ namespace fart::types {
 
 			Storage() : Data<S>() {}
 
-			Storage(const Storage& other) : Data<S>(other) { }
 			Storage(const Data<S>& other) : Data<S>(other) { }
 
+			Storage(const Storage& other) : Data<S>(other) { }
+			Storage(Storage&& other) : Data<S>(std::move(other)) { }
+
 			virtual ~Storage() { }
+
+			Storage& operator=(const Storage& other) {
+				Data<S>::operator=(other);
+				return *this;
+			}
+
+			Storage& operator=(Storage&& other) {
+				Data<S>::operator=(std::move(other));
+				return *this;
+			}
 
 		protected:
 
@@ -102,6 +114,8 @@ namespace fart::types {
 		Array() : Type() {}
 
 		Array(const Array<T>& other) : Array(other._storage) {}
+
+		Array(Array&& other) : Type(std::move(other)), _storage(std::move(other._storage)) { }
 
 		Array(Strong<T> repeating, size_t count) : Array() {
 			for (size_t idx = 0 ; idx < count ; idx++) {
@@ -420,6 +434,12 @@ namespace fart::types {
 				other._storage[idx]->retain();
 				_storage.append(other._storage[idx]);
 			}
+			return *this;
+		}
+
+		Array<T>& operator=(Array<T>&& other) {
+			_storage = std::move(other._storage);
+			Type::operator=(std::move(other));
 			return *this;
 		}
 

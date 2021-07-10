@@ -60,6 +60,10 @@ namespace fart::memory {
 			_setObject(other._object);
 		}
 
+		Strong(Strong<T>&& other) : _object(other._object) {
+			other._object = nullptr;
+		}
+
 		Strong(const Weak<T>& other) : _object(other) {}
 
 		template<typename... Args>
@@ -94,8 +98,14 @@ namespace fart::memory {
 			return *this;
 		}
 
-		Strong<T>& operator =(Strong<T> object) {
-			_setObject(object);
+		Strong<T>& operator =(const Strong<T>& object) {
+			_setObject(object._object);
+			return *this;
+		}
+
+		Strong<T>& operator =(Strong<T>&& other) {
+			this->_object = other._object;
+			other._object = nullptr;
 			return *this;
 		}
 

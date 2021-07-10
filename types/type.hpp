@@ -41,6 +41,7 @@ namespace fart::types {
 
 		Type() : Object(), Hashable() { }
 		Type(const Type& other) : Object(other), Hashable(other) { }
+		Type(Type&& other) : Object(std::move(other)), Hashable(std::move(other)) { }
 
 		virtual Kind kind() const {
 			throw NotImplementedException();
@@ -49,6 +50,12 @@ namespace fart::types {
 		Type& operator=(const Type& other) {
 			Object::operator=(other);
 			Hashable::operator=(other);
+			return *this;
+		}
+
+		Type& operator=(Type&& other) {
+			Object::operator=(std::move(other));
+			Hashable::operator=(std::move(other));
 			return *this;
 		}
 

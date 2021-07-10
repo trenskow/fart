@@ -52,6 +52,10 @@ namespace fart::memory {
 
 		Weak(const Strong<T>& other) : Weak(other) {}
 
+		Weak(Weak<T>&& other) : _object(other._object) {
+			other._object = nullptr;
+		}
+
 		~Weak() {
 			_setObject(nullptr);
 		}
@@ -70,6 +74,12 @@ namespace fart::memory {
 
 		Weak<T>& operator =(T& object) {
 			_setObject(&object);
+			return *this;
+		}
+
+		Weak<T>& operator =(T&& other) {
+			_setObject(other._object);
+			other._setObject(nullptr);
 			return *this;
 		}
 
