@@ -46,6 +46,7 @@ namespace fart::types {
 			Storage() : Data<S>() {}
 
 			Storage(const Storage& other) : Data<S>(other) { }
+			Storage(const Data<S>& other) : Data<S>(other) { }
 
 			virtual ~Storage() { }
 
@@ -57,7 +58,7 @@ namespace fart::types {
 
 		};
 
-		Array(const Storage<T*>& other) : _storage(other) {
+		Array(const Data<T*>& other) : _storage(other) {
 			for (size_t idx = 0 ; idx < this->_storage.count() ; idx++) {
 				this->_storage.itemAtIndex(idx)->retain();
 			}
