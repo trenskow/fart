@@ -349,7 +349,7 @@ namespace fart::types {
 			return result;
 		}
 
-		Array<Data<T>> split(Data<T>& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Array<Data<T>> split(const Data<T>& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return split(Array<Data<T>>(separator, 1), includeSeparator, max);
 		}
 

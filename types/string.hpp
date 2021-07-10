@@ -109,22 +109,18 @@ namespace fart::types {
 			return _storage.count();
 		}
 
-		template<typename F>
-		void withCString(const F& todo) const {
-			auto data = this->UTF8Data(true);
-			todo((const char*)data.items());
-		}
-
 		template<typename T, typename F>
 		auto mapCString(const F& todo) const {
-			auto data = this->UTF8Data(true);
-			return todo((const char*)data.items());
+			return todo((const char*)this->UTF8Data(true).items());
+		}
+
+		template<typename F>
+		void withCString(const F& todo) const {
+			todo((const char*)this->UTF8Data(true).items());
 		}
 
 		void print(bool newLine = true) const {
-			this->withCString([&newLine](const char* str) {
-				newLine ? printf("%s\n", str) : printf("%s", str);
-			});
+			this->appending(newLine ? "\n" : "").withCString(printf);
 		}
 
 		Data<uint8_t> UTF8Data(bool nullTerminate = false) const {
@@ -155,10 +151,6 @@ namespace fart::types {
 			_storage.append(character);
 		}
 
-		void append(const char* string) {
-			_storage.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
-		}
-
 		String appending(const String& other) const {
 			return String(this->_storage.appending(other._storage));
 		}
@@ -169,12 +161,7 @@ namespace fart::types {
 			});
 		}
 
-		Array<String> split(const char* separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			String sep(separator);
-			return split(sep, includeSeparator, max);
-		}
-
-		Array<String> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Array<String> split(const String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return _storage.split(separator._storage, includeSeparator, max).map<String>([](const Data<uint32_t>& current) {
 				return String(current);
 			});
