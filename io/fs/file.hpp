@@ -29,6 +29,8 @@ namespace fart::io::fs {
 
 	class File : public Object {
 
+		friend class Strong<File>;
+
 	public:
 
 		enum class Mode {
@@ -37,29 +39,15 @@ namespace fart::io::fs {
 			asAppend
 		};
 
-	private:
-
-		Mode _mode;
-		FILE* _stream;
-		size_t _size;
-		size_t _position;
-
-		Mutex _mutex;
-
-		void _determineSize() {
-			this->_position = ftell(this->_stream);
-			fseek(this->_stream, 0, SEEK_END);
-			this->_size = ftell(this->_stream);
-			fseek(this->_stream, this->_position, SEEK_SET);
-		}
-
-	public:
-
 		enum class Position {
 			beginning,
 			current,
 			end
 		};
+
+		static Strong<File> open(const String& filename, Mode mode) {
+			return Strong<File>(filename, mode);
+		}
 
 		static bool exists(const String& filename) {
 			return filename.mapCString<bool>([](const char* filename){
@@ -67,8 +55,8 @@ namespace fart::io::fs {
 			});
 		}
 
-		static Strong<String> expand(const String& filename) {
-			return filename.mapCString<Strong<String>>([](const char* filename) {
+		static String expand(const String& filename) {
+			return filename.mapCString<String>([](const char* filename) {
 				wordexp_t exp_result;
 				wordexp(filename, &exp_result, 0);
 				size_t filenameLength = strlen(exp_result.we_wordv[0]);
@@ -81,8 +69,8 @@ namespace fart::io::fs {
 			});
 		}
 
-		static Strong<String> resolve(const String& filename) {
-			return filename.mapCString<Strong<String>>([](const char* filename) {
+		static String resolve(const String& filename) {
+			return filename.mapCString<String>([](const char* filename) {
 				return String::fromCString([filename](char* buffer, size_t length) {
 					ssize_t result = readlink(filename, buffer, length);
 					if (result < 0) strncpy(buffer, filename, length);
@@ -91,7 +79,7 @@ namespace fart::io::fs {
 			});
 		}
 
-		static Strong<Array<String>> directoryContent(const String& filename) {
+		static Array<String> directoryContent(const String& filename) {
 
 			if (!File::exists(filename)) throw FileNotFoundException();
 
@@ -104,38 +92,16 @@ namespace fart::io::fs {
 
 			if (dp == nullptr) throw FileNotFoundException();
 
-			Strong<Array<String>> result;
+			Array<String> result;
 
 			while ((ep = readdir(dp))) {
-				result->append(ep->d_name);
+				result.append(ep->d_name);
 			}
 
 			closedir(dp);
 
 			return result;
 
-		}
-
-		File(const String& filename, Mode mode) {
-			File::resolve(File::expand(filename))->withCString([this,&mode](const char* filename) {
-
-				switch (mode) {
-					case Mode::asRead:
-						this->_stream = fopen(filename, "r");
-						break;
-					case Mode::asWrite:
-						this->_stream = fopen(filename, "w");
-						break;
-					case Mode::asAppend:
-						this->_stream = fopen(filename, "a");
-						break;
-				}
-
-				if (!this->_stream) throw CannotOpenFileException();
-				this->_mode = mode;
-				this->_determineSize();
-
-			});
 		}
 
 		virtual ~File() {
@@ -145,7 +111,7 @@ namespace fart::io::fs {
 		}
 
 		template<typename T = uint8_t>
-		Strong<Data<T>> read(size_t count) {
+		Data<T> read(size_t count) {
 			return this->_mutex.lockedValue([this,count](){
 				if (this->_mode == Mode::asWrite) throw FileModeException();
 				size_t toRead = math::min(sizeof(T) * count, this->_size - this->_position);
@@ -170,11 +136,11 @@ namespace fart::io::fs {
 		}
 
 		template<typename T = uint8_t>
-		Strong<Data<T>> readToEnd() {
-			Strong<Data<T>> buffer;
+		Data<T> readToEnd() {
+			Data<T> buffer;
 			this->_mutex.locked([this,&buffer](){
 				while (this->_position < this->_size) {
-					buffer->append(this->read(16384));
+					buffer.append(this->read(16384));
 				}
 			});
 			return buffer;
@@ -189,6 +155,46 @@ namespace fart::io::fs {
 				fwrite(data.items(), sizeof(T), data.count(), this->_stream);
 			});
 		}
+
+	private:
+
+		File(const String& filename, Mode mode) {
+			File::resolve(File::expand(filename)).withCString([this,&mode](const char* filename) {
+
+				switch (mode) {
+					case Mode::asRead:
+						this->_stream = fopen(filename, "r");
+						break;
+					case Mode::asWrite:
+						this->_stream = fopen(filename, "w");
+						break;
+					case Mode::asAppend:
+						this->_stream = fopen(filename, "a");
+						break;
+				}
+
+				if (!this->_stream) throw CannotOpenFileException();
+				this->_mode = mode;
+				this->_determineSize();
+
+			});
+		}
+
+		void _determineSize() {
+			this->_position = ftell(this->_stream);
+			fseek(this->_stream, 0, SEEK_END);
+			this->_size = ftell(this->_stream);
+			fseek(this->_stream, this->_position, SEEK_SET);
+		}
+
+		Mode _mode;
+		FILE* _stream;
+		size_t _size;
+		size_t _position;
+
+		Mutex _mutex;
+
+	public:
 
 	};
 

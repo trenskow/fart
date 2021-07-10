@@ -31,8 +31,8 @@ namespace fart::web {
 
 	protected:
 
-		virtual Strong<Data<uint8_t>> headData(const Data<uint8_t>& lineBreak) const {
-			return Strong<Data<uint8_t>>();
+		virtual Data<uint8_t> headData(const Data<uint8_t>& lineBreak) const {
+			return Data<uint8_t>();
 		}
 
 	};
@@ -61,22 +61,22 @@ namespace fart::web {
 			Data<uint8_t> deliminator(lineBreak);
 			deliminator.append(lineBreak);
 
-			Strong<Array<Data<uint8_t>>> parts = data.split(deliminator, IncludeSeparator::none, 2);
+			Array<Data<uint8_t>> parts = data.split(deliminator, IncludeSeparator::none, 2);
 
-			if (parts->count() < 1) {
+			if (parts.count() < 1) {
 				throw DataIncompleteException();
 			}
 
-			Strong<Array<Data<uint8_t>>> header = parts->itemAtIndex(0)->split(lineBreak);
+			Array<Data<uint8_t>> header = parts.itemAtIndex(0)->split(lineBreak);
 
-			header->forEach([this](const Data<uint8_t>& current) {
+			header.forEach([this](const Data<uint8_t>& current) {
 				Data<uint8_t> keyValueSplitter((uint8_t *)": ", 2);
-				Strong<Array<Data<uint8_t>>> parts = current.split(keyValueSplitter);
-				if (parts->count() != 2) throw DataIncompleteException();
-				Strong<Array<String>> strings = parts->map<String>([](const Data<uint8_t>& current) {
-					return Strong<String>(current);
+				Array<Data<uint8_t>> parts = current.split(keyValueSplitter);
+				if (parts.count() != 2) throw DataIncompleteException();
+				Array<String> strings = parts.map<String>([](const Data<uint8_t>& current) {
+					return String(current);
 				});
-				_headers.set(strings->itemAtIndex(0), strings->itemAtIndex(1));
+				_headers.set(strings.itemAtIndex(0), strings.itemAtIndex(1));
 			});
 
 			if (_headers.hasKey("content-length")) {
@@ -86,16 +86,16 @@ namespace fart::web {
 				try { length = _headers["content-length"]->doubleValue(); }
 				catch (const DecoderException&) { throw DataMalformedException(); }
 
-				if (parts->count() < 2) throw DataIncompleteException();
+				if (parts.count() < 2) throw DataIncompleteException();
 
-				if (parts->itemAtIndex(1)->count() < length) throw DataIncompleteException();
-				if (parts->itemAtIndex(1)->count() > length) throw DataMalformedException();
+				if (parts.itemAtIndex(1)->count() < length) throw DataIncompleteException();
+				if (parts.itemAtIndex(1)->count() > length) throw DataMalformedException();
 
-				_body = parts->itemAtIndex(1);
+				_body = parts.itemAtIndex(1);
 
 			}
 
-			parts->forEach([&data](const Data<uint8_t>& current) {
+			parts.forEach([&data](const Data<uint8_t>& current) {
 				data.remove(0, current.count());
 			});
 
@@ -115,11 +115,11 @@ namespace fart::web {
 			return _headers.hasKey(String(key));
 		}
 
-		Strong<String> headerValue(const char* key) const {
+		String headerValue(const char* key) const {
 			return _headers[String(key)];
 		}
 
-		Strong<String> headerValue(const String& key) const {
+		String headerValue(const String& key) const {
 			return _headers[key];
 		}
 
@@ -127,7 +127,7 @@ namespace fart::web {
 			_headers.set(key, value);
 		}
 
-		Strong<Data<uint8_t>> body() const {
+		Data<uint8_t> body() const {
 			return _body;
 		}
 
@@ -136,26 +136,26 @@ namespace fart::web {
 			_body = data;
 		}
 
-		Strong<Data<uint8_t>> data() const {
+		Data<uint8_t> data() const {
 
-			Strong<Data<uint8_t>> result;
-			Strong<Data<uint8_t>> lineBreak = dataForLineBreakMode(lineBreakMode());
+			Data<uint8_t> result;
+			Data<uint8_t> lineBreak = dataForLineBreakMode(lineBreakMode());
 
-			result->append(Head::headData(lineBreak));
+			result.append(Head::headData(lineBreak));
 
 			_headers.forEach([&result,&lineBreak](const String& key, const String& value) {
 				key.withCString([&result,&value](const char* key){
 					value.withCString([&result,key](const char* value){
-						result->append(String::format("%s: %s", key, value)->UTF8Data());
+						result.append(String::format("%s: %s", key, value).UTF8Data());
 					});
 				});
-				result->append(lineBreak);
+				result.append(lineBreak);
 			});
 
-			result->append(lineBreak);
+			result.append(lineBreak);
 
 			if (_body != nullptr) {
-				result->append(_body);
+				result.append(_body);
 			}
 
 			return result;
@@ -179,14 +179,14 @@ namespace fart::web {
 
 		}
 
-		static Strong<Data<uint8_t>> dataForLineBreakMode(LineBreakMode lineBreakMode) {
+		static Data<uint8_t> dataForLineBreakMode(LineBreakMode lineBreakMode) {
 			switch (lineBreakMode) {
 				case LineBreakMode::crLf:
-					return Strong<Data<uint8_t>>((uint8_t*)"\r\n", 2);
+					return Data<uint8_t>((uint8_t*)"\r\n", 2);
 				case LineBreakMode::cr:
-					return Strong<Data<uint8_t>>((uint8_t*)"\r", 1);
+					return Data<uint8_t>((uint8_t*)"\r", 1);
 				case LineBreakMode::lf:
-					return Strong<Data<uint8_t>>((uint8_t*)"\n", 1);
+					return Data<uint8_t>((uint8_t*)"\n", 1);
 			}
 		}
 
@@ -198,7 +198,7 @@ namespace fart::web {
 
 		LineBreakMode _lineBreakMode;
 		Dictionary<String, String> _headers;
-		Strong<Data<uint8_t>> _body;
+		Data<uint8_t> _body;
 
 	};
 

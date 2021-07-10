@@ -26,6 +26,7 @@ namespace fart::memory {
 		static_assert(std::is_base_of<Object, T>::value);
 
 	private:
+
 		T* _object;
 
 		void _setObject(T* object, bool newObject = false) {
@@ -45,6 +46,7 @@ namespace fart::memory {
 		}
 
 	public:
+
 		Strong(nullptr_t) : _object(nullptr) {};
 		Strong(T& object) : Strong(&object) {};
 
@@ -60,7 +62,8 @@ namespace fart::memory {
 			_setObject(other._object);
 		}
 
-		Strong(Strong<T>&& other) : _object(other._object) {
+		Strong(Strong<T>&& other) {
+			this->_object = other._object;
 			other._object = nullptr;
 		}
 
@@ -114,13 +117,17 @@ namespace fart::memory {
 			return _object;
 		}
 
-		bool operator==(std::nullptr_t n) {
-			return this->_object == n;
+		bool operator==(std::nullptr_t) {
+			return this->_object == nullptr;
 		}
 
-		bool operator!=(std::nullptr_t n) {
-			return !(this->_object == n);
+		bool operator!=(std::nullptr_t) {
+			return !(this->_object == nullptr);
 		}
+
+		void *operator new(size_t size) = delete;
+
+		void operator delete(void *ptr) throw() = delete;
 
 		template<class O>
 		Strong<O> as() {

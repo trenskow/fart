@@ -31,11 +31,10 @@ namespace fart::io::sockets {
 	private:
 
 		sockaddr_storage _storage;
-		Mutex _mutex;
 
 	public:
 
-		Endpoint(Strong<String> host, uint16_t port, EndpointType type = EndpointType::IPv4, uint32_t scope_id = 0) {
+		Endpoint(const String& host, uint16_t port, EndpointType type = EndpointType::IPv4, uint32_t scope_id = 0) {
 
 			switch (type) {
 				case EndpointType::IPv4: {
@@ -47,7 +46,7 @@ namespace fart::io::sockets {
 					addr->sin_addr.s_addr = INADDR_ANY;
 					addr->sin_port = htons(port);
 
-					host->withCString([&addr](const char* host){
+					host.withCString([&addr](const char* host){
 						inet_pton(AF_INET, host, &addr->sin_addr);
 					});
 
@@ -62,7 +61,7 @@ namespace fart::io::sockets {
 					addr->sin6_port = htons(port);
 					addr->sin6_scope_id = scope_id;
 
-					host->withCString([&addr](const char* host) {
+					host.withCString([&addr](const char* host) {
 						inet_pton(AF_INET6, host, &addr->sin6_addr);
 					});
 
@@ -71,9 +70,7 @@ namespace fart::io::sockets {
 
 		}
 
-		Endpoint(const char* host, uint16_t port, EndpointType types = EndpointType::IPv4, uint32_t scope_id = 0)  : Endpoint(Strong<String>(host), port, types, scope_id) {}
-
-		Endpoint(sockaddr* addr) {
+		Endpoint(const sockaddr* addr) {
 			memcpy(&this->_storage, addr, addr->sa_len);
 		}
 
@@ -82,61 +79,49 @@ namespace fart::io::sockets {
 		virtual ~Endpoint() {}
 
 		EndpointType type() const {
-			return _mutex.lockedValue([this]() {
-				if (this->_storage.ss_family == AF_INET) return EndpointType::IPv4;
-				return EndpointType::IPv6;
-			});
+			if (this->_storage.ss_family == AF_INET) return EndpointType::IPv4;
+			return EndpointType::IPv6;
 		}
 
-		Strong<String> host() const {
+		String host() const {
 
-			return _mutex.lockedValue([this]() {
+			char ret[1024];
 
-				char ret[1024];
+			switch (this->type()) {
+				case EndpointType::IPv4:
+					inet_ntop(AF_INET, &((sockaddr_in *)&this->_storage)->sin_addr, ret, 1024);
+					break;
+				case EndpointType::IPv6:
+					inet_ntop(AF_INET6, &((sockaddr_in6 *)&this->_storage)->sin6_addr, ret, 1024);
+					break;
+			}
 
-				switch (this->type()) {
-					case EndpointType::IPv4:
-						inet_ntop(AF_INET, &((sockaddr_in *)&this->_storage)->sin_addr, ret, 1024);
-						break;
-					case EndpointType::IPv6:
-						inet_ntop(AF_INET6, &((sockaddr_in6 *)&this->_storage)->sin6_addr, ret, 1024);
-						break;
-				}
-
-				return Strong<String>(ret);
-
-			});
+			return String(ret);
 
 		}
 
 		uint16_t port() const {
-			return _mutex.lockedValue([this]() {
-				switch (this->type()) {
-					case EndpointType::IPv4:
-						return ntohs(((sockaddr_in *)&this->_storage)->sin_port);
-					case EndpointType::IPv6:
-						return ntohs(((sockaddr_in6 *)&this->_storage)->sin6_port);
-				}
-			});
+			switch (this->type()) {
+				case EndpointType::IPv4:
+					return ntohs(((sockaddr_in *)&this->_storage)->sin_port);
+				case EndpointType::IPv6:
+					return ntohs(((sockaddr_in6 *)&this->_storage)->sin6_port);
+			}
 		}
 
 		void setPort(const uint16_t port) {
-			_mutex.locked([this,port]() {
-				switch (this->type()) {
-					case EndpointType::IPv4:
-						((sockaddr_in *)&this->_storage)->sin_port = htons(port);
-						break;
-					case EndpointType::IPv6:
-						((sockaddr_in6 *)&this->_storage)->sin6_port = htons(port);
-						break;
-				}
-			});
+			switch (this->type()) {
+				case EndpointType::IPv4:
+					((sockaddr_in *)&this->_storage)->sin_port = htons(port);
+					break;
+				case EndpointType::IPv6:
+					((sockaddr_in6 *)&this->_storage)->sin6_port = htons(port);
+					break;
+			}
 		}
 
 		const sockaddr* sockAddr() const {
-			return _mutex.lockedValue([this]() {
-				return (sockaddr *)&this->_storage;
-			});
+			return (sockaddr *)&this->_storage;
 		}
 
 	};

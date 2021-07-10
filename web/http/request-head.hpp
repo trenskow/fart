@@ -35,15 +35,15 @@ namespace fart::web::http {
 
 		RequestHead(Data<uint8_t>& data) : Head(data) {
 
-			if (*(*_parts)[0] == "HEAD") _method = Method::head;
-			else if (*(*_parts)[0] == "GET") _method = Method::get;
-			else if (*(*_parts)[0] == "POST") _method = Method::post;
-			else if (*(*_parts)[0] == "PUT") _method = Method::put;
-			else if (*(*_parts)[0] == "DELETE") _method = Method::del;
+			if (*(_parts)[0] == "HEAD") _method = Method::head;
+			else if (*(_parts)[0] == "GET") _method = Method::get;
+			else if (*(_parts)[0] == "POST") _method = Method::post;
+			else if (*(_parts)[0] == "PUT") _method = Method::put;
+			else if (*(_parts)[0] == "DELETE") _method = Method::del;
 			else throw MethodNotSupportedException();
 
-			_version = parseVersion((*_parts)[2]);
-			_path = *Url::decode(*(*_parts)[1]);
+			_version = parseVersion((_parts)[2]);
+			_path = Url::decode(*(_parts)[1]);
 
 		}
 
@@ -59,39 +59,39 @@ namespace fart::web::http {
 			return _method;
 		}
 
-		const Strong<String> path() const {
-			return Strong<String>(_path);
+		const String path() const {
+			return String(_path);
 		}
 
 	protected:
 
-		virtual Strong<Data<uint8_t>> headData(const Data<uint8_t> &lineBreak) const {
+		virtual Data<uint8_t> headData(const Data<uint8_t> &lineBreak) const {
 
-			Strong<Data<uint8_t>> result = MessageHead::headData(lineBreak);
+			Data<uint8_t> result = MessageHead::headData(lineBreak);
 
 			switch (method()) {
 				case Method::head:
-					result->append(String("HEAD").UTF8Data());
+					result.append(String("HEAD").UTF8Data());
 					break;
 				case Method::get:
-					result->append(String("GET").UTF8Data());
+					result.append(String("GET").UTF8Data());
 					break;
 				case Method::post:
-					result->append(String("POST").UTF8Data());
+					result.append(String("POST").UTF8Data());
 					break;
 				case Method::put:
-					result->append(String("PUT").UTF8Data());
+					result.append(String("PUT").UTF8Data());
 					break;
 				case Method::del:
-					result->append(String("DELETE").UTF8Data());
+					result.append(String("DELETE").UTF8Data());
 					break;
 			}
 
-			result->append(' ');
-			result->append(_path->UTF8Data());
-			result->append(' ');
-			result->append(Head::versionData(_version));
-			result->append(lineBreak);
+			result.append(' ');
+			result.append(_path->UTF8Data());
+			result.append(' ');
+			result.append(Head::versionData(_version));
+			result.append(lineBreak);
 
 			return result;
 

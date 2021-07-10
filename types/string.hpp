@@ -54,16 +54,16 @@ namespace fart::types {
 		}
 
 		String(const Data<uint16_t>& data) noexcept(false) : String() {
-			Strong<Data<uint16_t>> parseData(data);
+			Data<uint16_t> parseData(data);
 			Endian::Variant endian = Endian::Variant::big;
 			if (data.count() > 1) {
-				Data<uint8_t> potentialMarker = *data.subdata(0, 2)->as<uint8_t>();
+				Data<uint8_t> potentialMarker = data.subdata(0, 2).as<uint8_t>();
 				if (potentialMarker == bigEndianBOM || potentialMarker == littleEndianBOM) {
 					endian = potentialMarker == bigEndianBOM ? Endian::Variant::big : Endian::Variant::little;
-					parseData = parseData->subdata(2);
+					parseData = parseData.subdata(2);
 				}
 			}
-			_storage.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
+			_storage.append(_decodeUTF16(parseData.items(), parseData.count(), endian));
 		}
 
 		String(const Data<uint32_t>& store) : _storage(store) {}
@@ -73,8 +73,8 @@ namespace fart::types {
 		String(String&& other) : _storage(std::move(other._storage)) { }
 
 		template<typename F>
-		static Strong<String> fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
-			return Strong<String>(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
+		static String fromCString(const F& todo, size_t size = Data<uint32_t>::blockSize) {
+			return String(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
 				return todo((char*)buffer, length);
 			}));
 		}
@@ -83,7 +83,7 @@ namespace fart::types {
 
 		static
 		__attribute__ ((format (printf, 1, 0)))
-		Strong<String> format(const char* format, ...) {
+		String format(const char* format, ...) {
 
 			va_list args;
 
@@ -101,7 +101,7 @@ namespace fart::types {
 
 			va_end(args);
 
-			return Strong<String>((const char*)buffer);
+			return String((const char*)buffer);
 
 		}
 
@@ -112,13 +112,13 @@ namespace fart::types {
 		template<typename F>
 		void withCString(const F& todo) const {
 			auto data = this->UTF8Data(true);
-			todo((const char*)data->items());
+			todo((const char*)data.items());
 		}
 
 		template<typename T, typename F>
 		auto mapCString(const F& todo) const {
 			auto data = this->UTF8Data(true);
-			return todo((const char*)data->items());
+			return todo((const char*)data.items());
 		}
 
 		void print(bool newLine = true) const {
@@ -127,23 +127,23 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Data<uint8_t>> UTF8Data(bool nullTerminate = false) const {
+		Data<uint8_t> UTF8Data(bool nullTerminate = false) const {
 			return _encodeUTF8(_storage, nullTerminate);
 		}
 
-		Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
+		Data<uint16_t> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
 			return _encodeUTF16(_storage, endian, includeBOM);
 		}
 
-		Strong<Data<uint32_t>> UTF32Data() const {
-			return Strong<Data<uint32_t>>(this->_storage);
+		Data<uint32_t> UTF32Data() const {
+			return Data<uint32_t>(this->_storage);
 		}
 
-		static Strong<String> fromHex(const Data<uint8_t>& data) {
-			return Strong<String>(_decodeHex(data));
+		static String fromHex(const Data<uint8_t>& data) {
+			return String(_decodeHex(data));
 		}
 
-		Strong<Data<uint8_t>> hexData() const {
+		Data<uint8_t> hexData() const {
 			return _encodeHex(_storage);
 		}
 
@@ -159,49 +159,49 @@ namespace fart::types {
 			_storage.append(_decodeUTF8((const uint8_t*)string, strlen(string)));
 		}
 
-		Strong<String> appending(const String& other) const {
-			return Strong<String>(this->_storage.appending(other._storage));
+		String appending(const String& other) const {
+			return String(this->_storage.appending(other._storage));
 		}
 
-		Strong<Array<String>> split() const {
-			return _storage.split()->map<String>([](Data<uint32_t>& data) {
-				return Strong<String>(data);
+		Array<String> split() const {
+			return _storage.split().map<String>([](Data<uint32_t>& data) {
+				return String(data);
 			});
 		}
 
-		Strong<Array<String>> split(const char* separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Array<String> split(const char* separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			String sep(separator);
 			return split(sep, includeSeparator, max);
 		}
 
-		Strong<Array<String>> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			return _storage.split(separator._storage, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
-				return Strong<String>(current);
-			});
-		}
-
-		Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
-				return current._storage;
-			});
-			return _storage.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
+		Array<String> split(String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+			return _storage.split(separator._storage, includeSeparator, max).map<String>([](const Data<uint32_t>& current) {
 				return String(current);
 			});
 		}
 
-		static Strong<String> join(Array<String>& strings) {
-			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
+		Array<String> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
+				return current._storage;
+			});
+			return _storage.split(stores, includeSeparator, max).map<String>([](const Data<uint32_t>& current) {
+				return String(current);
+			});
+		}
+
+		static String join(const Array<String>& strings) {
+			return String(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			})));
 		}
 
-		static Strong<String> join(Array<String>& strings, const char* seperator) {
+		static String join(const Array<String>& strings, const char* seperator) {
 			String sep(seperator);
 			return String::join(strings, sep);
 		}
 
-		static Strong<String> join(Array<String>& strings, String& separator) {
-			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
+		static String join(const Array<String>& strings, const String& separator) {
+			return String(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			}), separator._storage));
 		}
@@ -310,20 +310,20 @@ namespace fart::types {
 			return this->_storage.indexOf(chr);
 		}
 
-		Strong<String> substring(size_t offset, size_t length = NotFound) const {
-			return Strong<String>(_storage.subdata(offset, length));
+		String substring(size_t offset, size_t length = NotFound) const {
+			return String(_storage.subdata(offset, length));
 		}
 
-		Strong<String> uppercased() const {
-			return Strong<String>(this->_storage.map<uint32_t>(Unicode::lowerToUpper));
+		String uppercased() const {
+			return String(this->_storage.map<uint32_t>(Unicode::lowerToUpper));
 		}
 
-		Strong<String> lowercased() const {
-			return Strong<String>(this->_storage.map<uint32_t>(Unicode::upperToLower));
+		String lowercased() const {
+			return String(this->_storage.map<uint32_t>(Unicode::upperToLower));
 		}
 
-		Strong<String> capitalized() const {
-			return this->substring(0, 1)->uppercased()->appending(this->substring(1)->lowercased());
+		String capitalized() const {
+			return this->substring(0, 1).uppercased().appending(this->substring(1).lowercased());
 		}
 
 		virtual uint64_t hash() const override {
@@ -361,8 +361,6 @@ namespace fart::types {
 
 	private:
 
-		friend class Strong<String>;
-
 		enum class DoublePart {
 			integer = 0,
 			fraction,
@@ -371,7 +369,7 @@ namespace fart::types {
 
 		Data<uint32_t>::Value _storage;
 
-		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
+		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 
 			size_t offset = 0;
 
@@ -379,7 +377,7 @@ namespace fart::types {
 				offset += 3;
 			}
 
-			Strong<Data<uint32_t>> ret;
+			Data<uint32_t> ret;
 
 			for (size_t idx = offset ; idx < length ; idx++) {
 
@@ -420,7 +418,7 @@ namespace fart::types {
 					idx++;
 				}
 
-				ret->append(codePoint);
+				ret.append(codePoint);
 
 			}
 
@@ -428,9 +426,9 @@ namespace fart::types {
 
 		}
 
-		static Strong<Data<uint8_t>> _encodeUTF8(const Data<uint32_t> &buffer, bool nullTerminate = false) noexcept(false) {
+		static Data<uint8_t> _encodeUTF8(const Data<uint32_t> &buffer, bool nullTerminate = false) noexcept(false) {
 
-			Strong<Data<uint8_t>> ret;
+			Data<uint8_t> ret;
 
 			for (size_t idx = 0 ; idx < buffer.count() ; idx++) {
 
@@ -438,47 +436,47 @@ namespace fart::types {
 
 				uint32_t codePoint = buffer.itemAtIndex(idx);
 				if (codePoint < 0x80) {
-					ret->append(codePoint);
+					ret.append(codePoint);
 				} else if (codePoint < 0x800) {
 					uint8_t chr[2];
 					chr[0] = 0xC0 | (codePoint >> 6);
 					chr[1] = 0x80 | (codePoint & 0x3F);
-					ret->append(chr, 2);
+					ret.append(chr, 2);
 				} else if (codePoint <= 0xFFFF) {
 					chr[0] = 0xE0 | (codePoint >> 12);
 					chr[1] = 0x80 | ((codePoint >> 6) & 0x3F);
 					chr[2] = 0x80 | (codePoint & 0x3F);
-					ret->append(chr, 3);
+					ret.append(chr, 3);
 				} else if (codePoint <= 0x1FFFFF) {
 					chr[0] = 0xF0 | (codePoint >> 18);
 					chr[1] = 0x80 | ((codePoint >> 12) & 0x3F);
 					chr[2] = 0x80 | ((codePoint >> 6) & 0x3F);
 					chr[3] = 0x80 | (codePoint & 0x3F);
-					ret->append(chr, 4);
+					ret.append(chr, 4);
 				}
 
 			}
 
-			if (nullTerminate) ret->append('\0');
+			if (nullTerminate) ret.append('\0');
 
 			return ret;
 
 		}
 
-		static Strong<Data<uint32_t>> _decodeUTF16(const uint16_t* buffer, size_t length, Endian::Variant endian) noexcept(false) {
+		static Data<uint32_t> _decodeUTF16(const uint16_t* buffer, size_t length, Endian::Variant endian) noexcept(false) {
 
-			Strong<Data<uint32_t>> ret;
+			Data<uint32_t> ret;
 
 			for (size_t idx = 0 ; idx < length ; idx++) {
 
 				uint16_t chr = buffer[idx];
 
-				if (chr < 0xD800 || chr >= 0xF000) ret->append(Endian::toSystemVariant(chr, endian));
+				if (chr < 0xD800 || chr >= 0xF000) ret.append(Endian::toSystemVariant(chr, endian));
 				else {
 					if (idx + 1 >= length) throw DecoderException(idx);
 					uint32_t high = Endian::toSystemVariant(chr, endian);
 					uint32_t low = Endian::toSystemVariant(buffer[++idx], endian);
-					ret->append(((high - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000);
+					ret.append(((high - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000);
 				}
 
 			}
@@ -487,19 +485,19 @@ namespace fart::types {
 
 		}
 
-		static Strong<Data<uint16_t>> _encodeUTF16(const Data<uint32_t> &buffer, Endian::Variant endian, bool includeBOM) noexcept(false) {
+		static Data<uint16_t> _encodeUTF16(const Data<uint32_t> &buffer, Endian::Variant endian, bool includeBOM) noexcept(false) {
 
-			Strong<Data<uint16_t>> ret;
+			Data<uint16_t> ret;
 
 			if (includeBOM) {
-				ret->append((endian == Endian::Variant::big ? bigEndianBOM : littleEndianBOM).as<uint16_t>());
+				ret.append((endian == Endian::Variant::big ? bigEndianBOM : littleEndianBOM).as<uint16_t>());
 			}
 
 			for (size_t idx = 0 ; idx < buffer.count() ; idx++) {
 
 				uint32_t chr = buffer[idx];
 
-				if (chr < 0xD800) ret->append(Endian::fromSystemVariant((uint16_t)chr, endian));
+				if (chr < 0xD800) ret.append(Endian::fromSystemVariant((uint16_t)chr, endian));
 
 				else if (chr < 0xF000 || chr > 0x10FFFF) throw EncoderException(idx);
 
@@ -507,8 +505,8 @@ namespace fart::types {
 					uint32_t tmp = chr - 0x10000;
 					uint32_t high = tmp / 0x400 + 0xD800;
 					uint32_t low = tmp % 0x400 + 0xDC00;
-					ret->append(Endian::fromSystemVariant((uint16_t)high, endian));
-					ret->append(Endian::fromSystemVariant((uint16_t)low, endian));
+					ret.append(Endian::fromSystemVariant((uint16_t)high, endian));
+					ret.append(Endian::fromSystemVariant((uint16_t)low, endian));
 				}
 
 			}
@@ -517,13 +515,13 @@ namespace fart::types {
 
 		}
 
-		static Strong<Data<uint32_t>> _decodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
+		static Data<uint32_t> _decodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
 			return buffer.map<uint32_t>([&endian](uint32_t character) {
 				return Endian::convert(character, endian, Endian::systemVariant());
 			});
 		}
 
-		static Strong<Data<uint32_t>> _encodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
+		static Data<uint32_t> _encodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
 			return buffer.map<uint32_t>([&endian](uint32_t character) {
 				return Endian::convert(character, Endian::systemVariant(), endian);
 			});
@@ -542,30 +540,30 @@ namespace fart::types {
 			else throw EncoderException(idx);
 		}
 
-		static Strong<Data<uint32_t>> _decodeHex(const Data<uint8_t> &buffer) noexcept(false) {
+		static Data<uint32_t> _decodeHex(const Data<uint8_t> &buffer) noexcept(false) {
 
 			if (buffer.count() % 2 != 0) throw OutOfBoundException(buffer.count() + 1);
 
-			Strong<Data<uint32_t>> ret;
+			Data<uint32_t> ret;
 
 			for (size_t idx = 0 ; idx < buffer.count() ; idx += 2) {
 				auto byte = buffer[idx];
-				ret->append(_valueToHex(byte >> 4, idx));
-				ret->append(_valueToHex(byte & 0xF, idx));
+				ret.append(_valueToHex(byte >> 4, idx));
+				ret.append(_valueToHex(byte & 0xF, idx));
 			}
 
 			return ret;
 
 		}
 
-		static Strong<Data<uint8_t>> _encodeHex(const Data<uint32_t> &buffer) noexcept(false) {
+		static Data<uint8_t> _encodeHex(const Data<uint32_t> &buffer) noexcept(false) {
 
 			if (buffer.count() % 2 != 0) throw OutOfBoundException(buffer.count() + 1);
 
-			Strong<Data<uint8_t>> ret;
+			Data<uint8_t> ret;
 
 			for (size_t idx = 0 ; idx < buffer.count() ; idx += 2) {
-				ret->append(_valueFromHex(buffer[idx], idx) << 4 | _valueFromHex(buffer[idx + 1], idx + 1));
+				ret.append(_valueFromHex(buffer[idx], idx) << 4 | _valueFromHex(buffer[idx + 1], idx + 1));
 			}
 
 			return ret;

@@ -66,31 +66,32 @@ namespace fart::types {
 		}
 
 		static Duration parse(const String& string) {
-			Strong<String> parse = string;
 
-			if (parse->length() == 0) throw DurationParserException();
+			String parse = string;
+
+			if (parse.length() == 0) throw DurationParserException();
 
 			double multiplier = 1;
 
-			auto prefix = parse->substring(0, 1);
-			if (*prefix == "+" || *prefix == "-") {
-				multiplier = (*prefix == "-" ? -1 : 1);
-				parse = parse->substring(1);
+			auto prefix = parse.substring(0, 1);
+			if (prefix == "+" || prefix == "-") {
+				multiplier = (prefix == "-" ? -1 : 1);
+				parse = parse.substring(1);
 			}
 
 			uint64_t hours = 0;
 			uint64_t minutes = 0;
 
-			if (parse->length() == 5 && *parse->substring(2, 1) == ":") {
-				hours = parse->substring(0, 2)->doubleValue();
-				minutes = parse->substring(3, 2)->doubleValue();
+			if (parse.length() == 5 && parse.substring(2, 1) == ":") {
+				hours = parse.substring(0, 2).doubleValue();
+				minutes = parse.substring(3, 2).doubleValue();
 			}
-			else if (parse->length() == 4) {
-				hours = parse->substring(0, 2)->doubleValue();
-				minutes = parse->substring(2, 4)->doubleValue();
+			else if (parse.length() == 4) {
+				hours = parse.substring(0, 2).doubleValue();
+				minutes = parse.substring(2, 4).doubleValue();
 			}
-			else if (parse->length() == 2) {
-				hours = parse->doubleValue();
+			else if (parse.length() == 2) {
+				hours = parse.doubleValue();
 			}
 			else throw DurationParserException();
 
@@ -155,14 +156,14 @@ namespace fart::types {
 			prefixPositive = 1 << 0
 		};
 
-		Strong<String> toString(ToStringOptions options) const {
+		String toString(ToStringOptions options) const {
 			double offset = _seconds;
 			double absOffset = fabs(offset);
 			uint64_t hours = Duration(absOffset).hours();
 			uint64_t minutes = Duration(absOffset - Duration::fromHours(hours)).minutes();
 			String prefix = offset < 0 ? "-" : (static_cast<uint8_t>(options) & static_cast<uint8_t>(ToStringOptions::prefixPositive) ? "+" : "");
-			return prefix.mapCString<Strong<String>>([&hours,&minutes](const char* prefix){
-				return Strong<String>(String::format("%s%02llu:%02llu", prefix, hours, minutes));
+			return prefix.mapCString<String>([&hours,&minutes](const char* prefix){
+				return String(String::format("%s%02llu:%02llu", prefix, hours, minutes));
 			});
 		}
 

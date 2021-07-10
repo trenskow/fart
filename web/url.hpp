@@ -24,17 +24,17 @@ namespace fart::web {
 
 	public:
 
-		static Strong<String> decode(const String& url) {
-			Strong<String> result;
+		static String decode(const String& url) {
+			String result;
 			for (size_t idx = 0 ; idx < url.length() ; idx++) {
 				uint32_t chr = url[idx];
 				if (chr == '+') chr = ' ';
 				else if (chr == '%') {
 					if (idx >= url.length() - 2) throw UrlDecodingException(chr);
-					chr = url.substring(idx + 1, 2)->hexData()->itemAtIndex(0);
+					chr = url.substring(idx + 1, 2).hexData().itemAtIndex(0);
 					idx += 2;
 				}
-				result->append(chr);
+				result.append(chr);
 			}
 			return result;
 		}

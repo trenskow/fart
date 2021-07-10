@@ -63,6 +63,16 @@ namespace fart::memory {
 			});
 		}
 
+		static void* allocate(size_t size) noexcept(false) {
+			void *mem = calloc(size, sizeof(uint8_t));
+			if (!mem) throw AllocationException(size);
+			return mem;
+		}
+
+		static void deallocate(void* ptr) throw() {
+			free(ptr);
+		}
+
 #ifdef FART_ALLOW_MANUAL_HEAP
 	public:
 #else
@@ -70,13 +80,11 @@ namespace fart::memory {
 #endif
 
 		void *operator new(size_t size) noexcept(false) {
-			void *mem = calloc(size, sizeof(uint8_t));
-			if (!mem) throw AllocationException(size);
-			return mem;
+			return allocate(size);
 		}
 
 		void operator delete(void *ptr) throw() {
-			free(ptr);
+			deallocate(ptr);
 		}
 
 	public:
@@ -84,7 +92,7 @@ namespace fart::memory {
 		Object() : _retainCount(0), _weakReferences(nullptr), _weakReferencesSize(0), _weakReferencesCount(0) {}
 
 		Object(const Object& other) : Object() {}
-		Object(Object&& other) { }
+		Object(Object&& other) : Object() { }
 
 		virtual ~Object() {
 			_mutex.locked([this]() {

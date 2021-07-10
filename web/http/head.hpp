@@ -40,7 +40,7 @@ namespace fart::web::http {
 			if (parts.count() != 3) throw DataMalformedException();
 
 			_parts = parts.map<String>([](const Data<uint8_t>& current) {
-				return Strong<String>(current);
+				return String(current);
 			});
 
 		}
@@ -57,7 +57,7 @@ namespace fart::web::http {
 			throw VersionNotSupportedException();
 		}
 
-		static Strong<Data<uint8_t>> versionData(Version version) {
+		static Data<uint8_t> versionData(Version version) {
 			switch (version) {
 				case Version::HTTP1_0:
 					return String("HTTP/1.0").UTF8Data();
@@ -66,7 +66,7 @@ namespace fart::web::http {
 			}
 		}
 
-		Strong<Array<String>> _parts;
+		Array<String> _parts;
 
 	};
 

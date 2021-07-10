@@ -36,6 +36,8 @@ namespace fart::io::sockets {
 
 	class Socket : public Object, public Hashable {
 
+		friend class Strong<Socket>;
+
 	public:
 
 		class ICloseListener {
@@ -43,15 +45,9 @@ namespace fart::io::sockets {
 			virtual void SocketClosed(const Socket& socket) const = 0;
 		};
 
-		Socket(int socket) : Socket() {
-			_socket = socket;
+		static Strong<Socket> create(bool isUDP = false) {
+			return Strong<Socket>(isUDP);
 		}
-
-		Socket(bool isUDP = false) : _isUDP(isUDP), _socket(-1), _state(SocketState::closed), _localEndpoint(nullptr), _remoteEndpoint(nullptr) {}
-
-		Socket(const Socket& other) : _isUDP(other._isUDP), _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) {}
-
-		Socket(Socket&& other) : _isUDP(other._isUDP), _socket(other._socket), _state(other._state), _localEndpoint(other._localEndpoint), _remoteEndpoint(other._remoteEndpoint) { }
 
 		virtual ~Socket() {
 			close();
@@ -64,13 +60,13 @@ namespace fart::io::sockets {
 			});
 		}
 
-		void bind(Strong<Endpoint> endpoint) {
+		void bind(const Endpoint& endpoint) {
 
 			_mutex.locked([this,endpoint](){
 
 				_localEndpoint = endpoint;
 
-				const sockaddr* addr = _localEndpoint->sockAddr();
+				const sockaddr* addr = _localEndpoint.sockAddr();
 
 				if (_socket < 0) {
 
@@ -81,7 +77,7 @@ namespace fart::io::sockets {
 						return;
 					}
 
-					if (_localEndpoint->type() == EndpointType::IPv6) {
+					if (_localEndpoint.type() == EndpointType::IPv6) {
 						int32_t on = 1;
 						setsockopt(_socket, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
 					}
@@ -156,14 +152,14 @@ namespace fart::io::sockets {
 
 		}
 
-		void accept(function<void(Data<uint8_t>&, const Endpoint&)> readCallback) {
+		void accept(function<void(const Data<uint8_t>&, const Endpoint&)> readCallback) {
 			_mutex.locked([this]() {
 				_state = SocketState::connected;
 			});
 			_read([]() {}, readCallback);
 		}
 
-		void connect(Strong<Endpoint> endpoint, function<void(Data<uint8_t>&, const Endpoint&)> readCallback) {
+		void connect(const Endpoint& endpoint, function<void(const Data<uint8_t>&, const Endpoint&)> readCallback) {
 
 			_mutex.locked([this,endpoint,readCallback]() {
 
@@ -178,7 +174,7 @@ namespace fart::io::sockets {
 
 				_remoteEndpoint = endpoint;
 
-				_socket = socket(_remoteEndpoint->sockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
+				_socket = socket(_remoteEndpoint.sockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
 
 				if (_socket < 0) {
 					// Handle error;
@@ -191,7 +187,7 @@ namespace fart::io::sockets {
 
 				_mutex.locked([this]() {
 
-					if (::connect(_socket, _remoteEndpoint->sockAddr(), _remoteEndpoint->sockAddr()->sa_len) != 0) {
+					if (::connect(_socket, _remoteEndpoint.sockAddr(), _remoteEndpoint.sockAddr()->sa_len) != 0) {
 						// Handle error
 						return;
 					}
@@ -224,13 +220,13 @@ namespace fart::io::sockets {
 			});
 		}
 
-		Strong<Endpoint> localEndpoint() const {
+		Endpoint localEndpoint() const {
 			return _mutex.lockedValue([this]() {
 				return this->_localEndpoint;
 			});
 		}
 
-		Strong<Endpoint> remoteEndpoint() const {
+		Endpoint remoteEndpoint() const {
 			return _mutex.lockedValue([this]() {
 				return this->_remoteEndpoint;
 			});
@@ -270,13 +266,15 @@ namespace fart::io::sockets {
 			void *context;
 		};
 
+		Socket(bool isUDP = false) : _isUDP(isUDP), _socket(-1), _state(SocketState::closed), _localEndpoint(nullptr), _remoteEndpoint(nullptr) {}
+
 		bool _isUDP;
 
 		int _socket;
 		SocketState _state;
 
-		Strong<Endpoint> _localEndpoint;
-		Strong<Endpoint> _remoteEndpoint;
+		Endpoint _localEndpoint;
+		Endpoint _remoteEndpoint;
 
 		Thread _listenThread;
 		Thread _receiveThread;
@@ -285,7 +283,7 @@ namespace fart::io::sockets {
 
 		CloseCallback _closeCallback;
 
-		void _read(function<void()> setup, function<void(Strong<Data<uint8_t>>, Strong<Endpoint> endpoint)> readCallback) {
+		void _read(function<void()> setup, function<void(const Data<uint8_t>&, const Endpoint& endpoint)> readCallback) {
 
 			this->retain();
 
@@ -315,7 +313,7 @@ namespace fart::io::sockets {
 						endpoint = Strong<Endpoint>((sockaddr*)&addr);
 					}
 					if (bytesRead > 0) {
-						Strong<Data<uint8_t>> data(buffer, bytesRead);
+						Data<uint8_t> data(buffer, bytesRead);
 						readCallback(data, endpoint);
 					} else {
 						close();

@@ -27,11 +27,11 @@ namespace fart::web {
 	public:
 
 		Server(uint16_t port, function<void(const Message<Request>& request, Message<Response>& response)> requestHandler) : _requestHandler(requestHandler) {
-			_listener.bind(Strong<Endpoint>(port));
-			_listener.listen([this](Socket& acceptSocket) {
+			_listener->bind(port);
+			_listener->listen([this](Socket& acceptSocket) {
 				acceptSocket.setCloseCallback(_socketClosed, this);
 				_connections.append(acceptSocket);
-				acceptSocket.accept([this,&acceptSocket](Data<uint8_t>& data, const Endpoint& sender) {
+				acceptSocket.accept([this,&acceptSocket](const Data<uint8_t>& data, const Endpoint& sender) {
 					this->_onData(data, acceptSocket);
 				});
 			});
@@ -75,7 +75,7 @@ namespace fart::web {
 
 		}
 
-		Socket _listener;
+		Strong<Socket> _listener;
 		Array<Socket> _connections;
 		Strong<Data<uint8_t>> _backbuffer;
 		function<void(const Message<Request>& request, Message<Response>& response)> _requestHandler;

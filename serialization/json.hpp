@@ -207,7 +207,7 @@ namespace fart::serialization {
 								_ensureLength(string, idx, 5, *line, *character);
 								String code = string.substring(*idx + 1, 4);
 								try {
-									stringBytes.append(Endian::toSystemVariant(code.hexData()->as<uint16_t>()->itemAtIndex(0), Endian::Variant::big));
+									stringBytes.append(Endian::toSystemVariant(code.hexData().as<uint16_t>().itemAtIndex(0), Endian::Variant::big));
 								} catch (DecoderException&) {
 									throw JSONMalformedException(*line, *character);
 								} catch (OutOfBoundException&) {
@@ -247,7 +247,7 @@ namespace fart::serialization {
 			switch (string[*idx]) {
 				case 't':
 					_ensureLength(string, idx, 4, *line, *character);
-					if (*string.substring(*idx, 4) != trueLiteral) {
+					if (string.substring(*idx, 4) != trueLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
 					(*idx) += 4;
@@ -255,7 +255,7 @@ namespace fart::serialization {
 					return Strong<types::Boolean>(true).as<Type>();
 				case 'f':
 					_ensureLength(string, idx, 5, *line, *character);
-					if (*string.substring(*idx, 5) != falseLiteral) {
+					if (string.substring(*idx, 5) != falseLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
 					(*idx) += 5;
@@ -263,7 +263,7 @@ namespace fart::serialization {
 					return Strong<types::Boolean>(false).as<Type>();
 				case 'n':
 					_ensureLength(string, idx, 4, *line, *character);
-					if (*string.substring(*idx, 4) != nullLiteral) {
+					if (string.substring(*idx, 4) != nullLiteral) {
 						throw JSONMalformedException(*line, *character);
 					}
 					(*idx) += 4;
@@ -349,99 +349,99 @@ namespace fart::serialization {
 			}
 		}
 
-		static Strong<String> stringify(const Type& data) {
+		static String stringify(const Type& data) {
 
-			Strong<String> result;
+			String result;
 
 			switch (data.kind()) {
 				case Type::Kind::dictionary: {
-					result->append("{");
+					result.append("{");
 					auto dictionary = data.as<Dictionary<Type, Type>>();
-					result->append(String::join(dictionary.keys()->map<String>([dictionary](const Type& key) {
+					result.append(String::join(dictionary.keys()->map<String>([dictionary](const Type& key) {
 						if (key.kind() != Type::Kind::string) throw EncoderTypeException();
-						Strong<String> result;
-						result->append(stringify(key));
-						result->append(":");
-						result->append(stringify(dictionary.get(key)));
+						String result;
+						result.append(stringify(key));
+						result.append(":");
+						result.append(stringify(dictionary.get(key)));
 						return result;
 					}), ","));
-					result->append("}");
+					result.append("}");
 					break;
 				}
 				case Type::Kind::array: {
 					Array<Type>& array = data.as<Array<Type>>();
-					result->append("[");
-					result->append(String::join(array.map<String>([](const Type& item) {
+					result.append("[");
+					result.append(String::join(array.map<String>([](const Type& item) {
 						return stringify(item);
 					}), ","));
-					result->append("]");
+					result.append("]");
 					break;
 				}
 				case Type::Kind::string: {
 					auto bytes = data.as<String>().UTF16Data(Endian::systemVariant());
-					result->append("\"");
-					for (size_t idx = 0 ; idx < bytes->count() ; idx++) {
-						auto byte = bytes->itemAtIndex(idx);
+					result.append("\"");
+					for (size_t idx = 0 ; idx < bytes.count() ; idx++) {
+						auto byte = bytes.itemAtIndex(idx);
 						switch (byte) {
 							case '\b':
-								result->append("\\b");
+								result.append("\\b");
 								break;
 							case '\f':
-								result->append("\\f");
+								result.append("\\f");
 								break;
 							case '\n':
-								result->append("\\n");
+								result.append("\\n");
 								break;
 							case '\r':
-								result->append("\\r");
+								result.append("\\r");
 								break;
 							case '\t':
-								result->append("\\t");
+								result.append("\\t");
 								break;
 							case '\"':
-								result->append("\\\"");
+								result.append("\\\"");
 								break;
 							case '\\':
-								result->append("\\\\");
+								result.append("\\\\");
 								break;
 							default:
 								if (!((byte >= 0x20 && byte <= 0x21) || (byte >= 0x23 && byte <= 0x5B) || byte >= 0x5D)) {
 									uint16_t beByte = Endian::fromSystemVariant(byte, Endian::Variant::big);
 									auto beByteData = Data<uint16_t>(&beByte, 1).as<uint8_t>();
-									result->append("\\U");
-									result->append(String::fromHex(beByteData));
+									result.append("\\U");
+									result.append(String::fromHex(beByteData));
 								} else {
-									result->append(byte);
+									result.append(byte);
 								}
 								break;
 						}
 					}
-					result->append("\"");
+					result.append("\"");
 					break;
 				}
 				case Type::Kind::number: {
 					switch (data.as<Number<uint64_t>>().subType()) {
 						case Subtype::boolean:
-							result->append(data.as<types::Boolean>().value() ? "true" : "false");
+							result.append(data.as<types::Boolean>().value() ? "true" : "false");
 							break;
 						case Subtype::integer:
-							result->append(String::format("%lld", data.as<Integer>().value()));
+							result.append(String::format("%lld", data.as<Integer>().value()));
 							break;
 						case Subtype::floatingPoint: {
 							double value = data.as<Float>().value();
 							std::ostringstream stream;
 							stream << value;
-							result->append(stream.str().c_str());
+							result.append(stream.str().c_str());
 							break;
 						}
 					}
 					break;
 				}
 				case Type::Kind::null:
-					result->append("null");
+					result.append("null");
 					break;
 				case Type::Kind::date:
-					return stringify(data.as<Date>().to(Date::TimeZone::utc)->toISO8601());
+					return stringify(data.as<Date>().to(Date::TimeZone::utc).toISO8601());
 					break;
 				default:
 					throw EncoderTypeException();

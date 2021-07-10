@@ -157,55 +157,55 @@ namespace fart::types {
 
 			auto parts = iso8601.split("T");
 
-			if (parts->count() > 0) {
+			if (parts.count() > 0) {
 
-				auto datePart = parts->itemAtIndex(0);
+				auto datePart = parts.itemAtIndex(0);
 
-				year = datePart->substring(0, 4)->doubleValue();
+				year = datePart->substring(0, 4).doubleValue();
 
 				if (datePart->length() == 8) {
-					month = datePart->substring(4, 2)->doubleValue();
-					day = datePart->substring(6, 2)->doubleValue();
+					month = datePart->substring(4, 2).doubleValue();
+					day = datePart->substring(6, 2).doubleValue();
 				}
 				else if (datePart->length() == 10) {
-					month = datePart->substring(5, 2)->doubleValue();
-					day = datePart->substring(8, 2)->doubleValue();
+					month = datePart->substring(5, 2).doubleValue();
+					day = datePart->substring(8, 2).doubleValue();
 				}
 				else throw ISO8601Exception();
 
-				if (parts->count() > 1) {
+				if (parts.count() > 1) {
 
-					auto seperators = Array<String>();
-					seperators.append(Strong<String>("+"));
-					seperators.append(Strong<String>("-"));
-					seperators.append(Strong<String>("Z"));
+					auto seperators = String();
+					seperators.append("+");
+					seperators.append("-");
+					seperators.append("Z");
 
-					auto timeParts = parts->itemAtIndex(1)->split(seperators, IncludeSeparator::prefix);
+					auto timeParts = parts.itemAtIndex(1)->split(seperators, IncludeSeparator::prefix);
 
-					if (timeParts->count() == 1) throw ISO8601Exception();
+					if (timeParts.count() == 1) throw ISO8601Exception();
 
-					auto timeComponentsPart = timeParts->itemAtIndex(0);
-					auto timeZonePart = timeParts->itemAtIndex(1);
+					auto timeComponentsPart = timeParts.itemAtIndex(0);
+					auto timeZonePart = timeParts.itemAtIndex(1);
 
 					auto timeComponentsSubParts = timeComponentsPart->split(".");
 
-					if (timeComponentsSubParts->count() > 0) {
+					if (timeComponentsSubParts.count() > 0) {
 
-						auto hmsComponentParts = timeComponentsSubParts->itemAtIndex(0);
+						auto hmsComponentParts = timeComponentsSubParts.itemAtIndex(0);
 
-						hours = hmsComponentParts->substring(0, 2)->doubleValue();
+						hours = hmsComponentParts->substring(0, 2).doubleValue();
 
 						if (hmsComponentParts->length() == 6) {
-							minutes = hmsComponentParts->substring(2, 2)->doubleValue();
-							seconds = hmsComponentParts->substring(4, 2)->doubleValue();
+							minutes = hmsComponentParts->substring(2, 2).doubleValue();
+							seconds = hmsComponentParts->substring(4, 2).doubleValue();
 						}
 						else if (timeComponentsPart->length() == 8) {
-							minutes = hmsComponentParts->substring(3, 2)->doubleValue();
-							seconds = hmsComponentParts->substring(6, 2)->doubleValue();
+							minutes = hmsComponentParts->substring(3, 2).doubleValue();
+							seconds = hmsComponentParts->substring(6, 2).doubleValue();
 						}
 
-						if (timeComponentsSubParts->count() > 1) {
-							microseconds = timeComponentsSubParts->itemAtIndex(1)->doubleValue();
+						if (timeComponentsSubParts.count() > 1) {
+							microseconds = timeComponentsSubParts.itemAtIndex(1)->doubleValue();
 						}
 
 					} else throw ISO8601Exception();
@@ -279,36 +279,35 @@ namespace fart::types {
 			return this->_time;
 		}
 
-		template<class T = Strong<Duration>>
-		T since(const Date& other) const {
+		Duration since(const Date& other) const {
 			return this->durationSinceEpoch() - other.durationSinceEpoch();
 		}
 
-		Strong<Date> to(TimeZone timeZone) const {
-			if (this->_timeZone == timeZone) return Strong<Date>(*this);
-			if (timeZone == TimeZone::local) return Strong<Date>(this->_time + _localOffset(), TimeZone::local);
-			return Strong<Date>(this->_time - _localOffset(), TimeZone::utc);
+		Date to(TimeZone timeZone) const {
+			if (this->_timeZone == timeZone) return Date(*this);
+			if (timeZone == TimeZone::local) return Date(this->_time + _localOffset(), TimeZone::local);
+			return Date(this->_time - _localOffset(), TimeZone::utc);
 		}
 
-		Strong<String> toISO8601() const {
-			Strong<String> ret;
-			ret->append(String::format("%02lld-%02d-%02dT%02d:%02d:%02d",
-									   this->year(),
-									   this->month(),
-									   this->day(),
-									   this->hours(),
-									   this->minutes(),
-									   this->seconds()));
+		String toISO8601() const {
+			String ret;
+			ret.append(String::format("%02lld-%02d-%02dT%02d:%02d:%02d",
+									  this->year(),
+									  this->month(),
+									  this->day(),
+									  this->hours(),
+									  this->minutes(),
+									  this->seconds()));
 			auto microseconds = this->microseconds();
 			if (microseconds != 0) {
-				ret->append(String::format(".%llu", microseconds));
+				ret.append(String::format(".%llu", microseconds));
 			}
 			switch (this->_timeZone) {
 				case TimeZone::utc:
-					ret->append("Z");
+					ret.append("Z");
 					break;
 				case TimeZone::local: {
-					ret->append(_localOffset().toString(Duration::ToStringOptions::prefixPositive));
+					ret.append(_localOffset().toString(Duration::ToStringOptions::prefixPositive));
 					break;
 				}
 			}
@@ -326,12 +325,12 @@ namespace fart::types {
 			return hash;
 		}
 
-		Strong<Date> operator+(const Duration& duration) const {
-			return Strong<Date>(this->seconds() + duration.seconds());
+		Date operator+(const Duration& duration) const {
+			return Date(this->seconds() + duration.seconds());
 		}
 
-		Strong<Date> operator-(const Duration& duration) const {
-			return Strong<Date>(this->seconds() - duration.seconds());
+		Date operator-(const Duration& duration) const {
+			return Date(this->seconds() - duration.seconds());
 		}
 
 		const Duration operator-(const Date& other) const {
@@ -347,7 +346,7 @@ namespace fart::types {
 		}
 
 		bool operator==(const Date& other) const {
-			return this->to(TimeZone::utc)->seconds() == other.to(TimeZone::utc)->seconds();
+			return this->to(TimeZone::utc).seconds() == other.to(TimeZone::utc).seconds();
 		}
 
 		bool operator!=(const Date& other) const {
@@ -355,11 +354,11 @@ namespace fart::types {
 		}
 
 		bool operator>(const Date& other) const {
-			return this->to(TimeZone::utc)->seconds() > other.to(TimeZone::utc)->seconds();
+			return this->to(TimeZone::utc).seconds() > other.to(TimeZone::utc).seconds();
 		}
 
 		bool operator<(const Date& other) const {
-			return this->to(TimeZone::utc)->seconds() < other.to(TimeZone::utc)->seconds();
+			return this->to(TimeZone::utc).seconds() < other.to(TimeZone::utc).seconds();
 		}
 
 		Date& operator=(const Date& other) {

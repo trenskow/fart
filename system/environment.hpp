@@ -18,8 +18,8 @@ namespace fart::system {
 	class Environment {
 
 	public:
-		static Strong<String> getVariable(const String& name) {
-			return Strong<String>(name.mapCString<const char*>([](const char* name) {
+		static String getVariable(const String& name) {
+			return String(name.mapCString<const char*>([](const char* name) {
 				return getenv(name);
 			}));
 		}

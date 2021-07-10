@@ -95,18 +95,18 @@ namespace fart::types {
 		}
 
 		template<typename OtherValue>
-		Strong<OtherValue> transformValue(const Key& key, function<Strong<OtherValue>(Value&)> todo) const {
+		OtherValue transformValue(const Key& key, function<OtherValue(Value&)> todo) const {
 			if (!this->hasKey(key)) return nullptr;
 			return todo(this->get(key));
 		}
 
-		Strong<Value> transformValue(const Key& key) const {
+		Value transformValue(const Key& key) const {
 			return this->transformValue<Value>(key, [](Value& value) {
 				return value;
 			});
 		}
 
-		Strong<Dictionary<Key, Value>> filter(function<bool(const Key& key, const Value& value)> todo) {
+		Dictionary<Key, Value> filter(function<bool(const Key& key, const Value& value)> todo) {
 			Dictionary<Key, Value> result;
 			for (size_t idx = 0 ; idx < this->_keys.count() ; idx++) {
 				Strong<Key> key = this->_keys[idx];
@@ -117,21 +117,21 @@ namespace fart::types {
 		}
 
 		template<typename OtherKey>
-		Strong<Dictionary<OtherKey, Value>> mapKeys(function<Strong<OtherKey>(const Key& key, Value& value)> todo) {
-			Strong<Dictionary<OtherKey, Value>> result;
+		Dictionary<OtherKey, Value> mapKeys(function<OtherKey(const Key& key, Value& value)> todo) {
+			Dictionary<OtherKey, Value> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result->set(todo(key, value), value);
+				result.set(todo(key, value), value);
 			});
 			return result;
 		}
 
 		template<typename OtherValue>
-		Strong<Dictionary<Key, OtherValue>> mapValues(function<Strong<OtherValue>(const Key& key, Value& value)> todo) {
-			Strong<Dictionary<Key, OtherValue>> result;
+		Dictionary<Key, OtherValue> mapValues(function<OtherValue(const Key& key, Value& value)> todo) {
+			Dictionary<Key, OtherValue> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result->set(key, todo(key, value));
+				result.set(key, todo(key, value));
 			});
 			return result;
 		}
