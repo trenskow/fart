@@ -361,7 +361,7 @@ namespace fart::types {
 			exponent
 		};
 
-		Data<uint32_t>::Primitive _storage;
+		Data<uint32_t>::Value _storage;
 
 		static Strong<Data<uint32_t>> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 

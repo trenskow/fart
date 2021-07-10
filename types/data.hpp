@@ -39,17 +39,17 @@ namespace fart::types {
 
 	public:
 
-		class Primitive: public Data {
+		class Value: public Data {
 
 		public:
 
-			Primitive() : Data() {}
-			Primitive(const T* items, size_t count) : Data(items, count) {}
-			Primitive(size_t capacity) : Data(capacity) {}
-			Primitive(const Primitive& other) : Data(other) {}
-			Primitive(const Data& other) : Data(other) {}
+			Value() : Data() {}
+			Value(const T* items, size_t count) : Data(items, count) {}
+			Value(size_t capacity) : Data(capacity) {}
+			Value(const Value& other) : Data(other) {}
+			Value(const Data& other) : Data(other) {}
 
-			virtual ~Primitive() {}
+			virtual ~Value() {}
 
 		protected:
 
