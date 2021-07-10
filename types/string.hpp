@@ -195,11 +195,6 @@ namespace fart::types {
 			})));
 		}
 
-		static String join(const Array<String>& strings, const char* seperator) {
-			String sep(seperator);
-			return String::join(strings, sep);
-		}
-
 		static String join(const Array<String>& strings, const String& separator) {
 			return String(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
