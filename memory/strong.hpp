@@ -125,9 +125,13 @@ namespace fart::memory {
 			return !(this->_object == nullptr);
 		}
 
+#ifndef FART_ALLOW_MANUAL_HEAP
+
 		void *operator new(size_t size) = delete;
 
 		void operator delete(void *ptr) throw() = delete;
+
+#endif
 
 		template<class O>
 		Strong<O> as() {
