@@ -169,6 +169,7 @@ namespace fart::types {
 			Type::operator=(std::move(other));
 			_keys = std::move(other._keys);
 			_values = std::move(other._values);
+			return *this;
 		}
 
 	};
