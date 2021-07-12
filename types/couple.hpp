@@ -19,11 +19,11 @@ namespace fart::types {
 		Couple(T1& first, T2& second) : Type(), _first(first), _second(second) { }
 		Couple(const Couple<T1, T2>& other): Type(), _first(other._first), _second(other._second) { }
 
-		Strong<T1> first() const {
+		T1& first() const {
 			return _first;
 		}
 
-		Strong<T2> second() const {
+		T2& second() const {
 			return _second;
 		}
 

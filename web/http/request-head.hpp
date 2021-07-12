@@ -35,15 +35,15 @@ namespace fart::web::http {
 
 		RequestHead(Data<uint8_t>& data) : Head(data) {
 
-			if (*(_parts)[0] == "HEAD") _method = Method::head;
-			else if (*(_parts)[0] == "GET") _method = Method::get;
-			else if (*(_parts)[0] == "POST") _method = Method::post;
-			else if (*(_parts)[0] == "PUT") _method = Method::put;
-			else if (*(_parts)[0] == "DELETE") _method = Method::del;
+			if (_parts[0] == "HEAD") _method = Method::head;
+			else if (_parts[0] == "GET") _method = Method::get;
+			else if (_parts[0] == "POST") _method = Method::post;
+			else if (_parts[0] == "PUT") _method = Method::put;
+			else if (_parts[0] == "DELETE") _method = Method::del;
 			else throw MethodNotSupportedException();
 
 			_version = parseVersion((_parts)[2]);
-			_path = Url::decode(*(_parts)[1]);
+			_path = Url::decode(_parts[1]);
 
 		}
 

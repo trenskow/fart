@@ -117,9 +117,10 @@ namespace fart::types {
 
 		Array(Array&& other) : Type(std::move(other)), _storage(std::move(other._storage)) { }
 
-		Array(Strong<T> repeating, size_t count) : Array() {
+		Array(T& repeating, size_t count) : Array() {
+			Strong<T> heapItem = repeating;
 			for (size_t idx = 0 ; idx < count ; idx++) {
-				append(repeating);
+				append(heapItem);
 			}
 		}
 
@@ -143,11 +144,11 @@ namespace fart::types {
 			return _storage.count();
 		}
 
-		Strong<T> itemAtIndex(size_t index) const noexcept(false) {
+		T& itemAtIndex(size_t index) const noexcept(false) {
 			return Strong<T>(_storage.itemAtIndex(index));
 		}
 
-		Strong<T> operator[](const size_t index) const noexcept(false) {
+		T& operator[](const size_t index) const noexcept(false) {
 			return this->itemAtIndex(index);
 		}
 
@@ -253,12 +254,12 @@ namespace fart::types {
 			return indexOf(item) != NotFound;
 		}
 
-		Strong<T> first() const noexcept(false) {
-			return Strong<T>(_storage.first());
+		T* first() const noexcept(false) {
+			return _storage.first();
 		}
 
-		Strong<T> last() const noexcept(false) {
-			return Strong<T>(_storage.last());
+		T* last() const noexcept(false) {
+			return _storage.last();
 		}
 
 		void forEach(function<void(T& value)> todo) const {

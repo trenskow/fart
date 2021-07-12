@@ -50,19 +50,19 @@ namespace fart::types {
 			_values.removeItemAtIndex(index);
 		}
 
-		Strong<Array<Key>> keys() const {
-			return _keys;
+		Array<Key> keys() const {
+			return Array(_keys);
 		}
 
-		Strong<Array<Value>> values() const {
-			return _values;
+		Array<Value> values() const {
+			return Array(_values);
 		}
 
 		bool hasKey(const Key& key) const {
 			return _keys.indexOf(key) != NotFound;
 		}
 
-		Strong<Value> get(const Key& key) const noexcept(false) {
+		Value& get(const Key& key) const noexcept(false) {
 			size_t keyIndex = _keys.indexOf(key);
 			if (keyIndex == NotFound) {
 				throw KeyNotFoundException<Key>(key);
@@ -70,18 +70,18 @@ namespace fart::types {
 			return _values[keyIndex];
 		}
 
-		Strong<Value> get(const Key& key, const Value& defaultValue) const {
+		Value& get(const Key& key, const Value& defaultValue) const {
 			if (!this->hasKey(key)) return defaultValue;
 			return this->get(key);
 		}
 
-		Strong<Value> get(const Key& key, const bool store, const Value& defaultValue) {
+		Value& get(const Key& key, const bool store, const Value& defaultValue) {
 			Strong<Value> value = this->get(key, defaultValue);
 			if (store) this->set(key, value);
 			return value;
 		}
 
-		Strong<Value> operator[](const Key& key) const noexcept(false) {
+		Value& operator[](const Key& key) const noexcept(false) {
 			return get(key);
 		}
 
