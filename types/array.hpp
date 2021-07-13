@@ -143,11 +143,11 @@ namespace fart::types {
 			return _storage.count();
 		}
 
-		T& itemAtIndex(size_t index) const noexcept(false) {
+		Strong<T> itemAtIndex(size_t index) const noexcept(false) {
 			return *_storage[index];
 		}
 
-		inline T& operator[](const size_t index) const noexcept(false) {
+		inline Strong<T> operator[](const size_t index) const noexcept(false) {
 			return this->itemAtIndex(index);
 		}
 
