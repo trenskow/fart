@@ -95,7 +95,7 @@ namespace fart::io::fs {
 			Array<String> result;
 
 			while ((ep = readdir(dp))) {
-				result.append(ep->d_name);
+				result.append(Strong<String>(ep->d_name));
 			}
 
 			closedir(dp);
