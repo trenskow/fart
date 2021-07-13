@@ -67,7 +67,7 @@ namespace fart::web {
 				throw DataIncompleteException();
 			}
 
-			Array<Data<uint8_t>> header = parts[0].split(lineBreak);
+			Array<Data<uint8_t>> header = parts[0]->split(lineBreak);
 
 			header.forEach([this](const Data<uint8_t>& current) {
 				Data<uint8_t> keyValueSplitter((uint8_t *)": ", 2);
@@ -83,13 +83,13 @@ namespace fart::web {
 
 				size_t length;
 
-				try { length = _headers["content-length"].doubleValue(); }
+				try { length = _headers["content-length"]->doubleValue(); }
 				catch (const DecoderException&) { throw DataMalformedException(); }
 
 				if (parts.count() < 2) throw DataIncompleteException();
 
-				if (parts[1].count() < length) throw DataIncompleteException();
-				if (parts[1].count() > length) throw DataMalformedException();
+				if (parts[1]->count() < length) throw DataIncompleteException();
+				if (parts[1]->count() > length) throw DataMalformedException();
 
 				_body = parts[1];
 
