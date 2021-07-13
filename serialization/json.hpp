@@ -207,7 +207,7 @@ namespace fart::serialization {
 								_ensureLength(string, idx, 5, *line, *character);
 								String code = string.substring(*idx + 1, 4);
 								try {
-									stringBytes.append(Endian::toSystemVariant(code.hexData().as<uint16_t>().itemAtIndex(0), Endian::Variant::big));
+									stringBytes.append(Endian::toSystemVariant(code.hexData().as<uint16_t>()[0], Endian::Variant::big));
 								} catch (DecoderException&) {
 									throw JSONMalformedException(*line, *character);
 								} catch (OutOfBoundException&) {
@@ -381,7 +381,7 @@ namespace fart::serialization {
 					auto bytes = data.as<String>().UTF16Data(Endian::systemVariant());
 					result.append("\"");
 					for (size_t idx = 0 ; idx < bytes.count() ; idx++) {
-						auto byte = bytes.itemAtIndex(idx);
+						auto byte = bytes[idx];
 						switch (byte) {
 							case '\b':
 								result.append("\\b");

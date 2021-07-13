@@ -32,7 +32,7 @@ namespace fart::types {
 		Dictionary(Dictionary<Key,Value>&& other) : Type(std::move(other)), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
 		virtual ~Dictionary() {}
 
-		void set(const Key& key, const Value& value) {
+		void set(const Key& key, Strong<Value> value) {
 			size_t index = _keys.indexOf(key);
 			if (index != NotFound) {
 				_keys.replace(key, index);

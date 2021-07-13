@@ -106,7 +106,7 @@ namespace fart::web::http {
 
 		void ensureSpaceAt(Data<uint8_t>& data, size_t index) const noexcept(false) {
 			if (data.count() < index) throw DataIncompleteException();
-			if (data.itemAtIndex(index)) throw DataMalformedException();
+			if (data[index]) throw DataMalformedException();
 		}
 
 	};

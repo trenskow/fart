@@ -416,7 +416,7 @@ namespace fart::types {
 
 				uint8_t chr[4];
 
-				uint32_t codePoint = buffer.itemAtIndex(idx);
+				uint32_t codePoint = buffer[idx];
 				if (codePoint < 0x80) {
 					ret.append(codePoint);
 				} else if (codePoint < 0x800) {

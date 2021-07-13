@@ -159,7 +159,7 @@ namespace fart::types {
 
 			if (parts.count() > 0) {
 
-				auto datePart = parts.itemAtIndex(0);
+				auto datePart = parts[0];
 
 				year = datePart.substring(0, 4).doubleValue();
 
@@ -180,18 +180,18 @@ namespace fart::types {
 					seperators.append("-");
 					seperators.append("Z");
 
-					auto timeParts = parts.itemAtIndex(1).split(seperators, IncludeSeparator::prefix);
+					auto timeParts = parts[1].split(seperators, IncludeSeparator::prefix);
 
 					if (timeParts.count() == 1) throw ISO8601Exception();
 
-					auto timeComponentsPart = timeParts.itemAtIndex(0);
-					auto timeZonePart = timeParts.itemAtIndex(1);
+					auto timeComponentsPart = timeParts[0];
+					auto timeZonePart = timeParts[1];
 
 					auto timeComponentsSubParts = timeComponentsPart.split(".");
 
 					if (timeComponentsSubParts.count() > 0) {
 
-						auto hmsComponentParts = timeComponentsSubParts.itemAtIndex(0);
+						auto hmsComponentParts = timeComponentsSubParts[0];
 
 						hours = hmsComponentParts.substring(0, 2).doubleValue();
 
@@ -205,7 +205,7 @@ namespace fart::types {
 						}
 
 						if (timeComponentsSubParts.count() > 1) {
-							microseconds = timeComponentsSubParts.itemAtIndex(1).doubleValue();
+							microseconds = timeComponentsSubParts[1].doubleValue();
 						}
 
 					} else throw ISO8601Exception();

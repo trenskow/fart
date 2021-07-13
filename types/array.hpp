@@ -72,7 +72,7 @@ namespace fart::types {
 
 		Array(const Data<T*>& other) : _storage(other) {
 			for (size_t idx = 0 ; idx < this->_storage.count() ; idx++) {
-				this->_storage.itemAtIndex(idx)->retain();
+				this->_storage[idx]->retain();
 			}
 		}
 
@@ -117,10 +117,9 @@ namespace fart::types {
 
 		Array(Array&& other) : Type(std::move(other)), _storage(std::move(other._storage)) { }
 
-		Array(T& repeating, size_t count) : Array() {
-			Strong<T> heapItem = repeating;
+		Array(Strong<T> repeatedItem, size_t count) : Array() {
 			for (size_t idx = 0 ; idx < count ; idx++) {
-				append(heapItem);
+				append(repeatedItem);
 			}
 		}
 
@@ -136,7 +135,7 @@ namespace fart::types {
 
 		virtual ~Array() {
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-				_storage.itemAtIndex(idx)->release();
+				_storage[idx]->release();
 			}
 		}
 
@@ -145,21 +144,19 @@ namespace fart::types {
 		}
 
 		T& itemAtIndex(size_t index) const noexcept(false) {
-			return Strong<T>(_storage.itemAtIndex(index));
+			return *_storage[index];
 		}
 
-		T& operator[](const size_t index) const noexcept(false) {
+		inline T& operator[](const size_t index) const noexcept(false) {
 			return this->itemAtIndex(index);
 		}
 
-		void append(const T& item) {
-			// Strong garantees object on the heap.
-			Strong<T> heapItem = (T*)&item;
-			heapItem->retain();
-			_storage.append(heapItem);
+		void append(Strong<T> item) {
+			item->retain();
+			_storage.append(item);
 		}
 
-		Array<T> appending(const T& item) const {
+		Array<T> appending(Strong<T> item) const {
 			Array<T> result(*this);
 			result.append(item);
 			return result;
@@ -211,10 +208,9 @@ namespace fart::types {
 			return result;
 		}
 
-		void replace(const T& item, size_t index) noexcept(false) {
-			Strong<T> heapItem = (T*)&item;
-			heapItem->retain();
-			_storage.replace(heapItem, index)->release();
+		void replace(Strong<T> item, size_t index) noexcept(false) {
+			item->retain();
+			_storage.replace(item, index)->release();
 		}
 
 		Array<T> replacing(const T& item, size_t idx) const noexcept(false) {
@@ -389,11 +385,10 @@ namespace fart::types {
 			this->_storage.swapItemsAtIndexes(index1, index2);
 		}
 
-		void insertItemAtIndex(const T& item, size_t dstIndex) noexcept(false) {
+		void insertItemAtIndex(Strong<T> item, size_t dstIndex) noexcept(false) {
 			if (dstIndex > this->count()) throw OutOfBoundException(dstIndex);
-			Strong<T> heapItem = item;
-			heapItem->retain();
-			_storage.insertItemAtIndex(heapItem, dstIndex);
+			item->retain();
+			_storage.insertItemAtIndex(item, dstIndex);
 		}
 
 		void sort(Comparer comparer) {
@@ -416,7 +411,7 @@ namespace fart::types {
 		bool operator==(const Array<T>& other) const {
 			if (!Type::operator==(other)) return false;
 			for (size_t idx = 0 ; idx < _storage.count() ; idx++) {
-				if (!(*_storage[idx] == *other[idx])) return false;
+				if (!(*_storage[idx] == *other._storage[idx])) return false;
 			}
 			return true;
 		}
@@ -436,7 +431,7 @@ namespace fart::types {
 
 		Array<T>& operator=(Array<T>&& other) {
 			for (size_t idx = 0 ; idx < this->_storage.count() ; idx++) {
-				this->_storage.itemAtIndex(idx)->release();
+				this->_storage[idx]->release();
 			}
 			_storage = std::move(other._storage);
 			Type::operator=(std::move(other));

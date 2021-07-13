@@ -202,6 +202,10 @@ namespace fart::types {
 			this->insertItemsAtIndex(&item, 1, dstIndex);
 		}
 
+		const T* items() const {
+			return _storage->pointer;
+		}
+
 		size_t count() const {
 			return this->_storage->count;
 		}
@@ -211,11 +215,7 @@ namespace fart::types {
 			return _storage->pointer[index];
 		}
 
-		const T* items() const {
-			return _storage->pointer;
-		}
-
-		T operator[](const size_t index) const noexcept(false) {
+		inline T operator[](const size_t index) const noexcept(false) {
 			return itemAtIndex(index);
 		}
 
@@ -359,7 +359,7 @@ namespace fart::types {
 
 		static Data<T> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
 			return datas.reduce(Data<T>(), [datas, seperator](Data<T>& result, const Data<T>& value, const size_t idx) {
-				result.append(datas.itemAtIndex(idx));
+				result.append(datas[idx]);
 				if (seperator != nullptr && idx != datas.count() - 1) result.append(*seperator);
 				return result;
 			});
@@ -486,7 +486,7 @@ namespace fart::types {
 			if (!Type::operator==(other)) return false;
 			if (this->count() != other.count()) return false;
 			for (size_t idx = 0 ; idx < this->count() ; idx++) {
-				if (_storage->pointer[idx] != other.itemAtIndex(idx)) return false;
+				if (_storage->pointer[idx] != other._storage->pointer[idx]) return false;
 			}
 			return true;
 		}

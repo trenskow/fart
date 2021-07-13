@@ -31,7 +31,7 @@ namespace fart::web {
 				if (chr == '+') chr = ' ';
 				else if (chr == '%') {
 					if (idx >= url.length() - 2) throw UrlDecodingException(chr);
-					chr = url.substring(idx + 1, 2).hexData().itemAtIndex(0);
+					chr = url.substring(idx + 1, 2).hexData()[0];
 					idx += 2;
 				}
 				result.append(chr);

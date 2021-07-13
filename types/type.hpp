@@ -39,10 +39,6 @@ namespace fart::types {
 			null
 		};
 
-		Type() : Object(), Hashable() { }
-		Type(const Type& other) : Object(other), Hashable(other) { }
-		Type(Type&& other) : Object(std::move(other)), Hashable(std::move(other)) { }
-
 		virtual Kind kind() const {
 			throw NotImplementedException();
 		}
@@ -91,6 +87,13 @@ namespace fart::types {
 			if (!this->is(kind)) throw TypeConversionException();
 			return this->as<T>();
 		}
+
+	protected:
+
+		Type() : Object(), Hashable() { }
+		Type(const Type& other) : Object(other), Hashable(other) { }
+		Type(Type&& other) : Object(std::move(other)), Hashable(std::move(other)) { }
+
 
 	};
 

@@ -95,12 +95,10 @@ namespace fart::memory {
 		Object(Object&& other) : Object() { }
 
 		virtual ~Object() {
-			_mutex.locked([this]() {
-				assert(_retainCount == 0);
-				for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
-					((Weak<Object>*)_weakReferences[0])->_object = nullptr;
-				}
-			});
+			assert(_retainCount == 0);
+			for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
+				((Weak<Object>*)_weakReferences[0])->_object = nullptr;
+			}
 		}
 
 		void retain() const {
