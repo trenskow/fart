@@ -156,9 +156,9 @@ namespace fart::types {
 			_storage.append(item);
 		}
 
-		Array<T> appending(Strong<T> item) const {
-			Array<T> result(*this);
-			result.append(item);
+		Strong<Array<T>> appending(Strong<T> item) const {
+			Strong<Array<T>> result(*this);
+			result->append(item);
 			return result;
 		}
 
@@ -166,9 +166,9 @@ namespace fart::types {
 			_storage.removeItemAtIndex(index)->release();
 		}
 
-		Array<T> removingItemAtIndex(size_t index) const noexcept(false) {
-			Array<T> result(*this);
-			result.removeItemAtIndex(index);
+		Strong<Array<T>> removingItemAtIndex(size_t index) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItemAtIndex(index);
 			return result;
 		}
 
@@ -178,9 +178,9 @@ namespace fart::types {
 			removeItemAtIndex(idx);
 		}
 
-		Array<T> removingItem(TesterIndex test) const noexcept(false) {
-			Array<T> result(*this);
-			result.removeItem(test);
+		Strong<Array<T>> removingItem(TesterIndex test) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(test);
 			return result;
 		}
 
@@ -190,9 +190,9 @@ namespace fart::types {
 			});
 		}
 
-		Array<T> removingItem(Tester test) const noexcept(false) {
-			Array<T> result(*this);
-			result.removeItem(test);
+		Strong<Array<T>> removingItem(Tester test) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(test);
 			return result;
 		}
 
@@ -202,9 +202,9 @@ namespace fart::types {
 			});
 		}
 
-		Array<T> removingItem(const T& item) const noexcept(false) {
-			Array<T> result(*this);
-			result.removeItem(item);
+		Strong<Array<T>> removingItem(const T& item) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->removeItem(item);
 			return result;
 		}
 
@@ -213,9 +213,9 @@ namespace fart::types {
 			_storage.replace(item, index)->release();
 		}
 
-		Array<T> replacing(const T& item, size_t idx) const noexcept(false) {
-			Array<T> result(*this);
-			result.replace(item, idx);
+		Strong<Array<T>> replacing(const T& item, size_t idx) const noexcept(false) {
+			Strong<Array<T>> result(*this);
+			result->replace(item, idx);
 			return result;
 		}
 
@@ -250,11 +250,11 @@ namespace fart::types {
 			return indexOf(item) != NotFound;
 		}
 
-		T* first() const noexcept(false) {
+		Strong<T> first() const noexcept(false) {
 			return _storage.first();
 		}
 
-		T* last() const noexcept(false) {
+		Strong<T> last() const noexcept(false) {
 			return _storage.last();
 		}
 
@@ -272,7 +272,7 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		Array<R> map(function<R(T& item, const size_t idx)> transform) const {
+		Strong<Array<R>> map(function<R(T& item, const size_t idx)> transform) const {
 			return this->reduce<Array<R>>(Array<R>(), [&transform](Array<R> result, T& item, const size_t idx) {
 				result.append(transform(item, idx));
 				return result;
@@ -280,19 +280,19 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		Array<R> map(function<R(T& value)> transform) const {
+		Strong<Array<R>> map(function<R(T& value)> transform) const {
 			return map<R>([&transform](T& item, const size_t idx) {
 				return transform(item);
 			});
 		}
 
-		Array<T> filter(TesterIndex test) const {
-			return Array<T>(this->_storage.filter([&test](T* item, const size_t idx) {
+		Strong<Array<T>> filter(TesterIndex test) const {
+			return Strong<Array<T>>(this->_storage.filter([&test](T* item, const size_t idx) {
 				return test(*item, idx);
 			}));
 		}
 
-		Array<T> filter(Tester test) const {
+		Strong<Array<T>> filter(Tester test) const {
 			return filter([&test](T& item, const size_t idx) {
 				return test(item);
 			});
@@ -328,41 +328,41 @@ namespace fart::types {
 			});
 		}
 
-		Array<T> subarray(size_t index, size_t length) const {
-			return Array<T>(this->_storage.subdata(index, length));
+		Strong<Array<T>> subarray(size_t index, size_t length) const {
+			return Strong<Array<T>>(this->_storage.subdata(index, length));
 		}
 
-		Array<T> subarray(size_t index) const {
+		Strong<Array<T>> subarray(size_t index) const {
 			return subarray(index, count() - index);
 		}
 
-		Array<T> reversed() const {
-			return Array<T>(this->_storage.reversed());
+		Strong<Array<T>> reversed() const {
+			return Strong<Array<T>>(this->_storage.reversed());
 		}
 
-		Array<T> unique(Comparer comparer) const {
-			Array<T> result;
+		Strong<Array<T>> unique(Comparer comparer) const {
+			Strong<Array<T>> result;
 			this->forEach([&result,&comparer](T& item1) {
-				if (!result.contains([&item1,&comparer](T& item2) { return comparer(item1, item2); })) {
-					result.append(item1);
+				if (!result->contains([&item1,&comparer](T& item2) { return comparer(item1, item2); })) {
+					result->append(item1);
 				}
 			});
 			return result;
 		}
 
-		Array<T> unique() const {
+		Strong<Array<T>> unique() const {
 			return this->unique([](const T& item1, const T& item2) { return item1 == item2; });
 		}
 
-		Array<T> nonUnique(Comparer comparer) const {
+		Strong<Array<T>> nonUnique(Comparer comparer) const {
 			return this->filter([this,&comparer](T& item1) {
 				return this->filter([&comparer,&item1](T& item2) {
 					return comparer(item1, item2);
-				}).count() > 1;
+				})->count() > 1;
 			});
 		}
 
-		Array<T> nonUnique() const {
+		Strong<Array<T>> nonUnique() const {
 			return nonUnique([](const T& item1, const T& item2) { return item1 == item2; });
 		}
 

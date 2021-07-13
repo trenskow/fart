@@ -115,9 +115,9 @@ namespace fart::types {
 			append(data.items(), data.count());
 		}
 
-		Data appending(const Data<T>& other) const {
-			Data result = *this;
-			result.append(other);
+		Strong<Data> appending(const Data<T>& other) const {
+			Strong<Data> result = *this;
+			result->append(other);
 			return result;
 		}
 
@@ -254,17 +254,17 @@ namespace fart::types {
 			return removed;
 		}
 
-		Data<T> subdata(const size_t offset, const size_t length = NotFound) const {
-			return Data<T>(&_storage->pointer[offset], math::min(this->count() - offset, length));
+		Strong<Data<T>> subdata(const size_t offset, const size_t length = NotFound) const {
+			return Strong<Data<T>>(&_storage->pointer[offset], math::min(this->count() - offset, length));
 		}
 
-		Data<T> remove(const size_t offset, const size_t length) {
+		Strong<Data<T>> remove(const size_t offset, const size_t length) {
 
 			if (offset + length > this->count()) throw OutOfBoundException(offset + length);
 
 			this->_ensureStorageOwnership();
 
-			Data<uint8_t> result(&_storage->pointer[offset], length);
+			Strong<Data<uint8_t>> result(&_storage->pointer[offset], length);
 
 			size_t moveCount = this->count() - (offset + length);
 
@@ -278,10 +278,10 @@ namespace fart::types {
 
 		}
 
-		Data<T> reversed() const {
-			Data<T> result;
+		Strong<Data<T>> reversed() const {
+			Strong<Data<T>> result;
 			for (size_t idx = this->count() ; idx > 0 ; idx--) {
-				result.append(this->_storage->pointer[idx - 1]);
+				result->append(this->_storage->pointer[idx - 1]);
 			}
 			return result;
 		}
@@ -299,16 +299,16 @@ namespace fart::types {
 			return count;
 		}
 
-		Array<Data<T>> split() const {
+		Strong<Array<Data<T>>> split() const {
 			return this->mapToArray<Data<T>>([](T item) {
 				return Data<T>(&item, 1);
 			});
 		}
 
-		Array<Data<T>> split(const Array<Data<T>>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			Array<Data<T>> result;
+		Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+			Strong<Array<Data<T>>> result;
 			size_t idx = 0;
-			while (result.count() < max - 1) {
+			while (result->count() < max - 1) {
 				if (!separators.some([this,&idx,&result,&includeSeparator](const Data<T>& separator) {
 					size_t next;
 					switch (includeSeparator) {
@@ -325,11 +325,11 @@ namespace fart::types {
 					switch (includeSeparator) {
 						case IncludeSeparator::none:
 						case IncludeSeparator::prefix:
-							result.append(subdata(idx, next - idx));
+							result->append(subdata(idx, next - idx));
 							break;
 						case IncludeSeparator::suffix:
 						case IncludeSeparator::both:
-							result.append(subdata(idx, next - idx + separator.count()));
+							result->append(subdata(idx, next - idx + separator.count()));
 							break;
 					}
 					switch (includeSeparator) {
@@ -345,37 +345,37 @@ namespace fart::types {
 					return true;
 				})) break;
 			}
-			result.append(subdata(idx, count() - idx));
+			result->append(subdata(idx, count() - idx));
 			return result;
 		}
 
-		Array<Data<T>> split(const Data<T>& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Strong<Array<Data<T>>> split(const Data<T>& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return split(Array<Data<T>>(separator, 1), includeSeparator, max);
 		}
 
-		Array<Data<T>> split(T* seperator, size_t length, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Strong<Array<Data<T>>> split(T* seperator, size_t length, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return split(Strong<Data<T>>(seperator, length), includeSeparator, max);
 		}
 
-		static Data<T> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
-			return datas.reduce(Data<T>(), [datas, seperator](Data<T>& result, const Data<T>& value, const size_t idx) {
+		static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
+			return datas.reduce(Strong<Data<T>>(), [datas, seperator](Data<T>& result, const Data<T>& value, const size_t idx) {
 				result.append(datas[idx]);
 				if (seperator != nullptr && idx != datas.count() - 1) result.append(*seperator);
 				return result;
 			});
 		}
 
-		static Data<T> join(const Array<Data<T>>& datas) {
+		static Strong<Data<T>> join(const Array<Data<T>>& datas) {
 			return join(datas, nullptr);
 		}
 
-		static Data<T> join(const Array<Data<T>>& datas, const Data<T>& seperator) {
+		static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>& seperator) {
 			return join(datas, &seperator);
 		}
 
 		template<typename O>
-		Data<O> as() const {
-			return Data<O>((const O*)this->_storage->pointer, (this->count() * sizeof(T)) / sizeof(O));
+		Strong<Data<O>> as() const {
+			return Strong<Data<O>>((const O*)this->_storage->pointer, (this->count() * sizeof(T)) / sizeof(O));
 		}
 
 		void forEach(function<void(T& item)> todo) const {
@@ -393,47 +393,47 @@ namespace fart::types {
 			return result;
 		}
 
-		Data<T> filter(TesterIndex test) const {
-			Data<T> result;
+		Strong<Data<T>> filter(TesterIndex test) const {
+			Strong<Data<T>> result;
 			for (size_t idx = 0 ; idx < this->count() ; idx++) {
-				if (test(this->_storage->pointer[idx], idx)) result.append(this->_storage->pointer[idx]);
+				if (test(this->_storage->pointer[idx], idx)) result->append(this->_storage->pointer[idx]);
 			}
 			return result;
 		}
 
-		Data<T> filter(Tester test) const {
+		Strong<Data<T>> filter(Tester test) const {
 			return filter([&test](T item, const size_t idx) {
 				return test(item);
 			});
 		}
 
 		template<typename O>
-		Data<O> map(function<O(T item, const size_t idx)> transform) const {
-			Data<O> result;
+		Strong<Data<O>> map(function<O(T item, const size_t idx)> transform) const {
+			Strong<Data<O>> result;
 			for (size_t idx = 0 ; idx < this->count() ; idx++) {
-				result.append(transform(this->_storage->pointer[idx], idx));
+				result->append(transform(this->_storage->pointer[idx], idx));
 			}
 			return result;
 		}
 
 		template<typename O>
-		Data<O> map(function<O(T item)> transform) const {
+		Strong<Data<O>> map(function<O(T item)> transform) const {
 			return map<O>([&transform](T item, const size_t idx) {
 				return transform(item);
 			});
 		}
 
 		template<typename O>
-		Array<O> mapToArray(function<O(T item, const size_t idx)> transform) const {
-			Array<O> result;
+		Strong<Array<O>> mapToArray(function<O(T item, const size_t idx)> transform) const {
+			Strong<Array<O>> result;
 			for (size_t idx = 0 ; idx < this->count(); idx++) {
-				result.append(transform(this->_storage->pointer[idx], idx));
+				result->append(transform(this->_storage->pointer[idx], idx));
 			}
 			return result;
 		}
 
 		template<typename O>
-		Array<O> mapToArray(function<O(T item)> transform) const {
+		Strong<Array<O>> mapToArray(function<O(T item)> transform) const {
 			return mapToArray<O>([&transform](T item, const size_t idx) {
 				return transform(item);
 			});

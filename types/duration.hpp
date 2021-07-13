@@ -74,21 +74,21 @@ namespace fart::types {
 			double multiplier = 1;
 
 			auto prefix = parse.substring(0, 1);
-			if (prefix == "+" || prefix == "-") {
-				multiplier = (prefix == "-" ? -1 : 1);
+			if (*prefix == "+" || *prefix == "-") {
+				multiplier = (*prefix == "-" ? -1 : 1);
 				parse = parse.substring(1);
 			}
 
 			uint64_t hours = 0;
 			uint64_t minutes = 0;
 
-			if (parse.length() == 5 && parse.substring(2, 1) == ":") {
-				hours = parse.substring(0, 2).doubleValue();
-				minutes = parse.substring(3, 2).doubleValue();
+			if (parse.length() == 5 && *parse.substring(2, 1) == ":") {
+				hours = parse.substring(0, 2)->doubleValue();
+				minutes = parse.substring(3, 2)->doubleValue();
 			}
 			else if (parse.length() == 4) {
-				hours = parse.substring(0, 2).doubleValue();
-				minutes = parse.substring(2, 4).doubleValue();
+				hours = parse.substring(0, 2)->doubleValue();
+				minutes = parse.substring(2, 4)->doubleValue();
 			}
 			else if (parse.length() == 2) {
 				hours = parse.doubleValue();

@@ -54,16 +54,16 @@ namespace fart::types {
 		}
 
 		String(const Data<uint16_t>& data) noexcept(false) : String() {
-			Data<uint16_t> parseData(data);
+			Strong<Data<uint16_t>> parseData(data);
 			Endian::Variant endian = Endian::Variant::big;
 			if (data.count() > 1) {
-				Data<uint8_t> potentialMarker = data.subdata(0, 2).as<uint8_t>();
-				if (potentialMarker == bigEndianBOM || potentialMarker == littleEndianBOM) {
-					endian = potentialMarker == bigEndianBOM ? Endian::Variant::big : Endian::Variant::little;
-					parseData = parseData.subdata(2);
+				Strong<Data<uint8_t>> potentialMarker = data.subdata(0, 2)->as<uint8_t>();
+				if (*potentialMarker == bigEndianBOM || *potentialMarker == littleEndianBOM) {
+					endian = *potentialMarker == bigEndianBOM ? Endian::Variant::big : Endian::Variant::little;
+					parseData = parseData->subdata(2);
 				}
 			}
-			_storage.append(_decodeUTF16(parseData.items(), parseData.count(), endian));
+			_storage.append(_decodeUTF16(parseData->items(), parseData->count(), endian));
 		}
 
 		String(const Data<uint32_t>& store) : _storage(store) {}
@@ -111,35 +111,35 @@ namespace fart::types {
 
 		template<typename T, typename F>
 		auto mapCString(const F& todo) const {
-			return todo((const char*)this->UTF8Data(true).items());
+			return todo((const char*)this->UTF8Data(true)->items());
 		}
 
 		template<typename F>
 		void withCString(const F& todo) const {
-			todo((const char*)this->UTF8Data(true).items());
+			todo((const char*)this->UTF8Data(true)->items());
 		}
 
 		void print(bool newLine = true) const {
-			this->appending(newLine ? "\n" : "").withCString(printf);
+			this->appending(newLine ? "\n" : "")->withCString(printf);
 		}
 
-		Data<uint8_t> UTF8Data(bool nullTerminate = false) const {
+		Strong<Data<uint8_t>> UTF8Data(bool nullTerminate = false) const {
 			return _encodeUTF8(_storage, nullTerminate);
 		}
 
-		Data<uint16_t> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
+		Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
 			return _encodeUTF16(_storage, endian, includeBOM);
 		}
 
-		Data<uint32_t> UTF32Data() const {
-			return Data<uint32_t>(this->_storage);
+		Strong<Data<uint32_t>> UTF32Data() const {
+			return Strong<Data<uint32_t>>(this->_storage);
 		}
 
-		static String fromHex(const Data<uint8_t>& data) {
-			return String(_decodeHex(data));
+		static Strong<String> fromHex(const Data<uint8_t>& data) {
+			return Strong<String>(_decodeHex(data));
 		}
 
-		Data<uint8_t> hexData() const {
+		Strong<Data<uint8_t>> hexData() const {
 			return _encodeHex(_storage);
 		}
 
@@ -151,39 +151,39 @@ namespace fart::types {
 			_storage.append(character);
 		}
 
-		String appending(const String& other) const {
+		Strong<String> appending(const String& other) const {
 			return String(this->_storage.appending(other._storage));
 		}
 
-		Array<String> split() const {
-			return _storage.split().map<String>([](Data<uint32_t>& data) {
+		Strong<Array<String>> split() const {
+			return _storage.split()->map<String>([](Data<uint32_t>& data) {
 				return String(data);
 			});
 		}
 
-		Array<String> split(const String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			return _storage.split(separator._storage, includeSeparator, max).map<String>([](const Data<uint32_t>& current) {
-				return String(current);
+		Strong<Array<String>> split(const String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+			return _storage.split(separator._storage, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
+				return Strong<String>(current);
 			});
 		}
 
-		Array<String> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+		Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			});
-			return _storage.split(stores, includeSeparator, max).map<String>([](const Data<uint32_t>& current) {
+			return _storage.split(stores, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return String(current);
 			});
 		}
 
-		static String join(const Array<String>& strings) {
-			return String(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
+		static Strong<String> join(const Array<String>& strings) {
+			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			})));
 		}
 
-		static String join(const Array<String>& strings, const String& separator) {
-			return String(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
+		static Strong<String> join(const Array<String>& strings, const String& separator) {
+			return Strong<String>(Data<uint32_t>::join(strings.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			}), separator._storage));
 		}
@@ -292,20 +292,20 @@ namespace fart::types {
 			return this->_storage.indexOf(chr);
 		}
 
-		String substring(size_t offset, size_t length = NotFound) const {
-			return String(_storage.subdata(offset, length));
+		Strong<String> substring(size_t offset, size_t length = NotFound) const {
+			return Strong<String>(_storage.subdata(offset, length));
 		}
 
-		String uppercased() const {
-			return String(this->_storage.map<uint32_t>(Unicode::lowerToUpper));
+		Strong<String> uppercased() const {
+			return Strong<String>(this->_storage.map<uint32_t>(Unicode::lowerToUpper));
 		}
 
-		String lowercased() const {
+		Strong<String> lowercased() const {
 			return String(this->_storage.map<uint32_t>(Unicode::upperToLower));
 		}
 
-		String capitalized() const {
-			return this->substring(0, 1).uppercased().appending(this->substring(1).lowercased());
+		Strong<String> capitalized() const {
+			return this->substring(0, 1)->uppercased()->appending(this->substring(1)->lowercased());
 		}
 
 		virtual uint64_t hash() const override {

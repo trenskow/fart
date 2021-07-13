@@ -50,12 +50,12 @@ namespace fart::types {
 			_values.removeItemAtIndex(index);
 		}
 
-		Array<Key> keys() const {
-			return Array(_keys);
+		Strong<Array<Key>> keys() const {
+			return Strong<Array<Key>>(_keys);
 		}
 
-		Array<Value> values() const {
-			return Array(_values);
+		Strong<Array<Value>> values() const {
+			return Strong<Array<Key>>(_values);
 		}
 
 		bool hasKey(const Key& key) const {
@@ -107,32 +107,32 @@ namespace fart::types {
 			});
 		}
 
-		Dictionary<Key, Value> filter(function<bool(const Key& key, const Value& value)> todo) {
-			Dictionary<Key, Value> result;
+		Strong<Dictionary<Key, Value>> filter(function<bool(const Key& key, const Value& value)> todo) {
+			Strong<Dictionary<Key, Value>> result;
 			for (size_t idx = 0 ; idx < this->_keys.count() ; idx++) {
 				Strong<Key> key = this->_keys[idx];
 				Strong<Value> value = this->_values[idx];
-				if (todo(key, value)) result.set(key, value);
+				if (todo(key, value)) result->set(key, value);
 			}
 			return result;
 		}
 
 		template<typename OtherKey>
-		Dictionary<OtherKey, Value> mapKeys(function<OtherKey(const Key& key, Value& value)> todo) {
-			Dictionary<OtherKey, Value> result;
+		Strong<Dictionary<OtherKey, Value>> mapKeys(function<OtherKey(const Key& key, Value& value)> todo) {
+			Strong<Dictionary<OtherKey, Value>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result.set(todo(key, value), value);
+				result->set(todo(key, value), value);
 			});
 			return result;
 		}
 
 		template<typename OtherValue>
-		Dictionary<Key, OtherValue> mapValues(function<OtherValue(const Key& key, Value& value)> todo) {
-			Dictionary<Key, OtherValue> result;
+		Strong<Dictionary<Key, OtherValue>> mapValues(function<OtherValue(const Key& key, Value& value)> todo) {
+			Strong<Dictionary<Key, OtherValue>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result.set(key, todo(key, value));
+				result->set(key, todo(key, value));
 			});
 			return result;
 		}
