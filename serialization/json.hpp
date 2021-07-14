@@ -380,7 +380,7 @@ namespace fart::serialization {
 				case Type::Kind::string: {
 					auto bytes = data.as<String>().UTF16Data(Endian::systemVariant());
 					result->append("\"");
-					for (size_t idx = 0 ; idx < bytes->count() ; idx++) {
+					for (size_t idx = 0 ; idx < bytes->length() ; idx++) {
 						auto byte = bytes->itemAtIndex(idx);
 						switch (byte) {
 							case '\b':

@@ -50,15 +50,15 @@ namespace fart::types {
 			_values.removeItemAtIndex(index);
 		}
 
-		Strong<Array<Key>> keys() const {
+		inline Strong<Array<Key>> keys() const {
 			return Strong<Array<Key>>(_keys);
 		}
 
-		Strong<Array<Value>> values() const {
+		inline Strong<Array<Value>> values() const {
 			return Strong<Array<Key>>(_values);
 		}
 
-		bool hasKey(const Key& key) const {
+		inline bool hasKey(const Key& key) const {
 			return _keys.indexOf(key) != NotFound;
 		}
 
@@ -75,39 +75,39 @@ namespace fart::types {
 			return this->get(key);
 		}
 
-		Strong<Value> get(const Key& key, const bool store, const Value& defaultValue) {
+		Strong<Value> get(const Key& key, const bool& store, const Value& defaultValue) {
 			Strong<Value> value = this->get(key, defaultValue);
 			if (store) this->set(key, value);
 			return value;
 		}
 
-		Strong<Value> operator[](const Key& key) const noexcept(false) {
+		inline Strong<Value> operator[](const Key& key) const noexcept(false) {
 			return get(key);
 		}
 
-		size_t count() const {
+		inline size_t count() const {
 			return _keys.count();
 		}
 
-		void forEach(function<void(const Key&, Value&)> todo) const {
+		void forEach(const function<void(const Key&, Value&)>& todo) const {
 			for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
 				todo(_keys[idx], _values[idx]);
 			}
 		}
 
 		template<typename OtherValue>
-		OtherValue transformValue(const Key& key, function<OtherValue(Value&)> todo) const {
+		OtherValue transformValue(const Key& key, const function<OtherValue(Value&)>& todo) const {
 			if (!this->hasKey(key)) return nullptr;
 			return todo(this->get(key));
 		}
 
-		Value transformValue(const Key& key) const {
+		inline Value transformValue(const Key& key) const {
 			return this->transformValue<Value>(key, [](Value& value) {
 				return value;
 			});
 		}
 
-		Strong<Dictionary<Key, Value>> filter(function<bool(const Key& key, const Value& value)> todo) {
+		Strong<Dictionary<Key, Value>> filter(const function<bool(const Key& key, const Value& value)>& todo) {
 			Strong<Dictionary<Key, Value>> result;
 			for (size_t idx = 0 ; idx < this->_keys.count() ; idx++) {
 				Strong<Key> key = this->_keys[idx];
@@ -118,7 +118,7 @@ namespace fart::types {
 		}
 
 		template<typename OtherKey>
-		Strong<Dictionary<OtherKey, Value>> mapKeys(function<OtherKey(const Key& key, Value& value)> todo) {
+		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<OtherKey(const Key& key, Value& value)>& todo) {
 			Strong<Dictionary<OtherKey, Value>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
@@ -128,7 +128,7 @@ namespace fart::types {
 		}
 
 		template<typename OtherValue>
-		Strong<Dictionary<Key, OtherValue>> mapValues(function<OtherValue(const Key& key, Value& value)> todo) {
+		Strong<Dictionary<Key, OtherValue>> mapValues(const function<OtherValue(const Key& key, Value& value)>& todo) {
 			Strong<Dictionary<Key, OtherValue>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
