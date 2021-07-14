@@ -10,6 +10,7 @@
 #define weak_hpp
 
 #include <type_traits>
+#include <atomic>
 
 namespace fart::memory {
 
@@ -26,7 +27,7 @@ namespace fart::memory {
 		friend class Object;
 
 	private:
-		T* _object;
+		std::atomic<T*> _object;
 
 		void _setObject(T* object) {
 			if (_object != nullptr) {
