@@ -201,7 +201,7 @@ namespace fart::io::sockets {
 		}
 
 		size_t send(const Data<uint8_t>& data) const {
-			return ::send(_socket, data.items(), data.count(), 0);
+			return ::send(_socket, data.items(), data.length(), 0);
 		}
 
 		size_t sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {

@@ -19,6 +19,8 @@
 #include "./array.hpp"
 #include "../tools/math.hpp"
 
+#define BLOCK_SIZE 4096
+
 using namespace fart::memory;
 using namespace fart::exceptions::types;
 using namespace fart::tools;
@@ -63,10 +65,8 @@ namespace fart::types {
 		typedef function<bool(T item)> Tester;
 		typedef function<bool(T item, const size_t& idx)> TesterIndex;
 
-		static const size_t blockSize = 4096;
-
 		template<typename F>
-		static Data<T> fromCBuffer(const F& todo, const size_t& length = blockSize) {
+		static Data<T> fromCBuffer(const F& todo, const size_t& length = BLOCK_SIZE) {
 			T buffer[length];
 			size_t read = todo(buffer, length);
 			return Data<T>((T*)buffer, read);
@@ -160,19 +160,19 @@ namespace fart::types {
 
 			this->ensureStorageOwnership();
 
-			T src = _storage->pointer[srcIndex];
+			T src = this->_get(srcIndex);
 
 			if (srcIndex < dstIndex) {
 				for (size_t idx = srcIndex + 1 ; idx <= dstIndex ; idx++) {
-					_storage->pointer[idx - 1] = _storage->pointer[idx];
+					this->_set(idx - 1, this->_get(idx));
 				}
 			} else {
 				for (size_t idx = srcIndex ; idx > dstIndex ; idx--) {
-					_storage->pointer[idx] = _storage->pointer[idx - 1];
+					this->_set(idx, this->_get(idx - 1));
 				}
 			}
 
-			_storage[dstIndex] = src;
+			this->_set(dstIndex, src);
 
 		}
 
@@ -185,9 +185,9 @@ namespace fart::types {
 
 			this->ensureStorageOwnership();
 
-			T reg = _storage->pointer[index1];
-			_storage->pointer[index1] = _storage->pointer[index2];
-			_storage->pointer[index2] = reg;
+			T reg = this->_get(index1);
+			this->_set(index1, this->_get(index2));
+			this->_set(index2, reg);
 
 		}
 
@@ -275,15 +275,15 @@ namespace fart::types {
 
 			this->_ensureStorageOwnership();
 
-			Strong<Data<uint8_t>> result(&_storage->pointer[offset], length);
+			Strong<Data<T>> result = this->subdata(offset, length);
 
 			size_t moveCount = this->length() - (offset + length);
 
 			for (size_t idx = 0 ; idx < moveCount ; idx++) {
-				_storage->pointer[offset + idx] = _storage->pointer[offset + length + idx];
+				this->_set(offset + idx, this->_get(offset + length + idx));
 			}
 
-			this->_storage->length -= length;
+			this->_length -= length;
 
 			return result;
 
@@ -292,7 +292,7 @@ namespace fart::types {
 		Strong<Data<T>> reversed() const {
 			Strong<Data<T>> result;
 			for (size_t idx = this->length() ; idx > 0 ; idx--) {
-				result->append(this->_storage->pointer[idx - 1]);
+				result->append(this->_get(idx - 1));
 			}
 			return result;
 		}
@@ -308,7 +308,7 @@ namespace fart::types {
 			if (offset > this->length()) return 0;
 			this->ensureStorageOwnership();
 			length = math::min(length, this->length() - offset);
-			memcpy(bytes, _storage->pointer, sizeof(T) * length);
+			memcpy(bytes, this->items(), sizeof(T) * length);
 			return length;
 		}
 
@@ -577,7 +577,7 @@ namespace fart::types {
 
 			void ensureStorageSize(const size_t& length) {
 				if (this->_length < length) {
-					this->_length = ((((sizeof(T) * length) / blockSize) + 1) * blockSize) / sizeof(T);
+					this->_length = ((((sizeof(T) * length) / BLOCK_SIZE) + 1) * BLOCK_SIZE) / sizeof(T);
 					this->_ptr = (T*) realloc(this->_ptr, sizeof(T) * this->_length);
 				}
 			}

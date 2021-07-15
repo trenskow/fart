@@ -88,18 +88,18 @@ namespace fart::web {
 
 				if (parts.count() < 2) throw DataIncompleteException();
 
-				if (parts[1]->count() < length) throw DataIncompleteException();
-				if (parts[1]->count() > length) throw DataMalformedException();
+				if (parts[1]->length() < length) throw DataIncompleteException();
+				if (parts[1]->length() > length) throw DataMalformedException();
 
 				_body = parts[1];
 
 			}
 
 			parts.forEach([&data](const Data<uint8_t>& current) {
-				data.remove(0, current.count());
+				data.remove(0, current.length());
 			});
 
-			data.remove(0, deliminator.count());
+			data.remove(0, deliminator.length());
 
 		}
 
@@ -132,7 +132,7 @@ namespace fart::web {
 		}
 
 		void setBody(Data<uint8_t>& data) {
-			setHeaderValue("Content-Length", String::format("%d", data.count()));
+			setHeaderValue("Content-Length", String::format("%d", data.length()));
 			_body = data;
 		}
 

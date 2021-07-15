@@ -31,9 +31,9 @@ namespace fart::web::http {
 		Head(Data<uint8_t>& data) {
 
 			Data<uint8_t> lineBreak = Message<Head>::dataForLineBreakMode(Message<Head>::determineLineBreakMode(data));
-			Data<uint8_t> head = data.remove(0, data.indexOf(lineBreak) + lineBreak.count());
+			Data<uint8_t> head = data.remove(0, data.indexOf(lineBreak) + lineBreak.length());
 
-			head.remove(head.count() - lineBreak.count(), lineBreak.count());
+			head.remove(head.length() - lineBreak.length(), lineBreak.length());
 
 			Array<Data<uint8_t>> parts = head.split((uint8_t*)" ", 1);
 
