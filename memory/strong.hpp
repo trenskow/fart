@@ -12,7 +12,6 @@
 #include <type_traits>
 
 #include "./object.hpp"
-#include "../types/type.hpp"
 
 using namespace std;
 
@@ -50,7 +49,10 @@ namespace fart::memory {
 
 		Strong(nullptr_t) : _object(nullptr) {};
 		Strong(T& object) : Strong(&object) {};
-		Strong(const T& object) : Strong((T*)&object) {}
+
+		Strong(const T& object) : Strong(nullptr) {
+			_setObject(new T(object), true);
+		}
 
 		Strong(T* object) : _object(nullptr) {
 			_setObject(object);

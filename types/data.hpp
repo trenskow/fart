@@ -99,13 +99,18 @@ namespace fart::types {
 			this->_storage = other._storage;
 			this->_offset = other._offset;
 			this->_length = other._length;
-			other._storage = new Storage();
+			this->_hashIsDirty = other._hashIsDirty;
+			this->_hash = other._hash;
+			other._storage = nullptr;
 			other._offset = 0;
 			other._length = 0;
+			other._hashIsDirty = true;
 		}
 
 		virtual ~Data() {
 			Storage::release(&this->_storage);
+			this->_offset = 0;
+			this->_length = 0;
 		}
 
 		void append(const T* items, const size_t& length) {
@@ -295,6 +300,8 @@ namespace fart::types {
 		void drain() {
 			Storage::release(&this->_storage);
 			_storage = new Storage();
+			_length = 0;
+			_offset = 0;
 		};
 
 		size_t copy(void* bytes, const size_t& length, const size_t& offset = 0) {
@@ -507,7 +514,14 @@ namespace fart::types {
 		Data& operator=(Data<T>&& other) {
 			Storage::release(&this->_storage);
 			this->_storage = other._storage;
-			other._storage = new Storage();
+			this->_length = other._length;
+			this->_offset = other._offset;
+			this->_hashIsDirty = other._hashIsDirty;
+			this->_hash = other._hash;
+			other._storage = nullptr;
+			other._length = 0;
+			other._offset = 0;
+			other._hashIsDirty = true;
 			Type::operator=(std::move(other));
 			return *this;
 		}
@@ -520,16 +534,17 @@ namespace fart::types {
 
 	private:
 
-		struct Storage : public Hashable {
+		struct Storage {
 
 		public:
-			Storage(const size_t& length = 0) : _ptr(nullptr), retainCount(1), _length(0) {
+			Storage(const size_t& length = 0) : _ptr(nullptr), _length(0), retainCount(1) {
 				this->ensureStorageSize(length);
 			}
 
 			~Storage() {
 				if (this->_ptr != nullptr) {
 					free(this->_ptr);
+					this->_ptr = nullptr;
 				}
 			}
 
@@ -538,14 +553,14 @@ namespace fart::types {
 				return (Storage*)this;
 			}
 
-			inline static bool own(Storage** store, const size_t& length, const size_t& offset = 0) {
-				bool replaced;
-				*store = (*store)->own(length, offset, &replaced);
+			static bool own(Storage** store, const size_t& length, const size_t& offset = 0) {
+				bool replaced = false;
+				if (*store != nullptr) *store = (*store)->own(length, offset, &replaced);
 				return replaced;
 			}
 
 			inline static void release(Storage** store) {
-				*store = (*store)->release();
+				if (*store != nullptr) *store = (*store)->release();
 			}
 
 			inline T& get(const size_t& index) const {
