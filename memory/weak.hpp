@@ -106,21 +106,6 @@ namespace fart::memory {
 			return !(this == n);
 		}
 
-#ifdef FART_ALLOW_MANUAL_HEAP
-
-		void *operator new(size_t size) {
-			return Object::allocate(size);
-		}
-
-		void operator delete(void *ptr) throw() {
-			Object::deallocate(ptr);
-		}
-
-#else
-		void *operator new(size_t size) = delete;
-		void operator delete(void *ptr) throw() = delete;
-#endif
-
 	};
 
 }
