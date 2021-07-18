@@ -582,6 +582,14 @@ namespace fart::types {
 				}
 			}
 
+			void *operator new(size_t size) {
+				return Object::allocate(size);
+			}
+
+			void operator delete(void *ptr) throw() {
+				Object::deallocate(ptr);
+			}
+
 		private:
 
 			Storage* own(const size_t& length, const size_t& offset, bool* replaced) const {

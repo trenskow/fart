@@ -63,28 +63,16 @@ namespace fart::memory {
 			});
 		}
 
+	protected:
+
 		static void* allocate(size_t size) noexcept(false) {
 			void *mem = calloc(size, sizeof(uint8_t));
 			if (!mem) throw AllocationException(size);
 			return mem;
 		}
 
-		static void deallocate(void* ptr) throw() {
+		inline static void deallocate(void* ptr) {
 			free(ptr);
-		}
-
-#ifdef FART_ALLOW_MANUAL_HEAP
-	public:
-#else
-	protected:
-#endif
-
-		void *operator new(size_t size) noexcept(false) {
-			return allocate(size);
-		}
-
-		void operator delete(void *ptr) throw() {
-			deallocate(ptr);
 		}
 
 	public:
@@ -119,6 +107,18 @@ namespace fart::memory {
 
 		Object& operator=(Object&& other) {
 			return *this;
+		}
+
+#ifndef FART_ALLOW_MANUAL_HEAP
+	protected:
+#endif
+
+		void *operator new(size_t size) noexcept(false) {
+			return allocate(size);
+		}
+
+		void operator delete(void *ptr) throw() {
+			deallocate(ptr);
 		}
 
 	};
