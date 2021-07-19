@@ -73,7 +73,7 @@ namespace fart::types {
 		String(String&& other) : _storage(std::move(other._storage)) { }
 
 		template<typename F>
-		inline static String fromCString(const F& todo, const size_t& size = BLOCK_SIZE) {
+		inline static String fromCString(const F& todo, const size_t& size = FART_BLOCK_SIZE) {
 			return String(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
 				return todo((char*)buffer, length);
 			}));

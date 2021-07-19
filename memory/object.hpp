@@ -14,17 +14,21 @@
 #include <atomic>
 
 #include "../threading/mutex.hpp"
-#include "../exceptions/exception.hpp"
 #include "./weak.hpp"
-
-#define WEAK_REFERENCES_BLOCK_SIZE 128
+#include "./allocator.hpp"
 
 using namespace fart::threading;
 using namespace fart::exceptions::memory;
 
 namespace fart::memory {
 
-	class Object {
+	class Object
+#ifdef FART_ALLOW_MANUAL_HEAP
+	: public Allocator
+#else
+	: protected Allocator
+#endif
+	{
 
 		template<class T>
 		friend class Strong;
@@ -43,7 +47,7 @@ namespace fart::memory {
 		void addWeakReference(void* weakReference) const {
 			_mutex.locked([this,weakReference]() {
 				if (_weakReferencesSize < _weakReferencesCount + 1) {
-					_weakReferencesSize = ((_weakReferencesCount + 1) / WEAK_REFERENCES_BLOCK_SIZE) + 1 * WEAK_REFERENCES_BLOCK_SIZE;
+					_weakReferencesSize = calculateBufferLength(_weakReferencesCount + 1);
 					_weakReferences = (void**)realloc(_weakReferences, _weakReferencesSize);
 					_weakReferences[_weakReferencesCount++] = weakReference;
 				}
@@ -61,30 +65,6 @@ namespace fart::memory {
 					}
 				}
 			});
-		}
-
-		static void* allocate(size_t size) noexcept(false) {
-			void *mem = calloc(size, sizeof(uint8_t));
-			if (!mem) throw AllocationException(size);
-			return mem;
-		}
-
-		static void deallocate(void* ptr) throw() {
-			free(ptr);
-		}
-
-#ifdef FART_ALLOW_MANUAL_HEAP
-	public:
-#else
-	protected:
-#endif
-
-		void *operator new(size_t size) noexcept(false) {
-			return allocate(size);
-		}
-
-		void operator delete(void *ptr) throw() {
-			deallocate(ptr);
 		}
 
 	public:

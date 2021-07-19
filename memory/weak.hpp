@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <atomic>
 
+#include "./allocator.hpp"
+
 namespace fart::memory {
 
 	class Object;
@@ -20,7 +22,13 @@ namespace fart::memory {
 	class Strong;
 
 	template<class T>
-	class Weak {
+	class Weak
+#ifdef FART_ALLOW_MANUAL_HEAP
+	: public Allocator
+#else
+	: public NoAllocator
+#endif
+	{
 
 		static_assert(std::is_base_of<Object, T>::value);
 

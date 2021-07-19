@@ -11,6 +11,7 @@
 
 #include <type_traits>
 
+#include "./allocator.hpp"
 #include "./object.hpp"
 
 using namespace std;
@@ -21,7 +22,13 @@ namespace fart::memory {
 	class Weak;
 
 	template<class T>
-	class Strong {
+	class Strong
+#ifdef FART_ALLOW_MANUAL_HEAP
+	: public Allocator
+#else
+	: public NoAllocator
+#endif
+	{
 
 		static_assert(std::is_base_of<Object, T>::value);
 
@@ -124,14 +131,6 @@ namespace fart::memory {
 		bool operator!=(std::nullptr_t) {
 			return !(this->_object == nullptr);
 		}
-
-#ifndef FART_ALLOW_MANUAL_HEAP
-
-		void *operator new(size_t size) = delete;
-
-		void operator delete(void *ptr) throw() = delete;
-
-#endif
 
 		template<class O>
 		Strong<O> as() {

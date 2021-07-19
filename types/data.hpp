@@ -13,13 +13,12 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "../exceptions/exception.hpp"
 #include "../memory/strong.hpp"
+#include "../exceptions/exception.hpp"
 #include "./type.hpp"
 #include "./array.hpp"
-#include "../tools/math.hpp"
 
-#define BLOCK_SIZE 4096
+#define MAX(x, y) (x > y ? x : y)
 
 using namespace fart::memory;
 using namespace fart::exceptions::types;
@@ -66,7 +65,7 @@ namespace fart::types {
 		typedef function<bool(T item, const size_t& idx)> TesterIndex;
 
 		template<typename F>
-		static Data<T> fromCBuffer(const F& todo, const size_t& length = BLOCK_SIZE) {
+		static Data<T> fromCBuffer(const F& todo, const size_t& length = FART_BLOCK_SIZE) {
 			T buffer[length];
 			size_t read = todo(buffer, length);
 			return Data<T>((T*)buffer, read);
@@ -534,10 +533,10 @@ namespace fart::types {
 
 	private:
 
-		struct Storage {
+		class Storage: public Allocator {
 
 		public:
-			Storage(const size_t& length = 0) : _ptr(nullptr), _length(0), retainCount(1) {
+			Storage(const size_t& length = 0) : _ptr(nullptr), _length(0), _retainCount(1) {
 				this->ensureStorageSize(length);
 			}
 
@@ -549,7 +548,7 @@ namespace fart::types {
 			}
 
 			Storage* retain() const {
-				this->retainCount++;
+				this->_retainCount++;
 				return (Storage*)this;
 			}
 
@@ -577,7 +576,7 @@ namespace fart::types {
 
 			void ensureStorageSize(const size_t& length) {
 				if (this->_length < length) {
-					this->_length = ((((sizeof(T) * length) / BLOCK_SIZE) + 1) * BLOCK_SIZE) / sizeof(T);
+					this->_length = Allocator::calculateBufferLength(length);
 					this->_ptr = (T*) realloc(this->_ptr, sizeof(T) * this->_length);
 				}
 			}
@@ -586,15 +585,15 @@ namespace fart::types {
 
 			Storage* own(const size_t& length, const size_t& offset, bool* replaced) const {
 				*replaced = false;
-				if (this->retainCount == 1) return (Storage*)this;
+				if (this->_retainCount == 1) return (Storage*)this;
 				this->release();
 				*replaced = true;
 				return new Storage(*this, offset, length);
 			}
 
 			Storage* release() const {
-				this->retainCount--;
-				if (this->retainCount == 0) {
+				this->_retainCount--;
+				if (this->_retainCount == 0) {
 					delete(this);
 				}
 				return nullptr;
@@ -602,7 +601,7 @@ namespace fart::types {
 
 			T* _ptr;
 			size_t _length;
-			mutable std::atomic<size_t> retainCount;
+			mutable std::atomic<size_t> _retainCount;
 
 			Storage(const Storage& other, const size_t& offset, const size_t& length) : Storage(length) {
 				for (size_t idx = 0 ; idx < length ; idx++) {
