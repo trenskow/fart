@@ -65,10 +65,10 @@ namespace fart::types {
 		typedef function<bool(T item, const size_t& idx)> TesterIndex;
 
 		template<typename F>
-		static Data<T> fromCBuffer(const F& todo, const size_t& length = FART_BLOCK_SIZE) {
+		static Data<T> fromCBuffer(const F& todo, const size_t& length) {
 			T buffer[length];
 			size_t read = todo(buffer, length);
-			return Data<T>((T*)buffer, read);
+			return Data<T>((T*)buffer, math::min(read, length));
 		}
 
 		Data(const T* items, const size_t& length) : Type(), _storage(new Storage()), _offset(0), _length(0), _hashIsDirty(true), _hash(0) {

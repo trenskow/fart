@@ -75,7 +75,7 @@ namespace fart::io::fs {
 					ssize_t result = readlink(filename, buffer, length);
 					if (result < 0) strncpy(buffer, filename, length);
 					return strlen(buffer);
-				});
+				}, 4096);
 			});
 		}
 
