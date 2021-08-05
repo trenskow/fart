@@ -194,8 +194,6 @@ namespace fart::io::fs {
 
 		Mutex _mutex;
 
-	public:
-
 	};
 
 }
