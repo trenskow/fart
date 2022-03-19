@@ -9,8 +9,6 @@
 #ifndef json_hpp
 #define json_hpp
 
-#include <sstream>
-
 #include "../memory/object.hpp"
 #include "../types/string.hpp"
 #include "../exceptions/exception.hpp"
@@ -429,9 +427,10 @@ namespace fart::serialization {
 							break;
 						case Subtype::floatingPoint: {
 							double value = data.as<Float>().value();
-							std::ostringstream stream;
-							stream << value;
-							result->append(stream.str().c_str());
+							uint64_t length = snprintf(nullptr, 0, "%f", value);
+							char str[length + 1];
+							snprintf(str, length + 1, "%f", value);
+							result->append(str);
 							break;
 						}
 					}
