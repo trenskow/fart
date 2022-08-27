@@ -20,6 +20,11 @@
 using namespace fart::threading;
 using namespace fart::exceptions::memory;
 
+namespace fart::types {
+	template<class T>
+	class Array;
+}
+
 namespace fart::memory {
 
 	class Object
@@ -35,6 +40,9 @@ namespace fart::memory {
 
 		template<class T>
 		friend class Weak;
+
+		template<class T>
+		friend class ::fart::types::Array;
 
 	private:
 
@@ -81,6 +89,20 @@ namespace fart::memory {
 			}
 		}
 
+		Object& operator=(const Object&) {
+			return *this;
+		}
+
+		Object& operator=(Object&& other) {
+			return *this;
+		}
+
+#ifdef FART_ALLOW_MANUAL_HEAP
+	public:
+#else
+	private:
+#endif
+
 		void retain() const {
 			this->_retainCount++;
 		}
@@ -91,14 +113,6 @@ namespace fart::memory {
 
 		size_t retainCount() const {
 			return this->_retainCount;
-		}
-
-		Object& operator=(const Object&) {
-			return *this;
-		}
-
-		Object& operator=(Object&& other) {
-			return *this;
 		}
 
 	};
