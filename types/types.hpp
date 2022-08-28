@@ -20,5 +20,6 @@
 #include "./duration.hpp"
 #include "./date.hpp"
 #include "./couple.hpp"
+#include "./uuid.hpp"
 
 #endif /* types_hpp */

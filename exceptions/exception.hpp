@@ -293,6 +293,16 @@ namespace fart::exceptions {
 
 		};
 
+		class UUIDMalformedException : public Exception {
+
+		public:
+
+			virtual const char* description() const override {
+				return "UUID is malformed.";
+			}
+
+		};
+
 	}
 
 	namespace web {

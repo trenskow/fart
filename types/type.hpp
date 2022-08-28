@@ -36,6 +36,7 @@ namespace fart::types {
 			dictionary,
 			date,
 			couple,
+			uuid,
 			null
 		};
 

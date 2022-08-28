@@ -208,6 +208,13 @@ namespace fart::types {
 			return result;
 		}
 
+		Strong<T> removeLast() noexcept(false) {
+			if (this->count() == 0) throw new OutOfBoundException(0);
+			auto last = this->last();
+			this->removeItemAtIndex(this->count() - 1);
+			return last;
+		}
+
 		void replace(Strong<T> item, const size_t& index) noexcept(false) {
 			item->retain();
 			_storage.replace(item, index)->release();

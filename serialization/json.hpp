@@ -341,6 +341,7 @@ namespace fart::serialization {
 				case Type::Kind::number:
 				case Type::Kind::null:
 				case Type::Kind::date:
+				case Type::Kind::uuid:
 					return true;
 				default:
 					return false;
@@ -442,6 +443,8 @@ namespace fart::serialization {
 				case Type::Kind::date:
 					return stringify(data.as<Date>().to(Date::TimeZone::utc).toISO8601());
 					break;
+				case Type::Kind::uuid:
+					return stringify(data.as<UUID>().string());
 				default:
 					throw EncoderTypeException();
 					break;

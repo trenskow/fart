@@ -68,6 +68,8 @@ namespace fart::types {
 
 		String(const Data<uint32_t>& store) : _storage(store) {}
 
+		String(const uint32_t character) : _storage(&character, 1) {}
+
 		String(const String& other) : String(other._storage) {}
 
 		String(String&& other) : _storage(std::move(other._storage)) { }

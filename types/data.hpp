@@ -52,6 +52,16 @@ namespace fart::types {
 
 			virtual ~Value() {}
 
+			Value& operator=(const Value& other) {
+				Data::operator=(other);
+				return *this;
+			}
+
+			Value& operator=(Value&& other) {
+				Data::operator=(std::move(other));
+				return *this;
+			}
+
 		protected:
 
 			virtual inline uint64_t hashForItem(const T& item) const override {
@@ -213,7 +223,7 @@ namespace fart::types {
 		}
 
 		inline const T* items() const {
-			return *_storage;
+			return *_storage + _offset;
 		}
 
 		inline size_t length() const {
@@ -506,6 +516,10 @@ namespace fart::types {
 		Data& operator=(const Data<T>& other) {
 			Storage::release(&this->_storage);
 			this->_storage = other._storage->retain();
+			this->_length = other._length;
+			this->_offset = other._offset;
+			this->_hashIsDirty = other._hashIsDirty;
+			this->_hash = other._hash;
 			Type::operator=(other);
 			return *this;
 		}
