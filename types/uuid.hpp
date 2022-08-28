@@ -22,8 +22,19 @@ namespace fart::types {
 	public:
 
 		UUID() : Type() {
-			this->_lower = ((uint64_t)arc4random() << 32) | arc4random();
-			this->_upper = ((uint64_t)arc4random() << 32) | arc4random();
+
+			uint64_t upper = ((uint64_t)arc4random() << 32) | arc4random();
+			uint64_t lower = ((uint64_t)arc4random() << 32) | arc4random();
+
+			uint8_t* upperBytes = (uint8_t*)&upper;
+			uint8_t* lowerBytes = (uint8_t*)&lower;
+
+			upperBytes[6] = (upperBytes[6] & 0x0f) | 0x40;
+			lowerBytes[0] = (lowerBytes[0] & 0x3f) | 0x80;
+
+			this->_upper = Endian::toSystemVariant(upper, Endian::Variant::big);
+			this->_lower = Endian::toSystemVariant(lower, Endian::Variant::big);
+
 		}
 
 		UUID(const UUID& other) : Type(other), _lower(other._lower), _upper(other._upper) { }
@@ -96,8 +107,10 @@ namespace fart::types {
 
 			String result;
 
-			for (size_t bits = 0 ; bits < sizeof(uint64_t) * 8 ; bits += 4) {
-				result = String(characters[(value >> bits) & 0xF]).appending(result);
+			uint8_t* bytes = (uint8_t*)&value;
+
+			for (size_t idx = 0 ; idx < sizeof(uint64_t) ; idx++) {
+				result = result.appending(String::format("%02x", bytes[idx]));
 			}
 
 			return result;
@@ -106,14 +119,23 @@ namespace fart::types {
 
 		uint64_t _decode(const String& string) const noexcept(false) {
 
-			uint64_t result = 0;
-
 			String characters = UUID::_base64Characters();
 
-			for (size_t idx = 0 ; idx < string.length() ; idx++) {
-				size_t value = characters.indexOf(string[idx]);
-				if (value == NotFound) throw UUIDMalformedException();
-				result = (result << 4) | (value & 0xF);
+			uint64_t result = 0;
+
+			uint8_t* bytes = (uint8_t*)&result;
+
+			for (size_t idx = 0 ; idx < sizeof(uint64_t) ; idx++) {
+
+				size_t upperIndex = characters.indexOf(string[idx * 2]);
+				size_t lowerIndex = characters.indexOf(string[idx * 2 + 1]);
+
+				if (upperIndex == NotFound || lowerIndex == NotFound) {
+					throw UUIDMalformedException();
+				}
+
+				bytes[idx] = (upperIndex << 4) | lowerIndex;
+
 			}
 
 			return Endian::toSystemVariant(result, Endian::Variant::big);
