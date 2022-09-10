@@ -55,7 +55,7 @@ namespace fart::types {
 		}
 
 		inline Strong<Array<Value>> values() const {
-			return Strong<Array<Key>>(_values);
+			return Strong<Array<Value>>(_values);
 		}
 
 		inline bool hasKey(const Key& key) const {
@@ -139,8 +139,8 @@ namespace fart::types {
 
 		virtual uint64_t hash() const override {
 			return Builder()
-				.add(_keys.hash())
-				.add(_values.hash());
+				.add(_keys)
+				.add(_values);
 		}
 
 		virtual Kind kind() const override {

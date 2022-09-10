@@ -34,8 +34,11 @@ namespace fart::types {
 				return this->add((double)value);
 			}
 
-			template<typename T>
-			inline Builder& add(const T& value) {
+			inline Builder& add(const Hashable& hashable) {
+				return this->add(hashable.hash());
+			}
+
+			inline Builder& add(const uint64_t value) {
 				_hash = ((_hash << 5) + _hash) + (uint64_t)value;
 				return *this;
 			}

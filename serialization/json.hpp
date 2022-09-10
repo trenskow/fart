@@ -330,7 +330,9 @@ namespace fart::serialization {
 			switch (data.kind()) {
 				case Type::Kind::dictionary: {
 					const Dictionary<Type, Type>& dictionary = data.as<Dictionary<Type, Type>>();
-					return dictionary.keys()->are(Type::Kind::string) && isStringifiable(dictionary.values());
+					return dictionary.keys()->every([](const Type& type) {
+						return type.is(Type::Kind::string);
+					}) && isStringifiable(dictionary.values());
 				}
 				case Type::Kind::array: {
 					return data.as<Array<Type>>().every([](const Type& data) {

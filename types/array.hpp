@@ -111,19 +111,29 @@ namespace fart::types {
 
 	public:
 
+		static Strong<Array<T>> flatten(const Array<Array<T>>& arrays) {
+			Strong<Array<T>> result;
+			arrays.forEach([&result](Array<T>& array) {
+				array.forEach([&result](T& item) {
+					result = result->appending(item);
+				});
+			});
+			return result;
+		}
+
 		Array() : Type() {}
 
 		Array(const Array<T>& other) : Array(other._storage) {}
 
 		Array(Array&& other) : Type(std::move(other)), _storage(std::move(other._storage)) { }
 
-		Array(Strong<T> repeatedItem, size_t count) : Array() {
+		Array(Strong<T> repeatedItem, size_t count = 1) : Array() {
 			for (size_t idx = 0 ; idx < count ; idx++) {
 				append(repeatedItem);
 			}
 		}
 
-		Array(const T& repeating, size_t count) : Array(Strong<T>(repeating), count) {}
+		Array(const T& repeating, size_t count = 1) : Array(Strong<T>(repeating), count) {}
 
 		Array(size_t count, T* items) : Array() {
 			for (size_t idx = 0 ; idx < count ; idx++) {
@@ -141,6 +151,18 @@ namespace fart::types {
 
 		inline size_t count() const {
 			return _storage.length();
+		}
+
+		inline size_t count(Tester tester) const {
+			return _storage.count([&tester](T* other) {
+				return tester(*other);
+			});
+		}
+
+		inline size_t count(const T& item) const {
+			return this->count([&item](T* other) {
+				return *other == item;
+			});
 		}
 
 		inline Strong<T> itemAtIndex(const size_t& index) const noexcept(false) {
@@ -209,7 +231,7 @@ namespace fart::types {
 		}
 
 		Strong<T> removeLast() noexcept(false) {
-			if (this->count() == 0) throw new OutOfBoundException(0);
+			if (this->count() == 0) throw OutOfBoundException(0);
 			auto last = this->last();
 			this->removeItemAtIndex(this->count() - 1);
 			return last;
@@ -261,13 +283,25 @@ namespace fart::types {
 			return _storage.first();
 		}
 
+		inline Strong<T> first(Tester tester) const noexcept(false) {
+			return _storage.first([&tester](T* item) {
+				return tester(*item);
+			});
+		}
+
 		inline Strong<T> last() const noexcept(false) {
 			return _storage.last();
 		}
 
 		inline void forEach(const function<void(T& value)>& todo) const {
-			this->_storage.forEach([&todo](T* item) {
-				todo(*item);
+			this->forEach([&todo](T& value, size_t idx) {
+				todo(value);
+			});
+		}
+
+		inline void forEach(const function<void(T& value, size_t idx)>& todo) const {
+			this->_storage.forEach([&todo](T* item, size_t idx) {
+				todo(*item, idx);
 			});
 		}
 
@@ -327,12 +361,6 @@ namespace fart::types {
 			return every([&test](T& item, const size_t& idx) {
 				return test(item);
 			}, def);
-		}
-
-		inline bool are(Type::Kind kind) const {
-			return this->every([&kind](const T& value) {
-				return value.is(kind);
-			});
 		}
 
 		inline Strong<Array<T>> subarray(const size_t& index, const size_t& length) const {
@@ -405,6 +433,16 @@ namespace fart::types {
 
 		inline void sort() {
 			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
+		}
+
+		Strong<Array<T>> sorted(const Comparer& comparer) {
+			Strong<Array<T>> result = *this;
+			result->sort(comparer);
+			return result;
+		}
+
+		Strong<Array<T>> sorted() {
+			return this->sorted([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
 		inline virtual uint64_t hash() const override {

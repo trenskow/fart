@@ -192,7 +192,7 @@ namespace fart::types {
 			if (index1 >= this->length()) throw OutOfBoundException(index1);
 			if (index2 >= this->length()) throw OutOfBoundException(index2);
 
-			this->ensureStorageOwnership();
+			this->_ensureStorageOwnership();
 
 			T reg = this->_get(index1);
 			this->_set(index1, this->_get(index2));
@@ -230,6 +230,20 @@ namespace fart::types {
 			return this->_length;
 		}
 
+		size_t count(function<bool(T& item)> tester) const {
+			size_t result = 0;
+			this->forEach([&tester,&result](T& item) {
+				if (tester(item)) result++;
+			});
+			return result;
+		}
+
+		size_t count(const T& item) const {
+			return this->count([&item](const T& other) {
+				return item == other;
+			});
+		}
+
 		T itemAtIndex(const size_t& index) const noexcept(false) {
 			if (index >= this->length()) throw OutOfBoundException(index);
 			return this->_get(index);
@@ -242,6 +256,14 @@ namespace fart::types {
 		T first() const noexcept(false) {
 			if (this->length() == 0) throw NotFoundException();
 			return this->_get(0);
+		}
+
+		T first(Tester tester) const noexcept(false) {
+			for (size_t idx = 0 ; idx < this->length() ; idx++) {
+				T current = this->_get(idx);
+				if (tester(current)) return current;
+			}
+			throw NotFoundException();
 		}
 
 		T last() const noexcept(false) {
@@ -272,6 +294,14 @@ namespace fart::types {
 			T removed = this->_get(index);
 			this->_set(index, element);
 			return removed;
+		}
+
+		T replace(const size_t& index, function<T(const T&)> todo) {
+			this->_ensureStorageOwnership();
+			T oldValue = this->itemAtIndex(index);
+			T newValue = todo(oldValue);
+			this->replace(newValue, index);
+			return oldValue;
 		}
 
 		inline Strong<Data<T>> subdata(const size_t& offset, const size_t& length = NotFound) const {
@@ -400,10 +430,16 @@ namespace fart::types {
 			return Strong<Data<O>>((const O*)((T*)*this->_storage), (this->length() * sizeof(T)) / sizeof(O));
 		}
 
-		void forEach(function<void(T& item)> todo) const {
+		void forEach(function<void(T& item, size_t idx)> todo) const {
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
-				todo(this->_get(idx));
+				todo(this->_get(idx), idx);
 			}
+		}
+
+		inline void forEach(function<void(T& item)> todo) const {
+			this->forEach([&todo](T& item, size_t idx) {
+				todo(item);
+			});
 		}
 
 		template<typename R, typename F>
