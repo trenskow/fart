@@ -95,7 +95,7 @@ namespace fart::types {
 
 	private:
 
-		static inline String _base64Characters() {
+		inline static String _base64Characters() {
 			return "0123456789abcdef";
 		}
 
