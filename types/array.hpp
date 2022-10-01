@@ -445,6 +445,12 @@ namespace fart::types {
 			return this->sorted([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
+		bool are(Type::Kind kind) const {
+			return this->every([&](T& item) {
+				return item.kind() == kind;
+			});
+		}
+
 		inline virtual uint64_t hash() const override {
 			return this->_storage.hash();
 		}
