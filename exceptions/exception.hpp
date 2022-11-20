@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 namespace fart::exceptions {
 
@@ -22,7 +23,11 @@ namespace fart::exceptions {
 	class NotImplementedException: public Exception {
 
 	public:
-		NotImplementedException() {}
+		NotImplementedException() {
+#ifdef DEBUG
+			raise(SIGTRAP);
+#endif
+		}
 
 		virtual const char* description() const override {
 			return "Not implemented.";
