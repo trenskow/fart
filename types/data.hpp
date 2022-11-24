@@ -160,6 +160,10 @@ namespace fart::types {
 
 		}
 
+		const T removeLast() noexcept(false) {
+			return this->removeItemAtIndex(this->length() - 1);
+		}
+
 		void moveItemAtIndex(const size_t& srcIndex, const size_t& dstIndex) noexcept(false) {
 
 			if (srcIndex == dstIndex) return;
