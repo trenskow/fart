@@ -121,6 +121,11 @@ namespace fart::types {
 			todo((const char*)this->UTF8Data(true)->items());
 		}
 
+		template<typename T>
+		inline T withCString(function<T(const char*)> todo) const {
+			return todo((const char*)this->UTF8Data(true)->items());
+		}
+
 		inline void print(bool newLine = true) const {
 			this->appending(newLine ? "\n" : "")->withCString(printf);
 		}

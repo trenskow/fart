@@ -26,7 +26,6 @@ namespace fart::types {
 	class Array : public Type {
 
 		static_assert(std::is_base_of<Object, T>::value);
-		static_assert(std::is_base_of<Hashable, T>::value);
 
 		friend class Strong<Array<T>>;
 
@@ -60,12 +59,6 @@ namespace fart::types {
 			Storage& operator=(Storage&& other) {
 				Data<S>::operator=(std::move(other));
 				return *this;
-			}
-
-		protected:
-
-			virtual inline uint64_t hashForItem(const S& item) const override {
-				return item->hash();
 			}
 
 		};
@@ -142,6 +135,12 @@ namespace fart::types {
 		}
 
 		Array(size_t capacity) : _storage(capacity) {}
+
+		Array(std::initializer_list<Strong<T>> items) : Array() {
+			for (Strong<T> item : items) {
+				append(item);
+			}
+		}
 
 		virtual ~Array() {
 			for (size_t idx = 0 ; idx < _storage.length() ; idx++) {
@@ -452,7 +451,7 @@ namespace fart::types {
 		}
 
 		inline virtual uint64_t hash() const override {
-			return this->_storage.hash();
+			return 0;
 		}
 
 		inline virtual Kind kind() const override {
