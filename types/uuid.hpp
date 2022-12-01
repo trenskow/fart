@@ -9,8 +9,15 @@
 #ifndef uuid_hpp
 #define uuid_hpp
 
+#include <stdlib.h>
 #include "./type.hpp"
 #include "../system/endian.hpp"
+
+#ifdef __linux__
+#define RANDOM() random()
+#else
+#define RANDOM() arc4random()
+#endif
 
 using namespace fart::exceptions::types;
 using namespace fart::system;
@@ -23,8 +30,8 @@ namespace fart::types {
 
 		UUID() : Type() {
 
-			uint64_t upper = ((uint64_t)arc4random() << 32) | arc4random();
-			uint64_t lower = ((uint64_t)arc4random() << 32) | arc4random();
+			uint64_t upper = ((uint64_t)RANDOM() << 32) | RANDOM();
+			uint64_t lower = ((uint64_t)RANDOM() << 32) | RANDOM();
 
 			uint8_t* upperBytes = (uint8_t*)&upper;
 			uint8_t* lowerBytes = (uint8_t*)&lower;

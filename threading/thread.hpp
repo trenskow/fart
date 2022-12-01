@@ -11,6 +11,7 @@
 
 #include <pthread.h>
 #include <thread>
+#include <functional>
 #include "./mutex.hpp"
 
 using namespace std;

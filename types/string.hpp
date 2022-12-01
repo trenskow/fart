@@ -356,7 +356,7 @@ namespace fart::types {
 			exponent
 		};
 
-		Data<uint32_t>::Value _storage;
+		DataValue<uint32_t> _storage;
 
 		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, const size_t& length) noexcept(false) {
 

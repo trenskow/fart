@@ -40,36 +40,6 @@ namespace fart::types {
 
 	public:
 
-		class Value: public Data {
-
-		public:
-
-			Value() : Data() {}
-			Value(const T* items, const size_t& length) : Data(items, length) {}
-			Value(size_t capacity) : Data(capacity) {}
-			Value(const Value& other) : Data(other) {}
-			Value(const Data& other) : Data(other) {}
-
-			virtual ~Value() {}
-
-			Value& operator=(const Value& other) {
-				Data::operator=(other);
-				return *this;
-			}
-
-			Value& operator=(Value&& other) {
-				Data::operator=(std::move(other));
-				return *this;
-			}
-
-		protected:
-
-			virtual inline uint64_t hashForItem(const T& item) const override {
-				return item;
-			}
-
-		};
-
 		typedef function<bool(T item1, T item2)> Comparer;
 		typedef function<bool(T item)> Tester;
 		typedef function<bool(T item, const size_t& idx)> TesterIndex;
@@ -701,6 +671,37 @@ namespace fart::types {
 
 		inline T& _set(const size_t& index, const T& value) {
 			return this->_storage->set(this->_index(index), value);
+		}
+
+	};
+
+	template<typename T>
+	class DataValue: public Data<T> {
+
+	public:
+
+		DataValue() : Data<T>() {}
+		DataValue(const T* items, const size_t& length) : Data<T>(items, length) {}
+		DataValue(size_t capacity) : Data<T>(capacity) {}
+		DataValue(const DataValue& other) : Data<T>(other) {}
+		DataValue(const Data<T>& other) : Data<T>(other) {}
+
+		virtual ~DataValue() {}
+
+		DataValue& operator=(const DataValue& other) {
+			Data<T>::operator=(other);
+			return *this;
+		}
+
+		DataValue& operator=(DataValue&& other) {
+			Data<T>::operator=(std::move(other));
+			return *this;
+		}
+
+	protected:
+
+		virtual inline uint64_t hashForItem(const T& item) const override {
+			return item;
 		}
 
 	};
