@@ -11,6 +11,7 @@
 
 #include <thread>
 #include "./array.hpp"
+#include "./couple.hpp"
 #include "./type.hpp"
 
 namespace fart::types {
@@ -30,6 +31,16 @@ namespace fart::types {
 		Dictionary() {}
 		Dictionary(const Dictionary<Key,Value>& other) : Type(other), _keys(other._keys), _values(other._values) {}
 		Dictionary(Dictionary<Key,Value>&& other) : Type(std::move(other)), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
+
+		Dictionary(const Couple<Key, Value>& keyValue) : Type(), _keys({ keyValue.first }), _values({ keyValue.second }) {}
+
+		Dictionary(std::initializer_list<std::pair<Key&, Value&>> keyValues) : Type(), _keys(), _values() {
+			for (auto keyValue : keyValues) {
+				_keys.append(keyValue.first);
+				_values.append(keyValue.second);
+			}
+		}
+
 		virtual ~Dictionary() {}
 
 		void set(Strong<Key> key, Strong<Value> value) {
@@ -151,9 +162,9 @@ namespace fart::types {
 
 		bool operator==(const Dictionary<Key,Value>& other) const {
 			if (!Type::operator==(other)) return false;
-			if (_keys.count() != other._keys.count) return false;
+			if (_keys.count() != other._keys.count()) return false;
 			for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
-				if (_keys[idx] != other._keys[idx] || _values[idx] != other._values[idx]) {
+				if (*_keys[idx] != *other._keys[idx] || *_values[idx] != *other._values[idx]) {
 					return false;
 				}
 			}

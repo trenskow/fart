@@ -10,6 +10,8 @@
 #ifndef couple_hpp
 #define couple_hpp
 
+#include <utility>
+
 namespace fart::types {
 
 	template<typename First, typename Second>
@@ -17,7 +19,8 @@ namespace fart::types {
 
 	public:
 		Couple(First& first, Second& second) : Type(), _first(first), _second(second) { }
-		Couple(const Couple<First, Second>& other): Type(), _first(other._first), _second(other._second) { }
+		Couple(const Couple<First, Second>& other) : Type(), _first(other._first), _second(other._second) { }
+		Couple(const std::pair<First&, Second&> pair) : Type(), _first(pair.first), _second(pair.second) { }
 
 		Strong<First> first() const {
 			return _first;
