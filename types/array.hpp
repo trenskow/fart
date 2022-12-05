@@ -292,6 +292,16 @@ namespace fart::types {
 			return _storage.last();
 		}
 
+		inline size_t lastIndex() const {
+			return _storage.lastIndex();
+		}
+
+		inline size_t lastIndex(Tester tester) const {
+			return _storage.lastIndex([&tester](T* item) {
+				return tester(*item);
+			});
+		}
+
 		inline void forEach(const function<void(T& value)>& todo) const {
 			this->forEach([&todo](T& value, size_t idx) {
 				todo(value);

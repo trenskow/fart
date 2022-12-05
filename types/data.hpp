@@ -251,6 +251,18 @@ namespace fart::types {
 			return this->_get(this->length() - 1);
 		}
 
+		inline size_t lastIndex() const {
+			if (this->length() == 0) return NotFound;
+			return this->length() - 1;
+		}
+
+		inline size_t lastIndex(Tester tester) const {
+			return reduce<size_t>(NotFound, [&tester](size_t result, T& item, const size_t idx) {
+				if (tester(item)) return idx;
+				return result;
+			});
+		}
+
 		size_t indexOf(const Data<T>& other, const size_t& offset = 0) const {
 			for (size_t hidx = offset ; hidx < this->length() ; hidx++) {
 				bool found = true;

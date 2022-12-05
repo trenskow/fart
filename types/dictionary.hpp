@@ -54,6 +54,10 @@ namespace fart::types {
 			}
 		}
 
+		void set(std::pair<Key&, Value&> keyValue) {
+			set(keyValue.first, keyValue.second);
+		}
+
 		void remove(const Key& key) {
 			size_t index = _keys.indexOf(key);
 			if (index == NotFound) throw KeyNotFoundException<Key>(key);
