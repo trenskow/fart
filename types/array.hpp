@@ -142,6 +142,12 @@ namespace fart::types {
 			}
 		}
 
+		Array(std::initializer_list<T> items) : Array() {
+			for (Strong<T> item : items) {
+				append(item);
+			}
+		}
+
 		virtual ~Array() {
 			for (size_t idx = 0 ; idx < _storage.length() ; idx++) {
 				_storage[idx]->release();
@@ -181,6 +187,10 @@ namespace fart::types {
 			Strong<Array<T>> result(*this);
 			result->append(item);
 			return result;
+		}
+
+		Strong<Array<T>> appending(T item) const {
+			return appending(Strong<T>(item));
 		}
 
 		inline void removeItemAtIndex(const size_t& index) noexcept(false) {
@@ -290,6 +300,18 @@ namespace fart::types {
 
 		inline Strong<T> last() const noexcept(false) {
 			return _storage.last();
+		}
+
+		inline size_t firstIndex() const {
+			if (count() > 0) return 0;
+			return NotFound;
+		}
+
+		inline size_t firstIndex(Tester tester) const {
+			for (size_t idx = 0 ; idx < count() ; idx++) {
+				if (tester(itemAtIndex(idx))) return idx;
+			}
+			return NotFound;
 		}
 
 		inline size_t lastIndex() const {
@@ -474,6 +496,10 @@ namespace fart::types {
 				if (!(*_storage[idx] == *other._storage[idx])) return false;
 			}
 			return true;
+		}
+
+		bool operator!=(const Array<T>& other) const {
+			return !(this->operator==(other));
 		}
 
 		Array<T>& operator=(const Array<T>& other) {

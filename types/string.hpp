@@ -323,6 +323,16 @@ namespace fart::types {
 			return Kind::string;
 		}
 
+		virtual bool operator==(const Type& other) const override {
+			if (!other.is(Type::Kind::string)) return false;
+			return this->operator==((const String&)other);
+		}
+
+		virtual bool operator!=(const Type& other) const override {
+			if (!other.is(Type::Kind::string)) return true;
+			return this->operator!=((const String&)other);
+		}
+
 		virtual bool operator==(const String& other) const {
 			if (!Type::operator==(other)) return false;
 			return _storage == other._storage;
@@ -330,6 +340,14 @@ namespace fart::types {
 
 		inline bool operator==(const char* other) const {
 			return *this == String(other);
+		}
+
+		inline bool operator!=(const String& other) const {
+			return !(*this == other);
+		}
+
+		inline bool operator!=(const char* other) const {
+			return !(*this == other);
 		}
 
 		inline uint32_t operator[](const size_t& idx) const {

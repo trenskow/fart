@@ -70,11 +70,11 @@ namespace fart::types {
 			return *this == *other;
 		}
 
-		bool operator!=(const Type& other) const {
+		virtual bool operator!=(const Type& other) const {
 			return !(*this == other);
 		}
 
-		bool operator!=(const Type* other) const {
+		virtual bool operator!=(const Type* other) const {
 			return !(*this == other);
 		}
 
