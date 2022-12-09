@@ -524,6 +524,13 @@ namespace fart::types {
 			return *this;
 		}
 
+		Strong<Array<T>> operator+(const Array<T>& other) const {
+			return Array<T>::flatten(
+				Strong<Array<Array<T>>>({
+					Strong<Array<T>>(*this),
+					Strong<Array<T>>(other) }));
+		}
+
 	};
 
 }
