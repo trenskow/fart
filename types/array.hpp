@@ -193,6 +193,14 @@ namespace fart::types {
 			return appending(Strong<T>(item));
 		}
 
+		Strong<Array<T>> appendingAll(const Array<T>& other) const {
+			Strong<Array<T>> result(*this);
+			other.forEach([&](const T& item) {
+				result->append(item);
+			});
+			return result;
+		}
+
 		inline void removeItemAtIndex(const size_t& index) noexcept(false) {
 			_storage.removeItemAtIndex(index)->release();
 		}
