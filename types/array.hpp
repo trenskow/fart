@@ -205,7 +205,9 @@ namespace fart::types {
 
 		void removeItem(const TesterIndex& test) noexcept(false) {
 			size_t idx = indexOf(test);
-			if (idx == NotFound) throw NotFoundException();
+			if (idx == NotFound) {
+				throw NotFoundException();
+			}
 			removeItemAtIndex(idx);
 		}
 

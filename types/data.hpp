@@ -240,7 +240,9 @@ namespace fart::types {
 		}
 
 		T first() const noexcept(false) {
-			if (this->length() == 0) throw NotFoundException();
+			if (this->length() == 0) {
+				throw NotFoundException();
+			}
 			return this->_get(0);
 		}
 
@@ -253,7 +255,9 @@ namespace fart::types {
 		}
 
 		T last() const noexcept(false) {
-			if (this->length() == 0) throw NotFoundException();
+			if (this->length() == 0) {
+				throw NotFoundException();
+			}
 			return this->_get(this->length() - 1);
 		}
 
