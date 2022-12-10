@@ -344,15 +344,14 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		inline Strong<Array<R>> map(const function<R(T& item, const size_t idx)>& transform) const {
+		inline Strong<Array<R>> map(const function<Strong<R>(T& item, const size_t idx)>& transform) const {
 			return this->reduce<Strong<Array<R>>>(Strong<Array<R>>(), [&transform](Strong<Array<R>> result, T& item, const size_t& idx) {
-				result->append(transform(item, idx));
-				return result;
+				return result->appending(transform(item, idx));
 			});
 		}
 
 		template<typename R>
-		inline Strong<Array<R>> map(const function<R(T& value)>& transform) const {
+		inline Strong<Array<R>> map(const function<Strong<R>(T& value)>& transform) const {
 			return map<R>([&transform](T& item, const size_t& idx) {
 				return transform(item);
 			});

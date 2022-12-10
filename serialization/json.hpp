@@ -449,7 +449,6 @@ namespace fart::serialization {
 					return stringify(data.as<UUID>().string());
 				default:
 					throw EncoderTypeException();
-					break;
 			}
 
 			return result;

@@ -165,14 +165,29 @@ namespace fart::types {
 		}
 
 		bool operator==(const Dictionary<Key,Value>& other) const {
+
 			if (!Type::operator==(other)) return false;
+
 			if (_keys.count() != other._keys.count()) return false;
-			for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
-				if (*_keys[idx] != *other._keys[idx] || *_values[idx] != *other._values[idx]) {
-					return false;
-				}
-			}
-			return true;
+
+			if (_keys.some([&](const Key& key) {
+				return !other._keys.contains(key);
+			})) return false;
+
+			return _keys.every([&](const Key& key) {
+				return *get(key) == *other.get(key);
+			});
+
+		}
+
+		virtual bool operator==(const Type& other) const override {
+			if (!other.is(Type::Kind::dictionary)) return false;
+			return this->operator==((const Dictionary<Key, Value>&)other);
+		}
+
+		virtual bool operator!=(const Type& other) const override {
+			if (!other.is(Type::Kind::dictionary)) return true;
+			return this->operator!=((const Dictionary<Key, Value>&)other);
 		}
 
 		Dictionary<Key, Value>& operator=(const Dictionary<Key, Value>& other) {
