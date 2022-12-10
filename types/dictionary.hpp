@@ -60,7 +60,9 @@ namespace fart::types {
 
 		void remove(const Key& key) {
 			size_t index = _keys.indexOf(key);
-			if (index == NotFound) throw KeyNotFoundException<Key>(key);
+			if (index == NotFound) {
+				throw KeyNotFoundException<Key>(key);
+			}
 			_keys.removeItemAtIndex(index);
 			_values.removeItemAtIndex(index);
 		}
@@ -178,6 +180,10 @@ namespace fart::types {
 				return *get(key) == *other.get(key);
 			});
 
+		}
+
+		bool operator!=(const Dictionary<Key, Value>& other) const {
+			return !(this->operator==(other));
 		}
 
 		virtual bool operator==(const Type& other) const override {

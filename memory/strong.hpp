@@ -132,6 +132,14 @@ namespace fart::memory {
 			return !(this->_object == nullptr);
 		}
 
+		bool operator==(const T& other) {
+			return *this->_object == other;
+		}
+
+		bool operator!=(const T& other) {
+			return *this->_object != other;
+		}
+
 		template<class O>
 		Strong<O> as() {
 			return Strong<O>((O*)_object);

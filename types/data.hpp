@@ -70,6 +70,12 @@ namespace fart::types {
 			va_end(args);
 		}
 
+		Data(size_t repeating, T item) : Data() {
+			for (size_t idx = 0 ; idx < repeating ; idx++) {
+				append(item);
+			}
+		}
+
 		Data(std::initializer_list<T> items) : Data() {
 			for (T item : items) {
 				append(item);
