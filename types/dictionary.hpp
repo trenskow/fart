@@ -16,7 +16,7 @@
 
 namespace fart::types {
 
-	template<class Key, class Value>
+	template<class Key, class Value = Type>
 	class Dictionary : public Type {
 
 		static_assert(std::is_base_of<Object, Key>::value);

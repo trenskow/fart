@@ -22,7 +22,7 @@ namespace fart::types {
 	template<typename T>
 	class Data;
 
-	template<class T>
+	template<class T = Type>
 	class Array : public Type {
 
 		static_assert(std::is_base_of<Object, T>::value);
