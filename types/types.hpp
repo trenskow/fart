@@ -19,7 +19,7 @@
 #include "./null.hpp"
 #include "./duration.hpp"
 #include "./date.hpp"
-#include "./couple.hpp"
+#include "./pair.hpp"
 #include "./uuid.hpp"
 
 #endif /* types_hpp */

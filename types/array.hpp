@@ -193,6 +193,12 @@ namespace fart::types {
 			return appending(Strong<T>(item));
 		}
 
+		void appendAll(const Array<T>& other) {
+			other.forEach([&](const T& item) {
+				this->append(Strong<T>(item));
+			});
+		}
+
 		Strong<Array<T>> appendingAll(const Array<T>& other) const {
 			Strong<Array<T>> result(*this);
 			other.forEach([&](const T& item) {

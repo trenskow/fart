@@ -11,7 +11,7 @@
 
 #include <thread>
 #include "./array.hpp"
-#include "./couple.hpp"
+#include "./pair.hpp"
 #include "./type.hpp"
 
 namespace fart::types {
@@ -32,7 +32,7 @@ namespace fart::types {
 		Dictionary(const Dictionary<Key,Value>& other) : Type(other), _keys(other._keys), _values(other._values) {}
 		Dictionary(Dictionary<Key,Value>&& other) : Type(std::move(other)), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
 
-		Dictionary(const Couple<Key, Value>& keyValue) : Type(), _keys({ keyValue.first }), _values({ keyValue.second }) {}
+		Dictionary(const Pair<Key, Value>& keyValue) : Type(), _keys({ keyValue.first }), _values({ keyValue.second }) {}
 
 		Dictionary(std::initializer_list<std::pair<Key&, Value&>> keyValues) : Type(), _keys(), _values() {
 			for (auto keyValue : keyValues) {
