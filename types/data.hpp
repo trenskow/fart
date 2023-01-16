@@ -291,6 +291,14 @@ namespace fart::types {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
+		inline bool contains(const Data<T>& other, const size_t& offset = 0) const {
+			return indexOf(other, offset) != NotFound;
+		}
+
+		inline bool contains(const T other, const size_t& offset = 0) const {
+			return indexOf(other, offset) != NotFound;
+		}
+
 		T replace(T element, const size_t& index) {
 			this->_ensureStorageOwnership();
 			T removed = this->_get(index);
