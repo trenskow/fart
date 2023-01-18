@@ -66,7 +66,8 @@ namespace fart::io::sockets {
 
 				_localEndpoint = endpoint;
 
-				const sockaddr* addr = _localEndpoint.sockAddr();
+				const sockaddr* addr = _localEndpoint->sockAddr();
+				const size_t sockaddrLength = _localEndpoint->sockAddrLength();
 
 				if (_socket < 0) {
 
@@ -77,7 +78,7 @@ namespace fart::io::sockets {
 						return;
 					}
 
-					if (_localEndpoint.type() == EndpointType::IPv6) {
+					if (_localEndpoint->type() == EndpointType::IPv6) {
 						int32_t on = 1;
 						setsockopt(_socket, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
 					}
@@ -89,7 +90,7 @@ namespace fart::io::sockets {
 					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr));
 				}
 
-				if (::bind(_socket, addr, addr->sa_len) != 0) {
+				if (::bind(_socket, addr, sockaddrLength) != 0) {
 					// Handle error
 					return;
 				}
@@ -174,7 +175,7 @@ namespace fart::io::sockets {
 
 				_remoteEndpoint = endpoint;
 
-				_socket = socket(_remoteEndpoint.sockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
+				_socket = socket(_remoteEndpoint->sockAddr()->sa_family, SOCK_STREAM, IPPROTO_TCP);
 
 				if (_socket < 0) {
 					// Handle error;
@@ -187,7 +188,7 @@ namespace fart::io::sockets {
 
 				_mutex.locked([this]() {
 
-					if (::connect(_socket, _remoteEndpoint.sockAddr(), _remoteEndpoint.sockAddr()->sa_len) != 0) {
+					if (::connect(_socket, _remoteEndpoint->sockAddr(), _remoteEndpoint->sockAddrLength()) != 0) {
 						// Handle error
 						return;
 					}
@@ -273,8 +274,8 @@ namespace fart::io::sockets {
 		int _socket;
 		SocketState _state;
 
-		Endpoint _localEndpoint;
-		Endpoint _remoteEndpoint;
+		Strong<Endpoint> _localEndpoint;
+		Strong<Endpoint> _remoteEndpoint;
 
 		Thread _listenThread;
 		Thread _receiveThread;
@@ -310,7 +311,7 @@ namespace fart::io::sockets {
 						sockaddr_storage addr;
 						socklen_t len = sizeof(sockaddr_storage);
 						bytesRead = recvfrom(socket, buffer, BUFFER_SIZE, 0, (sockaddr *)&addr, &len);
-						endpoint = Strong<Endpoint>((sockaddr*)&addr);
+						endpoint = Strong<Endpoint>((sockaddr*)&addr, len);
 					}
 					if (bytesRead > 0) {
 						Data<uint8_t> data(buffer, bytesRead);

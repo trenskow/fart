@@ -41,7 +41,9 @@ namespace fart::io::sockets {
 
 					sockaddr_in* addr = (sockaddr_in *)&this->_storage;
 
+#if __APPLE__
 					addr->sin_len = sizeof(sockaddr_in);
+#endif
 					addr->sin_family = AF_INET;
 					addr->sin_addr.s_addr = INADDR_ANY;
 					addr->sin_port = htons(port);
@@ -55,7 +57,9 @@ namespace fart::io::sockets {
 
 					sockaddr_in6* addr = ((sockaddr_in6*)&this->_storage);
 
+#if __APPLE__
 					addr->sin6_len = sizeof(sockaddr_in6);
+#endif
 					addr->sin6_family = AF_INET6;
 					addr->sin6_addr = in6addr_any;
 					addr->sin6_port = htons(port);
@@ -70,11 +74,11 @@ namespace fart::io::sockets {
 
 		}
 
-		Endpoint(const sockaddr* addr) {
-			memcpy(&this->_storage, addr, addr->sa_len);
+		Endpoint(const sockaddr* addr, size_t length) {
+			memcpy(&this->_storage, addr, length);
 		}
 
-		Endpoint(uint16_t port, EndpointType types = EndpointType::IPv4, uint32_t scope_id = 0)  : Endpoint("0.0.0.0", port, types, scope_id) {}
+		Endpoint(uint16_t port, EndpointType types = EndpointType::IPv4, uint32_t scope_id = 0) : Endpoint("0.0.0.0", port, types, scope_id) {}
 
 		virtual ~Endpoint() {}
 
@@ -122,6 +126,16 @@ namespace fart::io::sockets {
 
 		const sockaddr* sockAddr() const {
 			return (sockaddr *)&this->_storage;
+		}
+
+		const size_t sockAddrLength() const {
+			switch (this->type()) {
+				case EndpointType::IPv4:
+					return sizeof(sockaddr_in);
+				case EndpointType::IPv6:
+					return sizeof(sockaddr_in6);
+			}
+			return 0;
 		}
 
 	};
