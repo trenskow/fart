@@ -30,7 +30,7 @@ As of time of writing, Fart supports the following.
   * Data (buffer for *non*-memory managed types)
     * Backend for both String and Array
     * Uses copy-on-write
-  * Couple (Touple)
+  * Pair (Tuple)
   * Date
     * Full ISO-8601 support
     * Support for leap year
