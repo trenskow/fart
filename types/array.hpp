@@ -516,14 +516,14 @@ namespace fart::types {
 			return this->sorted([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		Strong<Array<Array<T>>> grouped(function<bool(const T&, const T&)> tester) const {
+		Strong<Array<Array<T>>> grouped(function<bool(size_t idx1, size_t idx2)> tester) const {
 			Strong<Array<Array<T>>> result;
 			if (this->count() == 0) return result;
 			Strong<Array<T>> current(this->first(), 1);
 			result->append(current);
 			for (size_t idx = 1 ; idx < this->count() ; idx++) {
 				T& item = this->itemAtIndex(idx);
-				if (tester(this->itemAtIndex(idx  - 1), item)) {
+				if (tester(idx - 1, idx)) {
 					current->append(item);
 				} else {
 					current = Strong<Array<T>>(item, 1);
@@ -531,6 +531,12 @@ namespace fart::types {
 				}
 			}
 			return result;
+		}
+
+		inline Strong<Array<Array<T>>> grouped(function<bool(T& item1, T& item2)> tester) const {
+			return grouped([this,&tester](size_t idx1, size_t idx2) {
+				return tester(this->itemAtIndex(idx1), this->itemAtIndex(idx2));
+			});
 		}
 
 		bool are(Type::Kind kind) const {
