@@ -31,33 +31,39 @@ namespace fart::types {
 
 	public:
 
-		typedef function<bool(T& item1, T& item2)> Comparer;
-		typedef function<bool(T& item, const size_t idx)> TesterIndex;
-		typedef function<bool(T& item)> Tester;
+		using Comparer = function<bool(T& item1, T& item2)>;
+		using ComparerIndex = function<bool(size_t idx1, size_t idx2)>;
+
+		using TesterIndex = function<bool(T& item, size_t idx)>;
+		using Tester = function<bool(T& item)>;
+
+		template<typename R>
+		using Reducer = function<R(R result, T& item)>;
+		template<typename R>
+		using ReducerIndex = function<R(R result, T& item, size_t idx)>;
 
 	private:
 
-		template<typename S>
-		class Storage: public Data<S> {
+		class Storage: public Data<T*> {
 
 		public:
 
-			Storage() : Data<S>() {}
+			Storage() : Data<T*>() {}
 
-			Storage(const Data<S>& other) : Data<S>(other) { }
+			Storage(const Data<T*>& other) : Data<T*>(other) { }
 
-			Storage(const Storage& other) : Data<S>(other) { }
-			Storage(Storage&& other) : Data<S>(std::move(other)) { }
+			Storage(const Storage& other) : Data<T*>(other) { }
+			Storage(Storage&& other) : Data<T*>(std::move(other)) { }
 
 			virtual ~Storage() { }
 
 			Storage& operator=(const Storage& other) {
-				Data<S>::operator=(other);
+				Data<T*>::operator=(other);
 				return *this;
 			}
 
 			Storage& operator=(Storage&& other) {
-				Data<S>::operator=(std::move(other));
+				Data<T*>::operator=(std::move(other));
 				return *this;
 			}
 
@@ -69,29 +75,29 @@ namespace fart::types {
 			}
 		}
 
-		Storage<T*> _storage;
+		Storage _storage;
 
-		static void _insertionSort(Array& array, const Comparer& comparer) {
+		static void _insertionSort(Array& array, ComparerIndex comparer) {
 			size_t sortedIdx = 0;
 			while (sortedIdx < array.count() - 1) {
 				sortedIdx++;
 				for (size_t idx = sortedIdx ; idx > 0 ; idx--) {
-					if (comparer((T&)array[idx - 1], (T&)array[idx])) array.swapItemAtIndexes(idx, idx);
+					if (comparer(idx - 1, idx)) array.swapItemAtIndices(idx, idx);
 				}
 			}
 		}
 
-		static void _quickSort(Array& array, const size_t& offset, const size_t& count, const Comparer& comparer) {
+		static void _quickSort(Array& array, const size_t& offset, const size_t& count, ComparerIndex comparer) {
 			if (count == 0) return;
 			size_t pivot = count - 1;
 			size_t idx = 0;
 			while (idx < pivot) {
-				if (comparer((T&)array[offset + idx], (T&)array[offset + pivot])) {
+				if (comparer(offset + idx, offset + pivot)) {
 					if (idx == pivot - 1) {
-						array.swapItemAtIndexes(offset + idx, offset + pivot);
+						array.swapItemAtIndices(offset + idx, offset + pivot);
 					} else {
-						array.swapItemAtIndexes(offset + pivot - 1, offset + pivot);
-						array.swapItemAtIndexes(offset + pivot, offset + idx);
+						array.swapItemAtIndices(offset + pivot - 1, offset + pivot);
+						array.swapItemAtIndices(offset + pivot, offset + idx);
 					}
 					pivot--;
 				} else {
@@ -352,10 +358,17 @@ namespace fart::types {
 			});
 		}
 
-		template<typename R, typename F>
-		inline R reduce(const R& initial, const F& todo) const {
-			return this->_storage.reduce(initial, [&todo](R& result, T* item, const size_t& idx) {
+		template<typename R>
+		inline R reduce(R initial, ReducerIndex<R> todo) const {
+			return this->_storage.template reduce<R>(initial, [&todo](R result, T* item, size_t idx) {
 				return todo(result, *item, idx);
+			});
+		}
+
+		template<typename R>
+		inline R reduce(R initial, Reducer<R> todo) const {
+			return reduce<R>(initial, [&todo](R result, T& item, size_t idx) {
+				return todo(result, item);
 			});
 		}
 
@@ -462,8 +475,8 @@ namespace fart::types {
 			this->_storage.moveItemAtIndex(srcIndex, dstIndex);
 		}
 
-		inline void swapItemAtIndexes(const size_t& index1, const size_t& index2) noexcept(false) {
-			this->_storage.swapItemsAtIndexes(index1, index2);
+		inline void swapItemAtIndices(const size_t& index1, const size_t& index2) noexcept(false) {
+			this->_storage.swapItemsAtIndices(index1, index2);
 		}
 
 		void insertItemAtIndex(Strong<T> item, const size_t& dstIndex) noexcept(false) {
@@ -472,23 +485,52 @@ namespace fart::types {
 			_storage.insertItemAtIndex(item, dstIndex);
 		}
 
-		void sort(const Comparer& comparer) {
+		void sort(const ComparerIndex comparer) {
 			if (this->count() <= 10) _insertionSort(*this, comparer);
 			else _quickSort(*this, 0, this->count(), comparer);
+		}
+
+		inline void sort(const Comparer comparer) {
+			sort([this,&comparer](size_t idx1, size_t idx2) {
+				return comparer(*this->itemAtIndex(idx1), *this->itemAtIndex(idx2));
+			});
 		}
 
 		inline void sort() {
 			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		Strong<Array<T>> sorted(const Comparer& comparer) {
+		Strong<Array<T>> sorted(ComparerIndex comparer) const {
 			Strong<Array<T>> result = *this;
 			result->sort(comparer);
 			return result;
 		}
 
+		Strong<Array<T>> sorted(Comparer comparer) const {
+			return sorted([this,&comparer](size_t idx1, size_t idx2) {
+				return comparer(*this->itemAtIndex(idx1), *this->itemAtIndex(idx2));
+			});
+		}
+
 		Strong<Array<T>> sorted() {
 			return this->sorted([](const T& item1, const T& item2) { return item1 > item2; });
+		}
+
+		Strong<Array<Array<T>>> grouped(function<bool(const T&, const T&)> tester) const {
+			Strong<Array<Array<T>>> result;
+			if (this->count() == 0) return result;
+			Strong<Array<T>> current(this->first(), 1);
+			result->append(current);
+			for (size_t idx = 1 ; idx < this->count() ; idx++) {
+				T& item = this->itemAtIndex(idx);
+				if (tester(this->itemAtIndex(idx  - 1), item)) {
+					current->append(item);
+				} else {
+					current = Strong<Array<T>>(item, 1);
+					result->append(current);
+				}
+			}
+			return result;
 		}
 
 		bool are(Type::Kind kind) const {

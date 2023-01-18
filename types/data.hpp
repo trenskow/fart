@@ -40,9 +40,13 @@ namespace fart::types {
 
 	public:
 
-		typedef function<bool(T item1, T item2)> Comparer;
-		typedef function<bool(T item)> Tester;
-		typedef function<bool(T item, const size_t& idx)> TesterIndex;
+		using Tester = function<bool(T item)>;
+		using TesterIndex = function<bool(T item, size_t idx)>;
+
+		template<typename R>
+		using Reducer = function<R(R result, T item)>;
+		template<typename R>
+		using ReducerIndex = function<R(R result, T item, size_t idx)>;
 
 		template<typename F>
 		static Data<T> fromCBuffer(const F& todo, const size_t& length) {
@@ -171,7 +175,7 @@ namespace fart::types {
 
 		}
 
-		void swapItemsAtIndexes(const size_t& index1, const size_t& index2) noexcept(false) {
+		void swapItemsAtIndices(const size_t& index1, const size_t& index2) noexcept(false) {
 
 			if (index1 == index2) return;
 
@@ -420,9 +424,9 @@ namespace fart::types {
 		}
 
 		inline static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
-			return datas.reduce(Strong<Data<T>>(), [datas, seperator](Data<T>& result, const Data<T>& value, const size_t& idx) {
-				result.append(datas[idx]);
-				if (seperator != nullptr && idx != datas.count() - 1) result.append(*seperator);
+			return datas.template reduce<Strong<Data<T>>>(Strong<Data<T>>(), [datas, seperator](Strong<Data<T>> result, Data<T>& value, size_t idx) {
+				result->append(datas[idx]);
+				if (seperator != nullptr && idx != datas.count() - 1) result->append(*seperator);
 				return result;
 			});
 		}
@@ -452,13 +456,20 @@ namespace fart::types {
 			});
 		}
 
-		template<typename R, typename F>
-		R reduce(R initial, F todo) const {
+		template<typename R>
+		R reduce(R initial, ReducerIndex<R> todo) const {
 			R result = initial;
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
 				result = todo(result, this->_get(idx), idx);
 			}
 			return result;
+		}
+
+		template<typename R>
+		inline R reduce(R initial, Reducer<R> todo) const {
+			return reduce<R>(initial, [&todo](R result, T item, size_t idx) {
+				return todo(result, item);
+			});
 		}
 
 		Strong<Data<T>> filter(const TesterIndex& test) const {
