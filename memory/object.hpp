@@ -100,7 +100,7 @@ namespace fart::memory {
 #ifdef FART_ALLOW_MANUAL_HEAP
 	public:
 #else
-	private:
+	protected:
 #endif
 
 		void retain() const {

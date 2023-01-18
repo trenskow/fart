@@ -411,7 +411,7 @@ namespace fart::types {
 		}
 
 		inline Strong<Array<Data<T>>> split(T* seperator, const size_t& length, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
-			return split(Strong<Data<T>>(seperator, length), includeSeparator, max);
+			return split(Data<T>(seperator, length), includeSeparator, max);
 		}
 
 		inline static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
