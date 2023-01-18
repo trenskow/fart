@@ -65,15 +65,6 @@ namespace fart::types {
 			this->_ensureStorageSize(capacity);
 		}
 
-		Data(size_t length, ...) : Data() {
-			va_list args;
-			va_start(args, length);
-			for (size_t idx = 0 ; idx < length ; idx++) {
-				append(va_arg(args, T));
-			}
-			va_end(args);
-		}
-
 		Data(size_t repeating, T item) : Data() {
 			for (size_t idx = 0 ; idx < repeating ; idx++) {
 				append(item);
