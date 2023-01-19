@@ -171,19 +171,35 @@ namespace fart::types {
 			return this->seconds();
 		}
 
-		Duration operator+(const Duration& other) const noexcept {
+		bool operator==(const Duration& other) const {
+			return _seconds == other._seconds;
+		}
+
+		bool operator!=(const Duration& other) const {
+			return !(*this == other);
+		}
+
+		bool operator>(const Duration& other) const {
+			return _seconds > other._seconds;
+		}
+
+		bool operator<(const Duration& other) const {
+			return _seconds < other._seconds;
+		}
+
+		Duration operator+(const Duration& other) const {
 			return this->seconds() + other.seconds();
 		}
 
-		Duration operator-(const Duration& other) const noexcept {
+		Duration operator-(const Duration& other) const {
 			return this->seconds() - other.seconds();
 		}
 
-		Duration operator*(const double other) const noexcept {
+		Duration operator*(const double other) const {
 			return this->seconds() * other;
 		}
 
-		Duration operator/(const double other) const noexcept {
+		Duration operator/(const double other) const {
 			return this->seconds() / other;
 		}
 

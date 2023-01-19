@@ -79,7 +79,7 @@ namespace fart::types {
 			}
 		}
 
-		static int64_t _daysFromEpoch(int64_t y, unsigned m, unsigned d) noexcept {
+		static int64_t _daysFromEpoch(int64_t y, unsigned m, unsigned d) {
 			y -= m <= 2;
 			const int64_t era = (y >= 0 ? y : y-399) / 400;
 			const unsigned yoe = static_cast<unsigned>(y - era * 400);      // [0, 399]
@@ -88,7 +88,7 @@ namespace fart::types {
 			return era * 146097 + static_cast<int64_t>(doe) - 719468;
 		}
 
-		static void _components(int64_t time, int64_t *year, uint8_t *month, uint8_t *day) noexcept {
+		static void _components(int64_t time, int64_t *year, uint8_t *month, uint8_t *day) {
 			time += 719468;
 			const int64_t era = (time >= 0 ? time : time - 146096) / 146097;
 			const unsigned doe = static_cast<unsigned>(time - era * 146097);          // [0, 146096]
@@ -113,10 +113,8 @@ namespace fart::types {
 
 		static const Duration _localOffset() {
 			time_t rawTime;
-			tm * timeinfo;
 			::time(&rawTime);
-			timeinfo = localtime(&rawTime);
-			return timeinfo->tm_gmtoff;
+			return localtime(&rawTime)->tm_gmtoff;
 		}
 
 	public:
@@ -175,12 +173,12 @@ namespace fart::types {
 
 				if (parts->count() > 1) {
 
-					auto seperators = String();
-					seperators.append("+");
-					seperators.append("-");
-					seperators.append("Z");
+					auto separators = String();
+					separators.append("+");
+					separators.append("-");
+					separators.append("Z");
 
-					auto timeParts = parts->itemAtIndex(1)->split(seperators, IncludeSeparator::prefix);
+					auto timeParts = parts->itemAtIndex(1)->split(separators, IncludeSeparator::prefix);
 
 					if (timeParts->count() == 1) throw ISO8601Exception();
 
