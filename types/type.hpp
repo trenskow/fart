@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 10/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef type_hpp
@@ -82,12 +82,12 @@ namespace fart::types {
 			return kind == this->kind();
 		}
 
-		template<class T>
+		template<typename T>
 		T& as() const {
 			return (T&)*this;
 		}
 
-		template<class T>
+		template<typename T>
 		T& as(Kind kind) const {
 			if (!this->is(kind)) throw TypeConversionException();
 			return this->as<T>();

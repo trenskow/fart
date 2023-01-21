@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 03/04/2020.
-//  Copyright © 2020 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef date_hpp
@@ -13,15 +13,16 @@
 #include <time.h>
 
 #include "../exceptions/exception.hpp"
-#include "type.hpp"
-#include "duration.hpp"
-#include "string.hpp"
+#include "./type.hpp"
+#include "./duration.hpp"
+#include "./string.hpp"
+#include "./comparable.hpp"
 
 using namespace fart::exceptions::types;
 
 namespace fart::types {
 
-	class Date : public Type {
+	class Date : public Type, public Comparable<Date> {
 
 	public:
 
@@ -343,20 +344,8 @@ namespace fart::types {
 			_time -= duration;
 		}
 
-		bool operator==(const Date& other) const {
-			return this->to(TimeZone::utc).seconds() == other.to(TimeZone::utc).seconds();
-		}
-
-		bool operator!=(const Date& other) const {
-			return !(*this == other);
-		}
-
-		bool operator>(const Date& other) const {
+		virtual bool operator>(const Date& other) const override {
 			return this->to(TimeZone::utc).seconds() > other.to(TimeZone::utc).seconds();
-		}
-
-		bool operator<(const Date& other) const {
-			return this->to(TimeZone::utc).seconds() < other.to(TimeZone::utc).seconds();
 		}
 
 		Date& operator=(const Date& other) {

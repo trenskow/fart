@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 17/08/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef exception_hpp
@@ -259,7 +259,7 @@ namespace fart::exceptions {
 
 		};
 
-		template<class T>
+		template<typename T>
 		class KeyNotFoundException : public Exception {
 
 			T _key;

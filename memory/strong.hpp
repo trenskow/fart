@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 17/08/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef strong_hpp
@@ -18,10 +18,10 @@ using namespace std;
 
 namespace fart::memory {
 
-	template<class T>
+	template<typename T>
 	class Weak;
 
-	template<class T>
+	template<typename T>
 	class Strong
 #ifdef FART_ALLOW_MANUAL_HEAP
 	: public Allocator
@@ -140,7 +140,7 @@ namespace fart::memory {
 			return *this->_object != other;
 		}
 
-		template<class O>
+		template<typename O>
 		Strong<O> as() {
 			return Strong<O>((O*)_object);
 		}

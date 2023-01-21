@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 04/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef weak_hpp
@@ -18,10 +18,10 @@ namespace fart::memory {
 
 	class Object;
 
-	template<class T>
+	template<typename T>
 	class Strong;
 
-	template<class T>
+	template<typename T>
 	class Weak
 #ifdef FART_ALLOW_MANUAL_HEAP
 	: public Allocator

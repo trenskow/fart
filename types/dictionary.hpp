@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 09/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef dictionary_hpp
@@ -16,7 +16,7 @@
 
 namespace fart::types {
 
-	template<class Key, class Value = Type>
+	template<typename Key, class Value = Type>
 	class Dictionary : public Type {
 
 		static_assert(std::is_base_of<Object, Key>::value);

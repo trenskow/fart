@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 16/01/2021.
-//  Copyright © 2020 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef environment_hpp

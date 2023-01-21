@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 14/12/2019.
-//  Copyright © 2019 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef semaphore_hpp

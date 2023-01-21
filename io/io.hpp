@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 12/04/2020.
-//  Copyright © 2020 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef FART_NO_IO

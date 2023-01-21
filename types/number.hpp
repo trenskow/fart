@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 09/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef number_hpp
@@ -12,6 +12,7 @@
 #include <type_traits>
 
 #include "./type.hpp"
+#include "./comparable.hpp"
 
 namespace fart::types {
 
@@ -22,7 +23,7 @@ namespace fart::types {
 	};
 
 	template<typename T>
-	class Number : public Type {
+	class Number : public Type, public Comparable<Number<T>> {
 
 	private:
 		Subtype _subtype;
@@ -33,11 +34,11 @@ namespace fart::types {
 		static T getValue(const Number<T>& number) {
 			switch (number.subType()) {
 				case Subtype::integer:
-					return (T)number.as<Number<int64_t>>().value();
+					return (T)number.template as<Number<int64_t>>().value();
 				case Subtype::floatingPoint:
-					return (T)number.as<Number<double>>().value();
+					return (T)number.template as<Number<double>>().value();
 				case Subtype::boolean:
-					return (T)(number.as<Number<bool>>().value() != 0);
+					return (T)(number.template as<Number<bool>>().value() != 0);
 				default:
 					throw TypeConversionException();
 			}
@@ -103,12 +104,7 @@ namespace fart::types {
 			return _subtype == subtype;
 		}
 
-		bool operator==(const Number<T>& other) const {
-			if (!Type::operator==(other)) return false;
-			return _value == other._value;
-		}
-
-		bool operator>(const Number<T>& other) const {
+		virtual bool operator>(const Number<T>& other) const override {
 			return _value > other._value;
 		}
 

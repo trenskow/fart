@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 19/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef socket_hpp

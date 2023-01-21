@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 04/09/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef array_hpp
@@ -22,7 +22,7 @@ namespace fart::types {
 	template<typename T>
 	class Data;
 
-	template<class T = Type>
+	template<typename T = Type>
 	class Array : public Type {
 
 		static_assert(std::is_base_of<Object, T>::value);

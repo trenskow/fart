@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 17/08/2018.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef object_hpp
@@ -21,7 +21,7 @@ using namespace fart::threading;
 using namespace fart::exceptions::memory;
 
 namespace fart::types {
-	template<class T>
+	template<typename T>
 	class Array;
 }
 
@@ -35,13 +35,13 @@ namespace fart::memory {
 #endif
 	{
 
-		template<class T>
+		template<typename T>
 		friend class Strong;
 
-		template<class T>
+		template<typename T>
 		friend class Weak;
 
-		template<class T>
+		template<typename T>
 		friend class ::fart::types::Array;
 
 	private:

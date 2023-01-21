@@ -4,7 +4,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 24/01/2021.
-//  Copyright © 2018 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef pair_hpp

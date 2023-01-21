@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 11/12/2019.
-//  Copyright © 2019 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef message_hpp
@@ -37,7 +37,7 @@ namespace fart::web {
 
 	};
 
-	template<class Head = MessageHead>
+	template<typename Head = MessageHead>
 	class Message : public Head {
 
 		static_assert(std::is_base_of<Object, MessageHead>::value);

@@ -3,7 +3,7 @@
 //  fart
 //
 //  Created by Kristian Trenskow on 04/04/2020.
-//  Copyright © 2020 Kristian Trenskow. All rights reserved.
+//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
 #ifndef duration_hpp
@@ -13,10 +13,11 @@
 
 #include "../memory/strong.hpp"
 #include "./type.hpp"
+#include "./comparable.hpp"
 
 namespace fart::types {
 
-	class Duration {
+	class Duration : public Comparable<Duration> {
 
 	private:
 
@@ -171,20 +172,8 @@ namespace fart::types {
 			return this->seconds();
 		}
 
-		bool operator==(const Duration& other) const {
-			return _seconds == other._seconds;
-		}
-
-		bool operator!=(const Duration& other) const {
-			return !(*this == other);
-		}
-
-		bool operator>(const Duration& other) const {
+		virtual bool operator>(const Duration& other) const override {
 			return _seconds > other._seconds;
-		}
-
-		bool operator<(const Duration& other) const {
-			return _seconds < other._seconds;
 		}
 
 		Duration operator+(const Duration& other) const {
