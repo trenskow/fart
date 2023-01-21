@@ -177,7 +177,7 @@ namespace fart::types {
 			})) return false;
 
 			return _keys.every([&](const Key& key) {
-				return *get(key) == *other.get(key);
+				return (Key&)*get(key) == (Key&)*other.get(key);
 			});
 
 		}
