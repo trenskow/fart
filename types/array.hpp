@@ -13,6 +13,7 @@
 
 #include "../memory/strong.hpp"
 #include "./type.hpp"
+#include "./comparable.hpp"
 
 using namespace fart::memory;
 using namespace fart::exceptions::types;
