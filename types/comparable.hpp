@@ -10,11 +10,12 @@
 #define comparable_hpp
 
 #include "./comparison.hpp"
+#include "./equatable.hpp"
 
 namespace fart::types {
 
 	template<typename T>
-	class Comparable {
+	class Comparable : public Equatable<T> {
 
 		public:
 
@@ -24,7 +25,7 @@ namespace fart::types {
 				return !(other >= (T&)*this);
 			}
 
-			inline bool operator==(const T& other) const {
+			virtual bool operator==(const T& other) const override {
 				return !other.operator>((T&)*this) && !this->operator>(other);
 			}
 
