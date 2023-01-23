@@ -26,7 +26,7 @@ namespace fart::types {
 			}
 
 			virtual bool operator==(const T& other) const override {
-				return !other.operator>((T&)*this) && !this->operator>(other);
+				return !(other > (T&)*this) && !((T&)*this > other);
 			}
 
 			inline bool operator!=(const T& other) const {

@@ -25,6 +25,8 @@ namespace fart::types {
 
 	public:
 
+		using Comparable<Duration>::operator==;
+
 		static const Duration& zero() {
 			static const Duration zero = 0;
 			return zero;

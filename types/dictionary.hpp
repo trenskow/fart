@@ -79,7 +79,7 @@ namespace fart::types {
 			return _keys.indexOf(key) != NotFound;
 		}
 
-		Strong<Value> get(const Key& key) const noexcept(false) {
+		Value& get(const Key& key) const noexcept(false) {
 			size_t keyIndex = _keys.indexOf(key);
 			if (keyIndex == NotFound) {
 				throw KeyNotFoundException<Key>(key);
@@ -87,18 +87,18 @@ namespace fart::types {
 			return _values[keyIndex];
 		}
 
-		Strong<Value> get(const Key& key, const Value& defaultValue) const {
+		Value& get(const Key& key, const Value& defaultValue) const {
 			if (!this->hasKey(key)) return defaultValue;
 			return this->get(key);
 		}
 
-		Strong<Value> get(const Key& key, const bool& store, const Value& defaultValue) {
+		Value& get(const Key& key, const bool& store, const Value& defaultValue) {
 			Strong<Value> value = this->get(key, defaultValue);
 			if (store) this->set(key, value);
 			return value;
 		}
 
-		inline Strong<Value> operator[](const Key& key) const noexcept(false) {
+		inline Value& operator[](const Key& key) const noexcept(false) {
 			return get(key);
 		}
 
@@ -177,7 +177,7 @@ namespace fart::types {
 			})) return false;
 
 			return _keys.every([&](const Key& key) {
-				return (Key&)*get(key) == (Key&)*other.get(key);
+				return this->get(key) == other.get(key);
 			});
 
 		}

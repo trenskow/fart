@@ -31,6 +31,8 @@ namespace fart::types {
 
 	public:
 
+		using Comparable<Number<T>>::operator==;
+
 		static T getValue(const Number<T>& number) {
 			switch (number.subType()) {
 				case Subtype::integer:

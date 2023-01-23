@@ -26,6 +26,8 @@ namespace fart::types {
 
 	public:
 
+		using Comparable<Date>::operator==;
+
 		enum class TimeZone {
 			utc,
 			local
@@ -160,15 +162,15 @@ namespace fart::types {
 
 				auto datePart = parts->itemAtIndex(0);
 
-				year = datePart->substring(0, 4)->doubleValue();
+				year = datePart.substring(0, 4)->doubleValue();
 
-				if (datePart->length() == 8) {
-					month = datePart->substring(4, 2)->doubleValue();
-					day = datePart->substring(6, 2)->doubleValue();
+				if (datePart.length() == 8) {
+					month = datePart.substring(4, 2)->doubleValue();
+					day = datePart.substring(6, 2)->doubleValue();
 				}
-				else if (datePart->length() == 10) {
-					month = datePart->substring(5, 2)->doubleValue();
-					day = datePart->substring(8, 2)->doubleValue();
+				else if (datePart.length() == 10) {
+					month = datePart.substring(5, 2)->doubleValue();
+					day = datePart.substring(8, 2)->doubleValue();
 				}
 				else throw ISO8601Exception();
 
@@ -179,37 +181,37 @@ namespace fart::types {
 					separators.append("-");
 					separators.append("Z");
 
-					auto timeParts = parts->itemAtIndex(1)->split(separators, IncludeSeparator::prefix);
+					auto timeParts = parts->itemAtIndex(1).split(separators, IncludeSeparator::prefix);
 
 					if (timeParts->count() == 1) throw ISO8601Exception();
 
 					auto timeComponentsPart = timeParts->itemAtIndex(0);
 					auto timeZonePart = timeParts->itemAtIndex(1);
 
-					auto timeComponentsSubParts = timeComponentsPart->split(".");
+					auto timeComponentsSubParts = timeComponentsPart.split(".");
 
 					if (timeComponentsSubParts->count() > 0) {
 
 						auto hmsComponentParts = timeComponentsSubParts->itemAtIndex(0);
 
-						hours = hmsComponentParts->substring(0, 2)->doubleValue();
+						hours = hmsComponentParts.substring(0, 2)->doubleValue();
 
-						if (hmsComponentParts->length() == 6) {
-							minutes = hmsComponentParts->substring(2, 2)->doubleValue();
-							seconds = hmsComponentParts->substring(4, 2)->doubleValue();
+						if (hmsComponentParts.length() == 6) {
+							minutes = hmsComponentParts.substring(2, 2)->doubleValue();
+							seconds = hmsComponentParts.substring(4, 2)->doubleValue();
 						}
-						else if (timeComponentsPart->length() == 8) {
-							minutes = hmsComponentParts->substring(3, 2)->doubleValue();
-							seconds = hmsComponentParts->substring(6, 2)->doubleValue();
+						else if (timeComponentsPart.length() == 8) {
+							minutes = hmsComponentParts.substring(3, 2)->doubleValue();
+							seconds = hmsComponentParts.substring(6, 2)->doubleValue();
 						}
 
 						if (timeComponentsSubParts->count() > 1) {
-							microseconds = timeComponentsSubParts->itemAtIndex(1)->doubleValue();
+							microseconds = timeComponentsSubParts->itemAtIndex(1).doubleValue();
 						}
 
 					} else throw ISO8601Exception();
 
-					if (timeZonePart->length() > 0) {
+					if (timeZonePart.length() > 0) {
 						timeZoneOffset = Duration::parse(timeZonePart);
 					}
 
