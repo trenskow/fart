@@ -25,12 +25,20 @@ namespace fart::types {
 		Pair(const Pair<First, Second>& other) : Type(), _first(other._first), _second(other._second) { }
 		Pair(const std::pair<First&, Second&> pair) : Type(), _first(pair.first), _second(pair.second) { }
 
-		Strong<First> first() const {
-			return _first;
+		First& first() const {
+			return *_first;
 		}
 
-		Strong<Second> second() const {
-			return _second;
+		void setFirst(const First& first) {
+			_first = first;
+		}
+
+		Second& second() const {
+			return *_second;
+		}
+
+		void setSecond(const Second& second) {
+			_second = second;
 		}
 
 		virtual uint64_t hash() const override {

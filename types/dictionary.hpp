@@ -34,6 +34,15 @@ namespace fart::types {
 
 		Dictionary(const Pair<Key, Value>& keyValue) : Type(), _keys({ keyValue.first }), _values({ keyValue.second }) {}
 
+		Dictionary(const Array<Pair<Key, Value>>& keyValues) : Type(), _keys(), _values() {
+			_keys = keyValues.template map<Key>([](const Pair<Key, Value>& keyValue) {
+				return keyValue.first();
+			});
+			_values = keyValues.template map<Value>([](const Pair<Key, Value>& keyValue) {
+				return keyValue.second();
+			});
+		}
+
 		Dictionary(std::initializer_list<std::pair<Key&, Value&>> keyValues) : Type(), _keys(), _values() {
 			for (auto keyValue : keyValues) {
 				_keys.append(keyValue.first);
@@ -106,9 +115,15 @@ namespace fart::types {
 			return _keys.count();
 		}
 
-		void forEach(const function<void(const Key&, Value&)>& todo) const {
+		Strong<Array<Pair<Key, Value>>> keyValues() const {
+			return this->map<Pair<Key, Value>>([](const Pair<Key, Value>& keyValue) {
+				return keyValue;
+			});
+		}
+
+		void forEach(const function<void(const Pair<Key, Value>&)>& todo) const {
 			for (size_t idx = 0 ; idx < _keys.count() ; idx++) {
-				todo(_keys[idx], _values[idx]);
+				todo(Pair<Key, Value>(_keys[idx], _values[idx]));
 			}
 		}
 
@@ -124,32 +139,41 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Dictionary<Key, Value>> filter(const function<bool(const Key& key, const Value& value)>& todo) {
+		Strong<Dictionary<Key, Value>> filter(const function<bool(const Pair<Key, Value>&)>& todo) const {
 			Strong<Dictionary<Key, Value>> result;
 			for (size_t idx = 0 ; idx < this->_keys.count() ; idx++) {
 				Strong<Key> key = this->_keys[idx];
 				Strong<Value> value = this->_values[idx];
-				if (todo(key, value)) result->set(key, value);
+				if (todo(Pair<Key, Value>(key, value))) result->set(key, value);
 			}
 			return result;
 		}
 
 		template<typename OtherKey>
-		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<OtherKey(const Key& key, Value& value)>& todo) {
+		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<Strong<OtherKey>(const Pair<Key, Value>&)>& todo) const {
 			Strong<Dictionary<OtherKey, Value>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result->set(todo(key, value), value);
+				result->set(todo(Pair<Key, Value>(key, value)), value);
 			});
 			return result;
 		}
 
 		template<typename OtherValue>
-		Strong<Dictionary<Key, OtherValue>> mapValues(const function<OtherValue(const Key& key, Value& value)>& todo) {
+		Strong<Dictionary<Key, OtherValue>> mapValues(const function<Strong<OtherValue>(const Pair<Key, Value>&)>& todo) const {
 			Strong<Dictionary<Key, OtherValue>> result;
 			this->_keys.forEach([&todo,&result,this](const Key& key) {
 				Strong<Value> value = this->get(key);
-				result->set(key, todo(key, value));
+				result->set(key, todo(Pair<Key, Value>(key, value)));
+			});
+			return result;
+		}
+
+		template<typename OtherValue>
+		Strong<Array<OtherValue>> map(const function<Strong<OtherValue>(const Pair<Key, Value>&)> todo) const {
+			Strong<Array<OtherValue>> result;
+			this->forEach([&todo,&result](const Pair<Key, Value>& element) {
+				result->append(todo(element));
 			});
 			return result;
 		}
