@@ -48,7 +48,7 @@ namespace fart::types {
 
 		static T getValue(const Type& value) noexcept(false) {
 			if (!value.is(Type::Kind::number)) throw TypeConversionException();
-			return Number<uint64_t>::getValue(value.as<Number<uint64_t>>());
+			return Number<T>::getValue(value.as<Number<T>>());
 		}
 
 		static bool is(const Type& value) {
