@@ -13,6 +13,7 @@
 #include <string.h>
 #include <signal.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 namespace fart::exceptions {
 

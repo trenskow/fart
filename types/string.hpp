@@ -74,8 +74,7 @@ namespace fart::types {
 
 		String(String&& other) : _storage(std::move(other._storage)) { }
 
-		template<typename F>
-		inline static String fromCString(const F& todo, const size_t& size) {
+		inline static String fromCString(function<size_t(const char*,size_t)> todo, const size_t& size) {
 			return String(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
 				return todo((char*)buffer, length);
 			}, size));
@@ -111,13 +110,12 @@ namespace fart::types {
 			return _storage.length();
 		}
 
-		template<typename T, typename F>
-		inline auto mapCString(const F& todo) const {
+		template<typename T>
+		inline T mapCString(const function<T(const char*)>& todo) const {
 			return todo((const char*)this->UTF8Data(true)->items());
 		}
 
-		template<typename F>
-		inline void withCString(const F& todo) const {
+		inline void withCString(const function<void(const char*)>& todo) const {
 			todo((const char*)this->UTF8Data(true)->items());
 		}
 

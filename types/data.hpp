@@ -48,8 +48,7 @@ namespace fart::types {
 		template<typename R>
 		using ReducerIndex = function<R(R result, T item, size_t idx)>;
 
-		template<typename F>
-		static Data<T> fromCBuffer(const F& todo, const size_t& length) {
+		static Data<T> fromCBuffer(const function<size_t(T*,size_t)>& todo, const size_t& length) {
 			T buffer[length];
 			size_t read = todo(buffer, length);
 			return Data<T>((T*)buffer, math::min(read, length));

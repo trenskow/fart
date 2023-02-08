@@ -13,10 +13,10 @@
 #include "./type.hpp"
 #include "../system/endian.hpp"
 
-#ifdef __linux__
-#define RANDOM() random()
-#else
+#if defined(__APPLE__) || defined(BSD)
 #define RANDOM() arc4random()
+#else
+#define RANDOM() random()
 #endif
 
 using namespace fart::exceptions::types;
