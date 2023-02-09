@@ -415,6 +415,7 @@ namespace fart::types {
 
 		inline static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
 			return datas.template reduce<Strong<Data<T>>>(Strong<Data<T>>(), [datas, seperator](Strong<Data<T>> result, Data<T>& value, size_t idx) {
+				(void)value;
 				result->append(datas[idx]);
 				if (seperator != nullptr && idx != datas.count() - 1) result->append(*seperator);
 				return result;
@@ -442,6 +443,7 @@ namespace fart::types {
 
 		inline void forEach(function<void(T& item)> todo) const {
 			this->forEach([&todo](T& item, size_t idx) {
+				(void)idx;
 				todo(item);
 			});
 		}
@@ -458,6 +460,7 @@ namespace fart::types {
 		template<typename R>
 		inline R reduce(R initial, Reducer<R> todo) const {
 			return reduce<R>(initial, [&todo](R result, T item, size_t idx) {
+				(void)idx;
 				return todo(result, item);
 			});
 		}
@@ -472,6 +475,7 @@ namespace fart::types {
 
 		inline Strong<Data<T>> filter(const Tester& test) const {
 			return filter([&test](T item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			});
 		}
@@ -488,6 +492,7 @@ namespace fart::types {
 		template<typename O>
 		inline Strong<Data<O>> map(const function<O(T item)>& transform) const {
 			return map<O>([&transform](T item, const size_t& idx) {
+				(void)idx;
 				return transform(item);
 			});
 		}
@@ -504,6 +509,7 @@ namespace fart::types {
 		template<typename O>
 		Strong<Array<O>> mapToArray(const function<O(T item)>& transform) const {
 			return mapToArray<O>([&transform](T item, const size_t& idx) {
+				(void)idx;
 				return transform(item);
 			});
 		}
@@ -518,6 +524,7 @@ namespace fart::types {
 
 		inline bool some(const Tester& test, bool def = false) const {
 			return some([&test](T item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			}, def);
 		}
@@ -531,6 +538,7 @@ namespace fart::types {
 
 		inline bool every(const Tester& test, bool def = true) const {
 			return every([&test](T item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			}, def);
 		}
@@ -589,6 +597,7 @@ namespace fart::types {
 	protected:
 
 		virtual inline uint64_t hashForItem(const T& item) const {
+			(void)item;
 			return 0;
 		}
 

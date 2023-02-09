@@ -240,6 +240,7 @@ namespace fart::types {
 
 		inline void removeItem(const Tester& test) noexcept(false) {
 			return removeItem([&test](T& item, const size_t idx) {
+				(void)idx;
 				return test(item);
 			});
 		}
@@ -289,6 +290,7 @@ namespace fart::types {
 
 		inline size_t indexOf(const Tester& test) const {
 			return indexOf([&test](T& item, const size_t idx) {
+				(void)idx;
 				return test(item);
 			});
 		}
@@ -349,6 +351,7 @@ namespace fart::types {
 
 		inline void forEach(const function<void(T& value)>& todo) const {
 			this->forEach([&todo](T& value, size_t idx) {
+				(void)idx;
 				todo(value);
 			});
 		}
@@ -369,6 +372,7 @@ namespace fart::types {
 		template<typename R>
 		inline R reduce(R initial, Reducer<R> todo) const {
 			return reduce<R>(initial, [&todo](R result, T& item, size_t idx) {
+				(void)idx;
 				return todo(result, item);
 			});
 		}
@@ -383,6 +387,7 @@ namespace fart::types {
 		template<typename R>
 		inline Strong<Array<R>> map(const function<Strong<R>(T& value)>& transform) const {
 			return map<R>([&transform](T& item, const size_t& idx) {
+				(void)idx;
 				return transform(item);
 			});
 		}
@@ -395,6 +400,7 @@ namespace fart::types {
 
 		inline Strong<Array<T>> filter(const Tester& test) const {
 			return filter([&test](T& item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			});
 		}
@@ -407,6 +413,7 @@ namespace fart::types {
 
 		inline bool some(const Tester& test, bool def = false) const {
 			return some([&test](T& item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			}, def);
 		}
@@ -419,6 +426,7 @@ namespace fart::types {
 
 		inline bool every(const Tester& test, bool def = true) const {
 			return every([&test](T& item, const size_t& idx) {
+				(void)idx;
 				return test(item);
 			}, def);
 		}

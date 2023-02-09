@@ -54,18 +54,26 @@ namespace fart::types {
 		};
 
 		Hashable() { }
-		Hashable(const Hashable& other) { }
-		Hashable(Hashable&& other) { }
+
+		Hashable(const Hashable& other) {
+			(void)other;
+		}
+
+		Hashable(Hashable&& other) {
+			(void)other;
+		}
 
 		virtual uint64_t hash() const {
 			throw NotImplementedException();
 		};
 
 		Hashable& operator=(const Hashable& other) {
+			(void)other;
 			return *this;
 		}
 
 		Hashable& operator=(Hashable&& other) {
+			(void)other;
 			return *this;
 		}
 

@@ -79,8 +79,13 @@ namespace fart::memory {
 
 		Object() : _retainCount(0), _weakReferences(nullptr), _weakReferencesSize(0), _weakReferencesCount(0) {}
 
-		Object(const Object& other) : Object() {}
-		Object(Object&& other) : Object() { }
+		Object(const Object& other) : Object() {
+			(void)other;
+		}
+
+		Object(Object&& other) : Object() {
+			(void)other;
+		}
 
 		virtual ~Object() {
 			assert(_retainCount == 0);
@@ -94,6 +99,7 @@ namespace fart::memory {
 		}
 
 		Object& operator=(Object&& other) {
+			(void)other;
 			return *this;
 		}
 
