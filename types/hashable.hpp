@@ -2,7 +2,7 @@
 //  hashable.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 09/09/2018.
+//  Created by Kristian Trenskow on 2018/09/09.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

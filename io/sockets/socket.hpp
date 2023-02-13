@@ -2,7 +2,7 @@
 //  socket.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 19/09/2018.
+//  Created by Kristian Trenskow on 2018/09/19.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

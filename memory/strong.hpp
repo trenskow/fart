@@ -2,7 +2,7 @@
 //  strong.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 17/08/2018.
+//  Created by Kristian Trenskow on 2018/08/17.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
@@ -63,6 +63,10 @@ namespace fart::memory {
 
 		Strong(T* object) : _object(nullptr) {
 			_setObject(object);
+		}
+
+		explicit Strong(const T* object) : _object(nullptr) {
+			_setObject((T*)object);
 		}
 
 		Strong(const Strong<T>& other) : _object(nullptr) {

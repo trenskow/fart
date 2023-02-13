@@ -2,7 +2,7 @@
 //  math.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 05/04/2020.
+//  Created by Kristian Trenskow on 2020/04/05.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

@@ -2,7 +2,7 @@
 //  data.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 17/08/2018.
+//  Created by Kristian Trenskow on 2018/08/17.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

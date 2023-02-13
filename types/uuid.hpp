@@ -2,7 +2,7 @@
 //  uuid.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 28/08/2022.
+//  Created by Kristian Trenskow on 2022/08/28.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

@@ -2,7 +2,7 @@
 //  exceptions.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 03/04/2020.
+//  Created by Kristian Trenskow on 2020/04/03.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

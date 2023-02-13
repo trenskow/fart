@@ -2,7 +2,7 @@
 //  equatable.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 21/01/2023.
+//  Created by Kristian Trenskow on 2023/01/21.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 

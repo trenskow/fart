@@ -2,7 +2,7 @@
 //  date.hpp
 //  fart
 //
-//  Created by Kristian Trenskow on 03/04/2020.
+//  Created by Kristian Trenskow on 2020/04/03.
 //  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
 //
 
@@ -141,7 +141,9 @@ namespace fart::types {
 
 		Date(const Duration& time, TimeZone timeZone = TimeZone::utc) : _time(time), _timeZone(timeZone) { }
 
-		Date(const int64_t year, const uint8_t month = 1, const uint8_t day = 1, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t microseconds = 0) : Date() {
+		Date(const time_t& time, TimeZone timeZone = TimeZone::utc) : _time(Duration((double)time)), _timeZone(timeZone) { }
+
+		Date(const int64_t year, const uint8_t month, const uint8_t day, const uint8_t hours = 0, const uint8_t minutes = 0, const uint8_t seconds = 0, uint64_t microseconds = 0) : Date() {
 			this->_set(year, month, day, hours, minutes, seconds, microseconds);
 		}
 
@@ -355,6 +357,10 @@ namespace fart::types {
 			this->_time = other._time;
 			this->_timeZone = other._timeZone;
 			return *this;
+		}
+
+		operator time_t() const {
+			return (time_t)this->_time.seconds();
 		}
 
 	};
