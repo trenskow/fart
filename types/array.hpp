@@ -177,11 +177,11 @@ namespace fart::types {
 			});
 		}
 
-		inline T& itemAtIndex(const size_t& index) const noexcept(false) {
-			return *_storage[index];
+		inline Strong<T> itemAtIndex(const size_t& index) const noexcept(false) {
+			return _storage[index];
 		}
 
-		inline T& operator[](const size_t& index) const noexcept(false) {
+		inline Strong<T> operator[](const size_t& index) const noexcept(false) {
 			return this->itemAtIndex(index);
 		}
 
@@ -313,18 +313,18 @@ namespace fart::types {
 			return indexOf(item) != NotFound;
 		}
 
-		inline T& first() const noexcept(false) {
-			return *_storage.first();
+		inline Strong<T> first() const noexcept(false) {
+			return _storage.first();
 		}
 
-		inline T& first(Tester tester) const noexcept(false) {
-			return *_storage.first([&tester](T* item) {
+		inline Strong<T> first(Tester tester) const noexcept(false) {
+			return _storage.first([&tester](T* item) {
 				return tester(*item);
 			});
 		}
 
-		inline T& last() const noexcept(false) {
-			return *_storage.last();
+		inline Strong<T> last() const noexcept(false) {
+			return _storage.last();
 		}
 
 		inline size_t firstIndex() const {
@@ -531,7 +531,7 @@ namespace fart::types {
 			Strong<Array<T>> current(this->first(), 1);
 			result->append(current);
 			for (size_t idx = 1 ; idx < this->count() ; idx++) {
-				T& item = this->itemAtIndex(idx);
+				Strong<T> item = this->itemAtIndex(idx);
 				if (tester(idx - 1, idx)) {
 					current->append(item);
 				} else {

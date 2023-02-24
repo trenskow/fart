@@ -274,7 +274,7 @@ namespace fart::exceptions {
 				return "Key was not found";
 			}
 
-			T& key() const {
+			T key() const {
 				return _key;
 			}
 

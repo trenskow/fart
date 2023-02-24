@@ -39,11 +39,11 @@ namespace fart::memory {
 
 		void _setObject(T* object) {
 			if (_object != nullptr) {
-				_object->removeWeakReference(this);
+				_object.load()->removeWeakReference(this);
 			}
 			_object = object;
 			if (_object) {
-				_object->addWeakReference(this);
+				_object.load()->addWeakReference(this);
 			}
 		}
 

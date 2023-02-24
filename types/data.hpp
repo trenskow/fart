@@ -76,9 +76,9 @@ namespace fart::types {
 			}
 		}
 
-		Data(const Data<T>& other, const size_t& offset, const size_t& length) : _storage(other._storage->retain()), _offset(offset), _length(length), _hashIsDirty(offset == other._offset && length == other._length), _hash(other._hash) { }
+		Data(const Data<T>& other, const size_t& offset, const size_t& length) : _storage(other._storage->retain()), _offset(other._offset + offset), _length(length), _hashIsDirty(offset == 0 && length == other._length), _hash(other._hash) { }
 
-		Data(const Data<T>& other) : Data(other, other._offset, other._length) { }
+		Data(const Data<T>& other) : Data(other, 0, other._length) { }
 
 		Data(Data<T>&& other) : Type(std::move(other)) {
 			this->_storage = other._storage;

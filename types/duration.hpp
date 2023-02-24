@@ -70,6 +70,8 @@ namespace fart::types {
 
 		static Duration parse(const String& string) {
 
+			if (string == "Z") return Duration::zero();
+
 			String parse = string;
 
 			if (parse.length() == 0) throw DurationParserException();
