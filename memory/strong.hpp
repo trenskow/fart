@@ -44,7 +44,11 @@ namespace fart::memory {
 			if (object) {
 				// If object is allocated on the stack, we make a copy on the heap.
 				if (!newObject && object->retainCount() == 0) {
-					_object = new T(*object);
+					if constexpr (is_copy_constructible<T>::value) {
+						_object = new T(*object);
+					} else {
+						assert(false);
+					}
 				} else {
 					_object = object;
 				}
@@ -58,7 +62,11 @@ namespace fart::memory {
 		Strong(T& object) : Strong(&object) {};
 
 		Strong(const T& object) : Strong(nullptr) {
-			_setObject(new T(object), true);
+			if constexpr (is_copy_constructible<T>::value) {
+				_setObject(new T(object), true);
+			} else {
+				_setObject(&(T&)object);
+			}
 		}
 
 		Strong(T* object) : _object(nullptr) {
