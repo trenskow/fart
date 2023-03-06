@@ -46,11 +46,11 @@ namespace fart::types {
 		}
 
 		String(const Data<uint8_t>& data) noexcept(false) : String() {
-			_storage.append(_decodeUTF8(data.items(), _lengthWithoutNullTerminator<uint8_t>(data.length())));
+			_storage.append(_decodeUTF8(data.items(), _lengthWithoutNullTerminator<uint8_t>(data)));
 		}
 
 		String(const Data<uint16_t>& data, const Endian::Variant& endian) noexcept(false) : String() {
-			_storage.append(_decodeUTF16(data.items(), _lengthWithoutNullTerminator<uint16_t>(data.length()), endian));
+			_storage.append(_decodeUTF16(data.items(), _lengthWithoutNullTerminator<uint16_t>(data), endian));
 		}
 
 		String(const Data<uint16_t>& data) noexcept(false) : String() {
