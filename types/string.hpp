@@ -374,7 +374,11 @@ namespace fart::types {
 
 		DataValue<uint32_t> _storage;
 
-		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, const size_t& length) noexcept(false) {
+		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
+
+			if (length > 0 && buffer[length - 1] == '\0') {
+				length--;
+			}
 
 			size_t offset = 0;
 
