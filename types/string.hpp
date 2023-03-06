@@ -46,11 +46,11 @@ namespace fart::types {
 		}
 
 		String(const Data<uint8_t>& data) noexcept(false) : String() {
-			_storage.append(_decodeUTF8(data.items(), data.length()));
+			_storage.append(_decodeUTF8(data.items(), _lengthWithoutNullTerminator<uint8_t>(data.length())));
 		}
 
 		String(const Data<uint16_t>& data, const Endian::Variant& endian) noexcept(false) : String() {
-			_storage.append(_decodeUTF16(data.items(), data.length(), endian));
+			_storage.append(_decodeUTF16(data.items(), _lengthWithoutNullTerminator<uint16_t>(data.length()), endian));
 		}
 
 		String(const Data<uint16_t>& data) noexcept(false) : String() {
@@ -374,11 +374,16 @@ namespace fart::types {
 
 		DataValue<uint32_t> _storage;
 
-		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
-
-			if (length > 0 && buffer[length - 1] == '\0') {
-				length--;
+		template<typename T>
+		static size_t _lengthWithoutNullTerminator(const Data<T>& data) {
+			size_t length = data.length();
+			if (length > 0 && data.itemAtIndex(length - 1) == 0) {
+				return length - 1;
 			}
+			return length;
+		}
+
+		static Data<uint32_t> _decodeUTF8(const uint8_t* buffer, size_t length) noexcept(false) {
 
 			size_t offset = 0;
 
