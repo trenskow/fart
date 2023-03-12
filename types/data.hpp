@@ -40,6 +40,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::data;
+		}
+
 		using Tester = function<bool(T item)>;
 		using TesterIndex = function<bool(T item, size_t idx)>;
 

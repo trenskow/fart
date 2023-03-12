@@ -32,6 +32,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::array;
+		}
+
 		using Comparer = function<bool(T& item1, T& item2)>;
 		using ComparerIndex = function<bool(size_t idx1, size_t idx2)>;
 

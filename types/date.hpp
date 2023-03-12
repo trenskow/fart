@@ -26,6 +26,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::date;
+		}
+
 		using Comparable<Date>::operator==;
 
 		enum class TimeZone {

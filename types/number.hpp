@@ -31,6 +31,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::number;
+		}
+
 		using Comparable<Number<T>>::operator==;
 
 		static T getValue(const Number<T>& number) {

@@ -28,6 +28,11 @@ namespace fart::types {
 		Array<Value> _values;
 
 	public:
+
+		static Type::Kind typeKind() {
+			return Type::Kind::dictionary;
+		}
+
 		Dictionary() {}
 		Dictionary(const Dictionary<Key,Value>& other) : Type(other), _keys(other._keys), _values(other._values) {}
 		Dictionary(Dictionary<Key,Value>&& other) : Type(std::move(other)), _keys(std::move(other._keys)), _values(std::move(other._values)) {}

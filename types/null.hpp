@@ -16,6 +16,11 @@ namespace fart::types {
 	class Null: public Type {
 
 	public:
+
+		static Type::Kind typeKind() {
+			return Type::Kind::null;
+		}
+
 		virtual Kind kind() const override {
 			return Kind::null;
 		}

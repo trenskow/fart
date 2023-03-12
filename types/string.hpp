@@ -37,6 +37,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::string;
+		}
+
 		String() : String(Data<uint32_t>()) {}
 
 		String(const char* string) noexcept(false) : String() {

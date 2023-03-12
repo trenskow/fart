@@ -28,6 +28,10 @@ namespace fart::types {
 
 	public:
 
+		static Type::Kind typeKind() {
+			return Type::Kind::uuid;
+		}
+
 		UUID() : Type() {
 
 			uint64_t upper = ((uint64_t)RANDOM() << 32) | RANDOM();
