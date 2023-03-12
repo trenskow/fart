@@ -41,8 +41,8 @@ namespace fart::types {
 		};
 
 		Type() : Object(), Hashable() { }
-		Type(const Type& other) : Object(other), Hashable(other) { }
-		Type(Type&& other) : Object(std::move(other)), Hashable(std::move(other)) { }
+		Type(const Type& other) = delete;
+		Type(Type&& other) = delete;
 
 		virtual Kind kind() const {
 			throw NotImplementedException();

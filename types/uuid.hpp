@@ -48,7 +48,7 @@ namespace fart::types {
 
 		}
 
-		UUID(const UUID& other) : Type(other), _lower(other._lower), _upper(other._upper) { }
+		UUID(const UUID& other) : Type(), _lower(other._lower), _upper(other._upper) { }
 
 		UUID(const String& string) : Type() {
 

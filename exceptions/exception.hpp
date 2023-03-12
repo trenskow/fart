@@ -260,22 +260,14 @@ namespace fart::exceptions {
 
 		};
 
-		template<typename T>
 		class KeyNotFoundException : public Exception {
-
-			T _key;
 
 		public:
 
-			KeyNotFoundException(T key) : _key(key) {};
-			KeyNotFoundException(const KeyNotFoundException<T>& other) : _key(other._key) {}
+			KeyNotFoundException() {};
 
 			virtual const char* description() const override {
 				return "Key was not found";
-			}
-
-			T key() const {
-				return _key;
 			}
 
 		};

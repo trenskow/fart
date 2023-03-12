@@ -84,7 +84,7 @@ namespace fart::types {
 
 		Data(const Data<T>& other) : Data(other, 0, other._length) { }
 
-		Data(Data<T>&& other) : Type(std::move(other)) {
+		Data(Data<T>&& other) : Type() {
 			this->_storage = other._storage;
 			this->_offset = other._offset;
 			this->_length = other._length;

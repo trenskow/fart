@@ -137,7 +137,7 @@ namespace fart::types {
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 		}
 
-		Date(const Date& other) : Type(other), _time(other._time), _timeZone(other._timeZone) { }
+		Date(const Date& other) : Type(), _time(other._time), _timeZone(other._timeZone) { }
 
 		Date() : _timeZone(TimeZone::utc) {
 			_time = Duration::fromSeconds(::time(nullptr));

@@ -34,8 +34,8 @@ namespace fart::types {
 		}
 
 		Dictionary() {}
-		Dictionary(const Dictionary<Key,Value>& other) : Type(other), _keys(other._keys), _values(other._values) {}
-		Dictionary(Dictionary<Key,Value>&& other) : Type(std::move(other)), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
+		Dictionary(const Dictionary<Key,Value>& other) : Type(), _keys(other._keys), _values(other._values) {}
+		Dictionary(Dictionary<Key,Value>&& other) : Type(), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
 
 		Dictionary(const Pair<Key, Value>& keyValue) : Type(), _keys({ keyValue.first }), _values({ keyValue.second }) {}
 
@@ -72,10 +72,10 @@ namespace fart::types {
 			set(keyValue.first, keyValue.second);
 		}
 
-		void remove(const Key& key) {
+		void remove(Strong<Key> key) {
 			size_t index = _keys.indexOf(key);
 			if (index == NotFound) {
-				throw KeyNotFoundException<Key>(key);
+				throw KeyNotFoundException();
 			}
 			_keys.removeItemAtIndex(index);
 			_values.removeItemAtIndex(index);
@@ -93,10 +93,10 @@ namespace fart::types {
 			return _keys.indexOf(key) != NotFound;
 		}
 
-		Strong<Value> get(const Key& key) const noexcept(false) {
+		Strong<Value> get(Strong<Key> key) const noexcept(false) {
 			size_t keyIndex = _keys.indexOf(key);
 			if (keyIndex == NotFound) {
-				throw KeyNotFoundException<Key>(key);
+				throw KeyNotFoundException();
 			}
 			return _values[keyIndex];
 		}

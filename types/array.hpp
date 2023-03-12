@@ -129,7 +129,7 @@ namespace fart::types {
 
 		Array(const Array<T>& other) : Array(other._storage) {}
 
-		Array(Array&& other) : Type(std::move(other)), _storage(std::move(other._storage)) { }
+		Array(Array&& other) : Type(), _storage(std::move(other._storage)) { }
 
 		Array(Strong<T> repeatedItem, size_t count = 1) : Array() {
 			for (size_t idx = 0 ; idx < count ; idx++) {
