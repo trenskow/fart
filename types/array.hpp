@@ -284,6 +284,13 @@ namespace fart::types {
 			return result;
 		}
 
+		Array<T>& replaceMap(const Tester& test, const function<Strong<T>(T&)> transform) {
+			size_t index = this->indexOf(test);
+			if (index == NotFound) return *this;
+			this->replace(transform(this->itemAtIndex(index)), index);
+			return *this;
+		}
+
 		size_t indexOf(const TesterIndex& test) const {
 			for (size_t idx = 0 ; idx < _storage.length() ; idx++) {
 				if (test(*_storage[idx], idx)) return idx;
