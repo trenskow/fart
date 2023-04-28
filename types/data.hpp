@@ -51,6 +51,8 @@ namespace fart::types {
 		using Reducer = function<R(R result, T item)>;
 		template<typename R>
 		using ReducerIndex = function<R(R result, T item, size_t idx)>;
+		template<typename R>
+		using ReducerIndexStop = function<R(R result, T item, size_t idx, bool* stop)>;
 
 		static Data<T> fromCBuffer(const function<size_t(T*,size_t)>& todo, const size_t& length) {
 			T buffer[length];
@@ -115,8 +117,14 @@ namespace fart::types {
 			append(data.items(), data.length());
 		}
 
-		Strong<Data> appending(const Data<T>& other) const {
-			Strong<Data> result = *this;
+		inline Strong<Data<T>> appending(T element) {
+			Strong<Data<T>> result = *this;
+			result->append(element);
+			return result;
+		}
+
+		Strong<Data<T>> appending(const Data<T>& other) const {
+			Strong<Data<T>> result = *this;
 			result->append(other);
 			return result;
 		}
@@ -451,12 +459,21 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		R reduce(R initial, ReducerIndex<R> todo) const {
+		R reduce(R initial, ReducerIndexStop<R> todo) const {
 			R result = initial;
+			bool stop = false;
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
-				result = todo(result, this->_get(idx), idx);
+				result = todo(result, this->_get(idx), idx, &stop);
+				if (stop) break;
 			}
 			return result;
+		}
+
+		template<typename R>
+		R reduce(R initial, ReducerIndex<R> todo) const {
+			return reduce<R>(initial, [&todo](R result, T item, size_t idx, bool*) {
+				return todo(result, item, idx);
+			});
 		}
 
 		template<typename R>

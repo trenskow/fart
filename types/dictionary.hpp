@@ -33,7 +33,7 @@ namespace fart::types {
 			return Type::Kind::dictionary;
 		}
 
-		Dictionary() {}
+		Dictionary() : Type(), _keys(), _values() {}
 		Dictionary(const Dictionary<Key,Value>& other) : Type(), _keys(other._keys), _values(other._values) {}
 		Dictionary(Dictionary<Key,Value>&& other) : Type(), _keys(std::move(other._keys)), _values(std::move(other._values)) {}
 
@@ -181,6 +181,12 @@ namespace fart::types {
 				result->append(todo(element));
 			});
 			return result;
+		}
+
+		Strong<Array<Pair<Key, Value>>> iterate() const {
+			return this->_keys.template map<Pair<Key, Value>>([&](Strong<Key> key, size_t idx) {
+				return Strong<Pair<Key, Value>>(key, this->_values[idx]);
+			});
 		}
 
 		virtual uint64_t hash() const override {

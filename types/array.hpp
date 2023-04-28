@@ -46,6 +46,8 @@ namespace fart::types {
 		using Reducer = function<R(R result, T& item)>;
 		template<typename R>
 		using ReducerIndex = function<R(R result, T& item, size_t idx)>;
+		template<typename R>
+		using ReducerIndexStop = function<R(R result, T& item, size_t idx, bool* stop)>;
 
 	private:
 
@@ -371,9 +373,16 @@ namespace fart::types {
 		}
 
 		template<typename R>
+		inline R reduce(R initial, ReducerIndexStop<R> todo) const {
+			return this->_storage.template reduce<R>(initial, [&todo](R result, T* item, size_t idx, bool* stop) {
+				return todo(result, *item, idx, stop);
+			});
+		}
+
+		template<typename R>
 		inline R reduce(R initial, ReducerIndex<R> todo) const {
-			return this->_storage.template reduce<R>(initial, [&todo](R result, T* item, size_t idx) {
-				return todo(result, *item, idx);
+			return reduce<R>(initial, [&todo](R result, T& item, size_t idx, bool*) {
+				return todo(result, item, idx);
 			});
 		}
 
@@ -385,15 +394,31 @@ namespace fart::types {
 		}
 
 		template<typename R>
-		inline Strong<Array<R>> map(const function<Strong<R>(T& item, const size_t idx)>& transform) const {
-			return this->reduce<Strong<Array<R>>>(Strong<Array<R>>(), [&transform](Strong<Array<R>> result, T& item, const size_t& idx) {
+		inline Strong<Array<R>> map(const function<Strong<R>(T&, size_t)>& transform) const {
+			return reduce<Strong<Array<R>>>(Strong<Array<R>>(), [&transform](Strong<Array<R>> result, T& item, const size_t& idx) {
 				return result->appending(transform(item, idx));
 			});
 		}
 
 		template<typename R>
-		inline Strong<Array<R>> map(const function<Strong<R>(T& value)>& transform) const {
-			return map<R>([&transform](T& item, const size_t&) {
+		inline Strong<Array<R>> map(const function<Strong<R>(T&)>& transform) const {
+			return map<R>([&transform](T& item, size_t) {
+				return transform(item);
+			});
+		}
+
+		template<typename R>
+		inline Strong<Data<R>> mapToData(const function<R(T&, size_t)>& transform) const {
+			return reduce<Strong<Data<R>>>(
+				Strong<Data<R>>(),
+				[&transform](Strong<Data<R>> result, T& item, size_t idx) {
+					return result->appending(transform(item, idx));
+				});
+		}
+
+		template<typename R>
+		inline Strong<Data<R>> mapToData(const function<R(T&)>& transform) const {
+			return mapToData<R>([&transform](T& item, size_t) {
 				return transform(item);
 			});
 		}
