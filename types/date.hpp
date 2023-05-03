@@ -11,6 +11,7 @@
 
 #include <math.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "../exceptions/exception.hpp"
 #include "./type.hpp"
@@ -140,7 +141,15 @@ namespace fart::types {
 		Date(const Date& other) : Type(), _time(other._time), _timeZone(other._timeZone) { }
 
 		Date() : _timeZone(TimeZone::utc) {
-			_time = Duration::fromSeconds(::time(nullptr));
+
+			struct timeval tv;
+
+			gettimeofday(&tv, nullptr);
+
+			time_t time = ::time(nullptr);
+
+			_time = Duration::fromSeconds((double)time + ((double)tv.tv_usec / 1000000));
+
 		}
 
 		Date(const Duration& time, TimeZone timeZone = TimeZone::utc) : _time(time), _timeZone(timeZone) { }

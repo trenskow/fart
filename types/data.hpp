@@ -54,19 +54,19 @@ namespace fart::types {
 		template<typename R>
 		using ReducerIndexStop = function<R(R result, T item, size_t idx, bool* stop)>;
 
-		static Data<T> fromCBuffer(const function<size_t(T*,size_t)>& todo, const size_t& length) {
+		static Data<T> fromCBuffer(const function<size_t(T*,size_t)>& todo, const size_t length) {
 			T buffer[length];
 			size_t read = todo(buffer, length);
 			return Data<T>((T*)buffer, math::min(read, length));
 		}
 
-		Data(const T* items, const size_t& length) : Type(), _storage(new Storage()), _offset(0), _length(0), _hashIsDirty(true), _hash(0) {
+		Data(const T* items, const size_t length) : Type(), _storage(new Storage()), _offset(0), _length(0), _hashIsDirty(true), _hash(0) {
 			append(items, length);
 		}
 
 		Data() : Data(nullptr, 0) {}
 
-		Data(const size_t& capacity) : Data() {
+		Data(const size_t capacity) : Data() {
 			this->_ensureStorageSize(capacity);
 		}
 
@@ -82,7 +82,7 @@ namespace fart::types {
 			}
 		}
 
-		Data(const Data<T>& other, const size_t& offset, const size_t& length) : _storage(other._storage->retain()), _offset(other._offset + offset), _length(length), _hashIsDirty(offset == 0 && length == other._length), _hash(other._hash) { }
+		Data(const Data<T>& other, const size_t offset, const size_t length) : _storage(other._storage->retain()), _offset(other._offset + offset), _length(length), _hashIsDirty(offset == 0 && length == other._length), _hash(other._hash) { }
 
 		Data(const Data<T>& other) : Data(other, 0, other._length) { }
 
@@ -104,7 +104,7 @@ namespace fart::types {
 			this->_length = 0;
 		}
 
-		void append(const T* items, const size_t& length) {
+		void append(const T* items, const size_t length) {
 			if (!length) return;
 			this->insertItemsAtIndex(items, length, this->length());
 		}
@@ -129,7 +129,7 @@ namespace fart::types {
 			return result;
 		}
 
-		const T removeItemAtIndex(const size_t& index) noexcept(false) {
+		const T removeItemAtIndex(const size_t index) noexcept(false) {
 
 			if (index >= this->length()) throw OutOfBoundException(index);
 
@@ -152,7 +152,7 @@ namespace fart::types {
 			return this->removeItemAtIndex(this->length() - 1);
 		}
 
-		void moveItemAtIndex(const size_t& srcIndex, const size_t& dstIndex) noexcept(false) {
+		void moveItemAtIndex(const size_t srcIndex, const size_t dstIndex) noexcept(false) {
 
 			if (srcIndex == dstIndex) return;
 
@@ -177,7 +177,7 @@ namespace fart::types {
 
 		}
 
-		void swapItemsAtIndices(const size_t& index1, const size_t& index2) noexcept(false) {
+		void swapItemsAtIndices(const size_t index1, const size_t index2) noexcept(false) {
 
 			if (index1 == index2) return;
 
@@ -192,7 +192,7 @@ namespace fart::types {
 
 		}
 
-		void insertItemsAtIndex(const T* items, const size_t& length, const size_t& dstIndex) noexcept(false) {
+		void insertItemsAtIndex(const T* items, const size_t length, const size_t dstIndex) noexcept(false) {
 
 			if (dstIndex > this->length()) throw OutOfBoundException(dstIndex);
 
@@ -210,7 +210,7 @@ namespace fart::types {
 
 		}
 
-		inline void insertItemAtIndex(T item, const size_t& dstIndex) noexcept(false) {
+		inline void insertItemAtIndex(T item, const size_t dstIndex) noexcept(false) {
 			this->insertItemsAtIndex(&item, 1, dstIndex);
 		}
 
@@ -236,12 +236,12 @@ namespace fart::types {
 			});
 		}
 
-		T itemAtIndex(const size_t& index) const noexcept(false) {
+		T itemAtIndex(const size_t index) const noexcept(false) {
 			if (index >= this->length()) throw OutOfBoundException(index);
 			return this->_get(index);
 		}
 
-		inline T operator[](const size_t& index) const noexcept(false) {
+		inline T operator[](const size_t index) const noexcept(false) {
 			return itemAtIndex(index);
 		}
 
@@ -279,7 +279,7 @@ namespace fart::types {
 			});
 		}
 
-		size_t indexOf(const Data<T>& other, const size_t& offset = 0) const {
+		size_t indexOf(const Data<T>& other, const size_t offset = 0) const {
 			for (size_t hidx = offset ; hidx < this->length() ; hidx++) {
 				bool found = true;
 				for (size_t nidx = 0 ; nidx < other.length() ; nidx++) {
@@ -293,26 +293,26 @@ namespace fart::types {
 			return NotFound;
 		}
 
-		inline size_t indexOf(const T other, const size_t& offset = 0) const {
+		inline size_t indexOf(const T other, const size_t offset = 0) const {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
-		inline bool contains(const Data<T>& other, const size_t& offset = 0) const {
+		inline bool contains(const Data<T>& other, const size_t offset = 0) const {
 			return indexOf(other, offset) != NotFound;
 		}
 
-		inline bool contains(const T other, const size_t& offset = 0) const {
+		inline bool contains(const T other, const size_t offset = 0) const {
 			return indexOf(other, offset) != NotFound;
 		}
 
-		T replace(T element, const size_t& index) {
+		T replace(T element, const size_t index) {
 			this->_ensureStorageOwnership();
 			T removed = this->_get(index);
 			this->_set(index, element);
 			return removed;
 		}
 
-		T replace(const size_t& index, function<T(const T&)> todo) {
+		T replace(const size_t index, function<T(const T&)> todo) {
 			this->_ensureStorageOwnership();
 			T oldValue = this->itemAtIndex(index);
 			T newValue = todo(oldValue);
@@ -320,11 +320,11 @@ namespace fart::types {
 			return oldValue;
 		}
 
-		inline Strong<Data<T>> subdata(const size_t& offset, const size_t& length = NotFound) const {
+		inline Strong<Data<T>> subdata(const size_t offset, const size_t length = NotFound) const {
 			return Strong<Data<T>>(*this, offset, math::min(this->length() - offset, length));
 		}
 
-		Strong<Data<T>> remove(const size_t& offset, const size_t& length) {
+		Strong<Data<T>> remove(const size_t offset, const size_t length) {
 
 			if (offset + length > this->length()) throw OutOfBoundException(offset + length);
 
@@ -359,7 +359,7 @@ namespace fart::types {
 			_offset = 0;
 		};
 
-		size_t copy(void* bytes, const size_t& length, const size_t& offset = 0) {
+		size_t copy(void* bytes, const size_t length, const size_t offset = 0) {
 			if (offset > this->length()) return 0;
 			this->ensureStorageOwnership();
 			length = math::min(length, this->length() - offset);
@@ -373,7 +373,7 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
+		Strong<Array<Data<T>>> split(const Array<Data<T>>& separators, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t max = 0) const {
 			Strong<Array<Data<T>>> result;
 			size_t idx = 0;
 			while (result->count() < max - 1) {
@@ -417,11 +417,11 @@ namespace fart::types {
 			return result;
 		}
 
-		inline Strong<Array<Data<T>>> split(const Data<T>& separator, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
+		inline Strong<Array<Data<T>>> split(const Data<T>& separator, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t max = 0) const {
 			return split(Array<Data<T>>(separator, 1), includeSeparator, max);
 		}
 
-		inline Strong<Array<Data<T>>> split(T* seperator, const size_t& length, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
+		inline Strong<Array<Data<T>>> split(T* seperator, const size_t length, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t max = 0) const {
 			return split(Data<T>(seperator, length), includeSeparator, max);
 		}
 
@@ -492,13 +492,13 @@ namespace fart::types {
 		}
 
 		inline Strong<Data<T>> filter(const Tester& test) const {
-			return filter([&test](T item, const size_t&) {
+			return filter([&test](T item, const size_t) {
 				return test(item);
 			});
 		}
 
 		template<typename O>
-		Strong<Data<O>> map(const function<O(T item, const size_t& idx)>& transform) const {
+		Strong<Data<O>> map(const function<O(T item, const size_t idx)>& transform) const {
 			Strong<Data<O>> result;
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
 				result->append(transform(this->_get(idx), idx));
@@ -508,13 +508,13 @@ namespace fart::types {
 
 		template<typename O>
 		inline Strong<Data<O>> map(const function<O(T item)>& transform) const {
-			return map<O>([&transform](T item, const size_t&) {
+			return map<O>([&transform](T item, const size_t) {
 				return transform(item);
 			});
 		}
 
 		template<typename O>
-		Strong<Array<O>> mapToArray(const function<O(T item, const size_t& idx)>& transform) const {
+		Strong<Array<O>> mapToArray(const function<O(T item, const size_t idx)>& transform) const {
 			Strong<Array<O>> result;
 			for (size_t idx = 0 ; idx < this->length(); idx++) {
 				result->append(transform(this->_get(idx), idx));
@@ -524,7 +524,7 @@ namespace fart::types {
 
 		template<typename O>
 		Strong<Array<O>> mapToArray(const function<O(T item)>& transform) const {
-			return mapToArray<O>([&transform](T item, const size_t&) {
+			return mapToArray<O>([&transform](T item, const size_t) {
 				return transform(item);
 			});
 		}
@@ -538,20 +538,20 @@ namespace fart::types {
 		}
 
 		inline bool some(const Tester& test, bool def = false) const {
-			return some([&test](T item, const size_t&) {
+			return some([&test](T item, const size_t) {
 				return test(item);
 			}, def);
 		}
 
 		bool every(const TesterIndex& test, bool def = true) const {
 			if (this->length() == 0) return def;
-			return !this->some([&test](const T item, const size_t& idx) {
+			return !this->some([&test](const T item, const size_t idx) {
 				return !test(item, idx);
 			});
 		}
 
 		inline bool every(const Tester& test, bool def = true) const {
-			return every([&test](T item, const size_t&) {
+			return every([&test](T item, const size_t) {
 				return test(item);
 			}, def);
 		}
@@ -618,7 +618,7 @@ namespace fart::types {
 		class Storage: public Allocator {
 
 		public:
-			Storage(const size_t& length = 0) : _ptr(nullptr), _length(0), _retainCount(1) {
+			Storage(const size_t length = 0) : _ptr(nullptr), _length(0), _retainCount(1) {
 				this->ensureStorageSize(length);
 			}
 
@@ -634,7 +634,7 @@ namespace fart::types {
 				return (Storage*)this;
 			}
 
-			static bool own(Storage** store, const size_t& length, const size_t& offset = 0) {
+			static bool own(Storage** store, const size_t length, const size_t offset = 0) {
 				bool replaced = false;
 				if (*store != nullptr) *store = (*store)->own(length, offset, &replaced);
 				return replaced;
@@ -644,11 +644,11 @@ namespace fart::types {
 				if (*store != nullptr) *store = (*store)->release();
 			}
 
-			inline T& get(const size_t& index) const {
+			inline T& get(const size_t index) const {
 				return this->_ptr[index];
 			}
 
-			inline T& set(const size_t& index, const T& value) {
+			inline T& set(const size_t index, const T& value) {
 				return this->_ptr[index] = value;
 			}
 
@@ -656,7 +656,7 @@ namespace fart::types {
 				return this->_ptr;
 			}
 
-			void ensureStorageSize(const size_t& length) {
+			void ensureStorageSize(const size_t length) {
 				if (this->_length < length) {
 					this->_length = Allocator::calculateBufferLength(length);
 					this->_ptr = (T*) realloc(this->_ptr, sizeof(T) * this->_length);
@@ -665,7 +665,7 @@ namespace fart::types {
 
 		private:
 
-			Storage* own(const size_t& length, const size_t& offset, bool* replaced) const {
+			Storage* own(const size_t length, const size_t offset, bool* replaced) const {
 				*replaced = false;
 				if (this->_retainCount == 1) return (Storage*)this;
 				this->release();
@@ -685,7 +685,7 @@ namespace fart::types {
 			size_t _length;
 			mutable std::atomic<size_t> _retainCount;
 
-			Storage(const Storage& other, const size_t& offset, const size_t& length) : Storage(length) {
+			Storage(const Storage& other, const size_t offset, const size_t length) : Storage(length) {
 				for (size_t idx = 0 ; idx < length ; idx++) {
 					this->_ptr[idx] = other._ptr[idx + offset];
 				}
@@ -699,7 +699,7 @@ namespace fart::types {
 		mutable bool _hashIsDirty;
 		mutable uint64_t _hash;
 
-		void _ensureStorageSize(const size_t& length) {
+		void _ensureStorageSize(const size_t length) {
 			if (this->_storage == nullptr) this->_storage = new Storage(length);
 			else {
 				this->_ensureStorageOwnership();
@@ -713,15 +713,15 @@ namespace fart::types {
 			}
 		}
 
-		inline size_t _index(const size_t& index) const {
+		inline size_t _index(const size_t index) const {
 			return this->_offset + index;
 		}
 
-		inline T& _get(const size_t& index) const {
+		inline T& _get(const size_t index) const {
 			return this->_storage->get(this->_index(index));
 		}
 
-		inline T& _set(const size_t& index, const T& value) {
+		inline T& _set(const size_t index, const T& value) {
 			return this->_storage->set(this->_index(index), value);
 		}
 
@@ -733,7 +733,7 @@ namespace fart::types {
 	public:
 
 		DataValue() : Data<T>() {}
-		DataValue(const T* items, const size_t& length) : Data<T>(items, length) {}
+		DataValue(const T* items, const size_t length) : Data<T>(items, length) {}
 		DataValue(size_t capacity) : Data<T>(capacity) {}
 		DataValue(const DataValue& other) : Data<T>(other) {}
 		DataValue(const Data<T>& other) : Data<T>(other) {}

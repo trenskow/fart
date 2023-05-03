@@ -546,8 +546,8 @@ namespace fart::types {
 		}
 
 		static uint8_t _valueFromHex(const uint8_t& chr, const size_t& idx) noexcept(false) {
-			if (chr >= 'a' && chr <= 'f') return chr - 32;
-			if (chr >= 'A' && chr <= 'F') return chr - 'A' + 10;
+			if (chr >= 'a' && chr <= 'f') return chr - ('a' - 'A');
+			if (chr >= 'A' && chr <= 'F') return (chr - 'A') + 10;
 			else if (chr >= '0' && chr <= '9') return chr - '0';
 			else throw DecoderException(idx);
 		}
