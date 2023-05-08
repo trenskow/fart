@@ -21,6 +21,7 @@
 #include "./serialization/serialization.hpp"
 #include "./io/io.hpp"
 #include "./system/system.hpp"
+#include "./crypto/crypto.hpp"
 
 #pragma GCC visibility pop
 
