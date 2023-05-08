@@ -143,9 +143,9 @@ namespace fart::web {
 
 			result.append(Head::headData(lineBreak));
 
-			_headers.forEach([&result,&lineBreak](const String& key, const String& value) {
-				key.withCString([&result,&value](const char* key){
-					value.withCString([&result,key](const char* value){
+			_headers.forEach([&result,&lineBreak](const Pair<String, String>& entry) {
+				entry.first().withCString([&result,&entry](const char* key){
+					entry.second().withCString([&result,key](const char* value){
 						result.append(String::format("%s: %s", key, value).UTF8Data());
 					});
 				});

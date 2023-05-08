@@ -86,7 +86,7 @@ namespace fart::io::fs {
 			DIR* dp;
 			dirent* ep;
 
-			dp = filename.mapCString<dirent*>([](const char* filename) {
+			dp = filename.mapCString<DIR*>([](const char* filename) {
 				return opendir(filename);
 			});
 

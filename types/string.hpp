@@ -78,7 +78,7 @@ namespace fart::types {
 
 		String(String&& other) : _storage(std::move(other._storage)) { }
 
-		inline static String fromCString(function<size_t(const char*,size_t)> todo, const size_t& size) {
+		inline static String fromCString(function<size_t(char*,size_t)> todo, const size_t size) {
 			return String(Data<uint8_t>::fromCBuffer([&todo](void* buffer, size_t length) {
 				return todo((char*)buffer, length);
 			}, size));
