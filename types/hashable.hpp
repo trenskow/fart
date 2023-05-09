@@ -10,10 +10,8 @@
 #define hashable_hpp
 
 #include "../exceptions/exception.hpp"
-#include "../system/endian.hpp"
 
 using namespace fart::exceptions;
-using namespace fart::system;
 
 namespace fart::types {
 
@@ -25,19 +23,7 @@ namespace fart::types {
 
 			public:
 
-				inline Builder(
-#if defined(FART_HASHABLE_ENDIAN_BIG)
-					Endian::Variant endianess = Endian::Variant::big
-#elif defined(FART_HASHABLE_ENDIAN_LITTLE)
-					Endian::Variant endianess = Endian::Variant::little
-#else
-					Endian::Variant endianess = Endian::systemVariant()
-#endif
-				) : _hash(5381), _endianess(endianess) { }
-
-				Builder(const Builder& other) : _hash(other._hash), _endianess(other._endianess) { }
-
-				Builder(Builder&& other) : _hash(other._hash), _endianess(other._endianess) { }
+				inline Builder() : _hash(5381) { }
 
 				inline Builder& add(uint64_t value) {
 					_hash = ((_hash << 5) + _hash) + (uint64_t)value;
@@ -45,7 +31,7 @@ namespace fart::types {
 				}
 
 				inline Builder& add(double value) {
-					return this->add(Endian::fromSystemVariant(*(uint64_t*)(&value), _endianess));
+					return this->add(*(uint64_t*)(&value));
 				}
 
 				inline Builder& add(float value) {
@@ -57,13 +43,12 @@ namespace fart::types {
 				}
 
 				inline operator uint64_t() {
-					return Endian::fromSystemVariant(_hash, _endianess);
+					return _hash;
 				}
 
 			private:
 
 				uint64_t _hash;
-				Endian::Variant _endianess;
 
 			};
 
