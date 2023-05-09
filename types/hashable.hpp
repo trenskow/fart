@@ -10,66 +10,86 @@
 #define hashable_hpp
 
 #include "../exceptions/exception.hpp"
+#include "../system/endian.hpp"
 
 using namespace fart::exceptions;
+using namespace fart::system;
 
 namespace fart::types {
 
 	class Hashable {
 
-	public:
-
-		class Builder {
-
 		public:
 
-			inline Builder() : _hash(5381) { }
+			class Builder {
 
-			inline Builder& add(double value) {
-				_hash = ((_hash << 5) + _hash) + *(uint64_t*)(&value);
+			public:
+
+				inline Builder(
+#if defined(FART_HASHABLE_ENDIAN_BIG)
+					Endian::Variant endianess = Endian::Variant::big
+#elif defined(FART_HASHABLE_ENDIAN_LITTLE)
+					Endian::Variant endianess = Endian::Variant::little
+#else
+					Endian::Variant endianess = Endian::systemVariant()
+#endif
+				) : _hash(5381), _endianess(endianess) { }
+
+				Builder(const Builder& other) : _hash(other._hash), _endianess(other._endianess) { }
+
+				Builder(Builder&& other) : _hash(other._hash), _endianess(other._endianess) { }
+
+				inline Builder& add(uint64_t value) {
+					_hash = ((_hash << 5) + _hash) + (uint64_t)value;
+					return *this;
+				}
+
+				inline Builder& add(double value) {
+					return this->add(Endian::fromSystemVariant(*(uint64_t*)(&value), _endianess));
+				}
+
+				inline Builder& add(float value) {
+					return this->add((double)value);
+				}
+
+				inline Builder& add(const Hashable& hashable) {
+					return this->add(hashable.hash());
+				}
+
+				inline operator uint64_t() {
+					return Endian::fromSystemVariant(_hash, _endianess);
+				}
+
+			private:
+
+				uint64_t _hash;
+				Endian::Variant _endianess;
+
+			};
+
+			Hashable() { }
+
+			Hashable(const Hashable& other) { }
+
+			Hashable(Hashable&& other) { }
+
+			virtual uint64_t hash() const {
+				return this->hashBuilder();
+			};
+
+			Hashable& operator=(const Hashable&) {
 				return *this;
 			}
 
-			inline Builder& add(float value) {
-				return this->add((double)value);
-			}
-
-			inline Builder& add(const Hashable& hashable) {
-				return this->add(hashable.hash());
-			}
-
-			inline Builder& add(const uint64_t value) {
-				_hash = ((_hash << 5) + _hash) + (uint64_t)value;
+			Hashable& operator=(Hashable&&) {
 				return *this;
 			}
 
-			inline operator uint64_t() {
-				return _hash;
+		protected:
+
+			virtual Builder hashBuilder() const {
+				throw NotImplementedException();
 			}
-
-		private:
-
-			uint64_t _hash;
-
-		};
-
-		Hashable() { }
-
-		Hashable(const Hashable&) { }
-
-		Hashable(Hashable&&) { }
-
-		virtual uint64_t hash() const {
-			throw NotImplementedException();
-		};
-
-		Hashable& operator=(const Hashable&) {
-			return *this;
-		}
-
-		Hashable& operator=(Hashable&&) {
-			return *this;
-		}
 
 	};
 
