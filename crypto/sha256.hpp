@@ -22,17 +22,23 @@ namespace fart::crypto {
 
 			virtual ~SHA256() { }
 
-			void update(const Data<uint8_t>& data) {
+			SHA256& update(uint8_t value) {
+				_data[_length] = value;
+				_length++;
+				if (_length == 64) {
+					_transform();
+					_bitLength += 512;
+					_length = 0;
+				}
+			}
+
+			SHA256& update(const Data<uint8_t>& data) {
 
 				for (size_t idx = 0 ; idx < data.length() ; idx++) {
-					_data[_length] = data[idx];
-					_length++;
-					if (_length == 64) {
-						_transform();
-						_bitLength += 512;
-						_length = 0;
-					}
+					this->update(data[idx]);
 				}
+
+				return *this;
 
 			}
 
