@@ -58,7 +58,6 @@ namespace fart::memory {
 
 	public:
 
-		Strong() : _object(nullptr) {};
 		Strong(nullptr_t) : _object(nullptr) {};
 		Strong(T& object) : Strong(&object) {};
 

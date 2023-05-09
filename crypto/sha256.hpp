@@ -18,7 +18,16 @@ namespace fart::crypto {
 
 		public:
 
-			SHA256() : _length(0), _bitLength(0), _state({ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 }) { }
+			SHA256() : _length(0), _bitLength(0) {
+				_state[0] = 0x6a09e667;
+				_state[1] = 0xbb67ae85;
+				_state[2] = 0x3c6ef372;
+				_state[3] = 0xa54ff53a;
+				_state[4] = 0x510e527f;
+				_state[5] = 0x9b05688c;
+				_state[6] = 0x1f83d9ab;
+				_state[7] = 0x5be0cd19;
+			}
 
 			virtual ~SHA256() { }
 
