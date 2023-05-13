@@ -483,13 +483,18 @@ namespace fart::types {
 
 			for (size_t idx = 0 ; idx < length ; idx++) {
 
-				uint16_t high = Endian::toSystemVariant(high, endian);
+				uint16_t high = Endian::toSystemVariant(buffer[idx], endian);
 
-				if (high >= 0xD800 && high <= 0xD8FF) ret.append(high);
+				if (!(high >= 0xD800 && high <= 0xD8FF) || idx + 1 == length) ret.append(high);
 				else {
-					if (idx + 1 >= length) throw DecoderException(idx);
-					uint32_t low = Endian::toSystemVariant(buffer[++idx], endian);
-					ret.append(((high & 0x3FF) << 10) | (low & 0x3FF));
+
+					uint16_t low = Endian::toSystemVariant(buffer[idx + 1], endian);
+
+					if (low >= 0xDC00 && low <= 0xDFFF) {
+						ret.append((((high & 0x3FF) << 10) | (low & 0x3FF)) + 0x10000);
+						idx++;
+					}
+
 				}
 
 			}
