@@ -95,7 +95,7 @@ namespace fart::memory {
 
 		~Strong() {
 			_setObject(nullptr);
-		};
+		}
 
 		operator T&() const {
 			return *_object;

@@ -406,13 +406,13 @@ namespace fart::serialization {
 								result->append("\\\\");
 								break;
 							default:
-								if (!((byte >= 0x20 && byte <= 0x21) || (byte >= 0x23 && byte <= 0x5B) || byte >= 0x5D)) {
+								if ((byte >= 0x20 && byte <= 0x7E)) {
+									result->append(byte);
+								} else {
 									uint16_t beByte = Endian::fromSystemVariant(byte, Endian::Variant::big);
 									auto beByteData = Data<uint16_t>(&beByte, 1).as<uint8_t>();
-									result->append("\\U");
+									result->append("\\u");
 									result->append(String::fromHex(beByteData));
-								} else {
-									result->append(byte);
 								}
 								break;
 						}

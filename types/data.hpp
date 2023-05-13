@@ -36,7 +36,7 @@ namespace fart::types {
 	};
 
 	template<typename T = uint8_t>
-	class Data : public Type {
+	class Data : public Type, public Comparable<Data<T>> {
 
 	public:
 
@@ -572,13 +572,24 @@ namespace fart::types {
 			return Kind::data;
 		}
 
-		bool operator ==(const Data<T>& other) const {
+		bool operator==(const Data<T>& other) const override {
 			if (!Type::operator==(other)) return false;
 			if (this->length() != other.length()) return false;
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
 				if (this->_get(idx) != other._get(idx)) return false;
 			}
 			return true;
+		}
+
+		bool operator>(const Data<T>& other) const override {
+			for (size_t idx = 0 ; idx < this->length() ; idx++) {
+				if (idx >= other.length()) return true;
+				T left = this->_get(idx);
+				T right = other._get(idx);
+				if (left < right) return false;
+				if (left > right) return true;
+			}
+			return false;
 		}
 
 		Data& operator=(const Data<T>& other) {

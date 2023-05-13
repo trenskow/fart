@@ -90,7 +90,7 @@ namespace fart::io::sockets {
 					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr));
 				}
 
-				if (::bind(_socket, addr, sockaddrLength) != 0) {
+				if (::bind(_socket, addr, (int)sockaddrLength) != 0) {
 					// Handle error
 					return;
 				}
@@ -188,7 +188,7 @@ namespace fart::io::sockets {
 
 				_mutex.locked([this]() {
 
-					if (::connect(_socket, _remoteEndpoint->sockAddr(), _remoteEndpoint->sockAddrLength()) != 0) {
+					if (::connect(_socket, _remoteEndpoint->sockAddr(), (int)_remoteEndpoint->sockAddrLength()) != 0) {
 						// Handle error
 						return;
 					}

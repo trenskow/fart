@@ -33,7 +33,7 @@ namespace fart::types {
 	static const Data<uint8_t> bigEndianBOM(_bigEndianBOM, 2);
 	static const Data<uint8_t> littleEndianBOM(_littleEndianBOM, 2);
 
-	class String : public Type {
+	class String : public Type, public Comparable<String> {
 
 	public:
 
@@ -156,7 +156,7 @@ namespace fart::types {
 			_storage.append(other._storage);
 		}
 
-		inline void append(const uint32_t& character) {
+		inline void append(uint32_t character) {
 			_storage.append(character);
 		}
 
@@ -335,7 +335,7 @@ namespace fart::types {
 			return this->operator!=((const String&)other);
 		}
 
-		virtual bool operator==(const String& other) const {
+		virtual bool operator==(const String& other) const override {
 			if (!Type::operator==(other)) return false;
 			return _storage == other._storage;
 		}
@@ -344,12 +344,8 @@ namespace fart::types {
 			return *this == String(other);
 		}
 
-		inline bool operator!=(const String& other) const {
-			return !(*this == other);
-		}
-
-		inline bool operator!=(const char* other) const {
-			return !(*this == other);
+		virtual bool operator>(const String& other) const override {
+			return this->lowercased()->_storage > other.lowercased()->_storage;
 		}
 
 		inline uint32_t operator[](const size_t& idx) const {
@@ -487,14 +483,13 @@ namespace fart::types {
 
 			for (size_t idx = 0 ; idx < length ; idx++) {
 
-				uint16_t chr = buffer[idx];
+				uint16_t high = Endian::toSystemVariant(high, endian);
 
-				if (chr < 0xD800 || chr >= 0xF000) ret.append(Endian::toSystemVariant(chr, endian));
+				if (high >= 0xD800 && high <= 0xD8FF) ret.append(high);
 				else {
 					if (idx + 1 >= length) throw DecoderException(idx);
-					uint32_t high = Endian::toSystemVariant(chr, endian);
 					uint32_t low = Endian::toSystemVariant(buffer[++idx], endian);
-					ret.append(((high - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000);
+					ret.append(((high & 0x3FF) << 10) | (low & 0x3FF));
 				}
 
 			}
@@ -515,16 +510,11 @@ namespace fart::types {
 
 				uint32_t chr = buffer[idx];
 
-				if (chr < 0xD800) ret.append(Endian::fromSystemVariant((uint16_t)chr, endian));
-
-				else if (chr < 0xF000 || chr > 0x10FFFF) throw EncoderException(idx);
-
+				if (chr <= 0xFFFF) ret.append(Endian::fromSystemVariant((uint16_t)chr, endian));
 				else {
-					uint32_t tmp = chr - 0x10000;
-					uint32_t high = tmp / 0x400 + 0xD800;
-					uint32_t low = tmp % 0x400 + 0xDC00;
-					ret.append(Endian::fromSystemVariant((uint16_t)high, endian));
-					ret.append(Endian::fromSystemVariant((uint16_t)low, endian));
+					chr -= 0x10000;
+					ret.append(Endian::fromSystemVariant(0xD800 + ((chr >> 10) & 0x3FF), endian));
+					ret.append(Endian::fromSystemVariant(0xDC00 + (chr & 0x3FF), endian));
 				}
 
 			}
@@ -553,21 +543,21 @@ namespace fart::types {
 		}
 
 		static uint8_t _valueToHex(const uint8_t& value, const size_t& idx) noexcept(false) {
-			if (value < 10) return 'A' + value;
-			else if (value < 16) return '0' + (value - 10);
+			if (value < 10) return '0' + value;
+			else if (value < 16) return 'A' + (value - 10);
 			else throw EncoderException(idx);
 		}
 
-		static Data<uint32_t> _decodeHex(const Data<uint8_t> &buffer) noexcept(false) {
+		static Data<uint32_t> _decodeHex(const Data<uint8_t>& buffer) noexcept(false) {
 
 			if (buffer.length() % 2 != 0) throw OutOfBoundException(buffer.length() + 1);
 
 			Data<uint32_t> ret;
 
-			for (size_t idx = 0 ; idx < buffer.length() ; idx += 2) {
+			for (size_t idx = 0 ; idx < buffer.length() ; idx++) {
 				auto byte = buffer[idx];
-				ret.append(_valueToHex(byte >> 4, idx));
-				ret.append(_valueToHex(byte & 0xF, idx));
+				ret.append(_valueToHex((byte & 0xF0) >> 4, idx));
+				ret.append(_valueToHex(byte & 0x0F, idx));
 			}
 
 			return ret;

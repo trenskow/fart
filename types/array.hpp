@@ -85,11 +85,11 @@ namespace fart::types {
 		Storage _storage;
 
 		static void _insertionSort(Array& array, ComparerIndex comparer) {
-			size_t sortedIdx = 0;
-			while (sortedIdx < array.count() - 1) {
-				sortedIdx++;
-				for (size_t idx = sortedIdx ; idx > 0 ; idx--) {
-					if (comparer(idx - 1, idx)) array.swapItemAtIndices(idx, idx);
+			for (size_t idx = 1 ; idx < array.count() ; idx++) {
+				ssize_t j = idx - 1;
+				while (j >= 0 && comparer(j, idx)) {
+					array.swapItemAtIndices(j + 1, j);
+					j--;
 				}
 			}
 		}
@@ -537,14 +537,14 @@ namespace fart::types {
 			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		Strong<Array<T>> sorted(ComparerIndex comparer) const {
+		Strong<Array<T>> sortedIndex(ComparerIndex comparer) const {
 			Strong<Array<T>> result = *this;
 			result->sort(comparer);
 			return result;
 		}
 
 		Strong<Array<T>> sorted(Comparer comparer) const {
-			return sorted([this,&comparer](size_t idx1, size_t idx2) {
+			return sortedIndex([this,&comparer](size_t idx1, size_t idx2) {
 				return comparer(*this->itemAtIndex(idx1), *this->itemAtIndex(idx2));
 			});
 		}

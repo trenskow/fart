@@ -32,13 +32,19 @@ namespace fart::crypto {
 			virtual ~SHA256() { }
 
 			SHA256& update(uint8_t value) {
+
 				_data[_length] = value;
+
 				_length++;
+
 				if (_length == 64) {
 					_transform();
 					_bitLength += 512;
 					_length = 0;
 				}
+
+				return *this;
+
 			}
 
 			SHA256& update(const Data<uint8_t>& data) {
