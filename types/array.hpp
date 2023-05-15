@@ -36,18 +36,18 @@ namespace fart::types {
 			return Type::Kind::array;
 		}
 
-		using Comparer = function<bool(T& item1, T& item2)>;
-		using ComparerIndex = function<bool(size_t idx1, size_t idx2)>;
+		using Comparer = function<bool(T&, T&)>;
+		using ComparerIndex = function<bool(size_t, size_t)>;
 
-		using TesterIndex = function<bool(T& item, size_t idx)>;
-		using Tester = function<bool(T& item)>;
+		using TesterIndex = function<bool(T&, size_t)>;
+		using Tester = function<bool(T&)>;
 
 		template<typename R>
-		using Reducer = function<R(R result, T& item)>;
+		using Reducer = function<R(R, T&)>;
 		template<typename R>
-		using ReducerIndex = function<R(R result, T& item, size_t idx)>;
+		using ReducerIndex = function<R(R, T&, size_t)>;
 		template<typename R>
-		using ReducerIndexStop = function<R(R result, T& item, size_t idx, bool* stop)>;
+		using ReducerIndexStop = function<R(R, T&, size_t, bool*)>;
 
 	private:
 
@@ -84,22 +84,22 @@ namespace fart::types {
 
 		Storage _storage;
 
-		static void _insertionSort(Array& array, ComparerIndex comparer) {
+		static void _insertionSort(Array& array, Comparer comparer) {
 			for (size_t idx = 1 ; idx < array.count() ; idx++) {
-				ssize_t j = idx - 1;
-				while (j >= 0 && comparer(j, idx)) {
-					array.swapItemAtIndices(j + 1, j);
+				size_t j = idx;
+				while (j > 0 && comparer(array[j - 1], array[j])) {
+					array.swapItemAtIndices(j - 1, j);
 					j--;
 				}
 			}
 		}
 
-		static void _quickSort(Array& array, const size_t& offset, const size_t& count, ComparerIndex comparer) {
+		static void _quickSort(Array& array, const size_t& offset, const size_t& count, Comparer comparer) {
 			if (count == 0) return;
 			size_t pivot = count - 1;
 			size_t idx = 0;
 			while (idx < pivot) {
-				if (comparer(offset + idx, offset + pivot)) {
+				if (comparer(array[offset + idx], array[offset + pivot])) {
 					if (idx == pivot - 1) {
 						array.swapItemAtIndices(offset + idx, offset + pivot);
 					} else {
@@ -522,45 +522,33 @@ namespace fart::types {
 			_storage.insertItemAtIndex(item, dstIndex);
 		}
 
-		void sort(const ComparerIndex comparer) {
+		void sort(const Comparer comparer) {
 			if (this->count() <= 10) _insertionSort(*this, comparer);
 			else _quickSort(*this, 0, this->count(), comparer);
-		}
-
-		inline void sort(const Comparer comparer) {
-			sort([this,&comparer](size_t idx1, size_t idx2) {
-				return comparer(*this->itemAtIndex(idx1), *this->itemAtIndex(idx2));
-			});
 		}
 
 		inline void sort() {
 			this->sort([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		Strong<Array<T>> sortedIndex(ComparerIndex comparer) const {
+		Strong<Array<T>> sorted(Comparer comparer) const {
 			Strong<Array<T>> result = *this;
 			result->sort(comparer);
 			return result;
-		}
-
-		Strong<Array<T>> sorted(Comparer comparer) const {
-			return sortedIndex([this,&comparer](size_t idx1, size_t idx2) {
-				return comparer(*this->itemAtIndex(idx1), *this->itemAtIndex(idx2));
-			});
 		}
 
 		Strong<Array<T>> sorted() {
 			return this->sorted([](const T& item1, const T& item2) { return item1 > item2; });
 		}
 
-		Strong<Array<Array<T>>> grouped(function<bool(size_t idx1, size_t idx2)> tester) const {
+		Strong<Array<Array<T>>> grouped(function<bool(const T&, const T&)> tester) const {
 			Strong<Array<Array<T>>> result;
 			if (this->count() == 0) return result;
 			Strong<Array<T>> current(this->first(), 1);
 			result->append(current);
 			for (size_t idx = 1 ; idx < this->count() ; idx++) {
 				Strong<T> item = this->itemAtIndex(idx);
-				if (tester(idx - 1, idx)) {
+				if (tester(*this->itemAtIndex(idx - 1), this->itemAtIndex(idx))) {
 					current->append(item);
 				} else {
 					current = Strong<Array<T>>(item, 1);
@@ -568,12 +556,6 @@ namespace fart::types {
 				}
 			}
 			return result;
-		}
-
-		inline Strong<Array<Array<T>>> grouped(function<bool(T& item1, T& item2)> tester) const {
-			return grouped([this,&tester](size_t idx1, size_t idx2) {
-				return tester(this->itemAtIndex(idx1), this->itemAtIndex(idx2));
-			});
 		}
 
 		bool are(Type::Kind kind) const {
