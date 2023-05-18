@@ -335,6 +335,10 @@ namespace fart::types {
 			return hash;
 		}
 
+		virtual bool operator==(const Date& other) const override {
+			return this->to(TimeZone::utc)._time == other.to(TimeZone::utc)._time;
+		}
+
 		Date operator+(const Duration& duration) const {
 			return Date(this->seconds() + duration.seconds());
 		}

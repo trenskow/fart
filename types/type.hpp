@@ -65,16 +65,7 @@ namespace fart::types {
 			return this->hash() == other.hash();
 		}
 
-		virtual bool operator==(const Type* other) const {
-			if (other == nullptr) return false;
-			return *this == *other;
-		}
-
 		virtual bool operator!=(const Type& other) const {
-			return !(*this == other);
-		}
-
-		virtual bool operator!=(const Type* other) const {
 			return !(*this == other);
 		}
 

@@ -176,6 +176,10 @@ namespace fart::types {
 			return this->seconds();
 		}
 
+		virtual bool operator==(const Duration& other) const override {
+			return _seconds == other._seconds;
+		}
+
 		virtual bool operator>(const Duration& other) const override {
 			return _seconds > other._seconds;
 		}

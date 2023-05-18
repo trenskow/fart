@@ -29,11 +29,6 @@ namespace fart::types {
 			return other.kind() == Kind::null;
 		}
 
-		virtual bool operator==(const Type* other) const override {
-			if (other == nullptr) return true;
-			return Type::operator==(other);
-		}
-
 	};
 
 }

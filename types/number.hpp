@@ -110,6 +110,10 @@ namespace fart::types {
 			return _subtype == subtype;
 		}
 
+		virtual bool operator==(const Number<T>& other) const override {
+			return _value == other._value;
+		}
+
 		virtual bool operator>(const Number<T>& other) const override {
 			return _value > other._value;
 		}
