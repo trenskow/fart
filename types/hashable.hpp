@@ -54,9 +54,9 @@ namespace fart::types {
 
 			Hashable() { }
 
-			Hashable(const Hashable& other) { }
+			Hashable(const Hashable&) { }
 
-			Hashable(Hashable&& other) { }
+			Hashable(Hashable&&) { }
 
 			virtual uint64_t hash() const {
 				return this->hashBuilder();
