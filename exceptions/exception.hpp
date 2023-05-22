@@ -19,6 +19,7 @@ namespace fart::exceptions {
 
 	class Exception {
 	public:
+		virtual ~Exception() = default;
 		virtual const char* description() const = 0;
 	};
 
@@ -30,6 +31,8 @@ namespace fart::exceptions {
 			raise(SIGTRAP);
 #endif
 		}
+
+		virtual ~NotImplementedException() = default;
 
 		virtual const char* description() const override {
 			return "Not implemented.";
@@ -50,6 +53,8 @@ namespace fart::exceptions {
 				AddressAlreadyInUseException(uint16_t port) : _port(port) {};
 				AddressAlreadyInUseException(const AddressAlreadyInUseException& other) : _port(other._port) {}
 
+				virtual ~AddressAlreadyInUseException() = default;
+
 				virtual const char* description() const override {
 					return "Port already in use.";
 				}
@@ -67,6 +72,8 @@ namespace fart::exceptions {
 			class CannotOpenFileException: public Exception {
 
 			public:
+
+				virtual ~CannotOpenFileException() = default;
 
 				virtual const char* description() const override {
 					return "Cannot open file.";
@@ -86,6 +93,8 @@ namespace fart::exceptions {
 					_position = position;
 				}
 
+				virtual ~PositionIsOutsideFileRange() = default;
+
 				ssize_t position() const {
 					return _position;
 				}
@@ -100,6 +109,8 @@ namespace fart::exceptions {
 
 			public:
 
+				virtual ~FileModeException() = default;
+
 				virtual const char* description() const override {
 					return "Operation not allowed in file's mode.";
 				}
@@ -109,6 +120,8 @@ namespace fart::exceptions {
 			class FileNotFoundException: public Exception {
 
 			public:
+
+				virtual ~FileNotFoundException() = default;
 
 				virtual const char* description() const override {
 					return "File does not exists.";
@@ -129,10 +142,13 @@ namespace fart::exceptions {
 			size_t _character;
 
 		public:
+
 			JSONMalformedException(size_t line, size_t character) {
 				this->_line = line;
 				this->_character = character;
 			}
+
+			virtual ~JSONMalformedException() = default;
 
 			size_t line() const {
 				return this->_line;
@@ -161,6 +177,8 @@ namespace fart::exceptions {
 			AllocationException(const size_t size) : _size(size) {}
 			AllocationException(const AllocationException& other) : _size(other._size) {}
 
+			virtual ~AllocationException() = default;
+
 			size_t size() const {
 				return _size;
 			}
@@ -178,6 +196,9 @@ namespace fart::exceptions {
 		class TypeConversionException : public Exception {
 
 		public:
+
+			virtual ~TypeConversionException() = default;
+
 			virtual const char* description() const override {
 				return "Could not convert to type.";
 			}
@@ -187,6 +208,9 @@ namespace fart::exceptions {
 		class ISO8601Exception : public Exception {
 
 		public:
+
+			virtual ~ISO8601Exception() = default;
+
 			virtual const char* description() const override {
 				return "Not a valid ISO 8601 string";
 			}
@@ -199,8 +223,11 @@ namespace fart::exceptions {
 			size_t _characterIndex;
 
 		public:
+
 			DecoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
 			DecoderException(const DecoderException& other) : _characterIndex(other._characterIndex) {}
+
+			virtual ~DecoderException() = default;
 
 			size_t characterIndex() const {
 				return _characterIndex;
@@ -220,6 +247,8 @@ namespace fart::exceptions {
 		public:
 			EncoderException(const size_t characterIndex) : _characterIndex(characterIndex) {}
 
+			virtual ~EncoderException() = default;
+
 			size_t characterIndex() const {
 				return _characterIndex;
 			}
@@ -235,6 +264,8 @@ namespace fart::exceptions {
 		public:
 			EncoderTypeException() {}
 
+			virtual ~EncoderTypeException() = default;
+
 			virtual const char* description() const override {
 				return "Cannot encode type.";
 			}
@@ -249,6 +280,8 @@ namespace fart::exceptions {
 		public:
 			OutOfBoundException(const size_t index) : _index(index) {}
 			OutOfBoundException(const OutOfBoundException& other) : _index(other._index) {}
+
+			virtual ~OutOfBoundException() = default;
 
 			size_t index() const {
 				return _index;
@@ -266,6 +299,8 @@ namespace fart::exceptions {
 
 			KeyNotFoundException() {};
 
+			virtual ~KeyNotFoundException() = default;
+
 			virtual const char* description() const override {
 				return "Key was not found";
 			}
@@ -275,6 +310,8 @@ namespace fart::exceptions {
 		class NotFoundException : public Exception {
 
 		public:
+
+			virtual ~NotFoundException() = default;
 
 			virtual const char* description() const override {
 				return "Item not found.";
@@ -286,6 +323,8 @@ namespace fart::exceptions {
 
 		public:
 
+			virtual ~DurationParserException() = default;
+
 			virtual const char* description() const override {
 				return "Could not parse duration";
 			}
@@ -295,6 +334,8 @@ namespace fart::exceptions {
 		class UUIDMalformedException : public Exception {
 
 		public:
+
+			virtual ~UUIDMalformedException() = default;
 
 			virtual const char* description() const override {
 				return "UUID is malformed.";
@@ -315,6 +356,8 @@ namespace fart::exceptions {
 			UrlDecodingException(uint8_t chr) : _character(chr) {};
 			UrlDecodingException(const UrlDecodingException& other) : _character(other._character) {}
 
+			virtual ~UrlDecodingException() = default;
+
 			virtual const char* description() const override {
 				return "Cannot decode character.";
 			}
@@ -327,33 +370,49 @@ namespace fart::exceptions {
 
 		class DataIncompleteException : public Exception {
 
-			virtual const char* description() const override {
-				return "Data is incomplete.";
-			}
+			public:
+
+				virtual ~DataIncompleteException() = default;
+
+				virtual const char* description() const override {
+					return "Data is incomplete.";
+				}
 
 		};
 
 		class DataMalformedException : public Exception {
 
-			virtual const char* description() const override {
-				return "Data is malformed.";
-			}
+			public:
+
+				virtual ~DataMalformedException() = default;
+
+				virtual const char* description() const override {
+					return "Data is malformed.";
+				}
 
 		};
 
 		class MethodNotSupportedException : public Exception {
 
-			virtual const char* description() const override {
-				return "Method is not supported.";
-			}
+			public:
+
+				virtual ~MethodNotSupportedException() = default;
+
+				virtual const char* description() const override {
+					return "Method is not supported.";
+				}
 
 		};
 
 		class VersionNotSupportedException : public Exception {
 
-			virtual const char* description() const override {
-				return "Version is not supported.";
-			}
+			public:
+
+				virtual ~VersionNotSupportedException() = default;
+
+				virtual const char* description() const override {
+					return "Version is not supported.";
+				}
 
 		};
 
