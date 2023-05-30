@@ -86,7 +86,10 @@ namespace fart::memory {
 		virtual ~Object() {
 			assert(_retainCount == 0);
 			for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
-				((Weak<Object>*)_weakReferences[0])->_object = nullptr;
+				((Weak<Object>*)_weakReferences[idx])->_object = nullptr;
+			}
+			if (_weakReferences != nullptr) {
+				free(_weakReferences);
 			}
 		}
 

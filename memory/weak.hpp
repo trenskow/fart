@@ -21,7 +21,7 @@ namespace fart::memory {
 	template<typename T>
 	class Strong;
 
-	template<typename T>
+	template<typename T = Object>
 	class Weak
 #ifdef FART_ALLOW_MANUAL_HEAP
 	: public Allocator
