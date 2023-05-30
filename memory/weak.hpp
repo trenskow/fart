@@ -106,12 +106,17 @@ namespace fart::memory {
 			return _object;
 		}
 
-		bool operator==(std::nullptr_t n) {
+		bool operator==(std::nullptr_t n) const {
 			return this->_object == n;
 		}
 
-		bool operator!=(std::nullptr_t n) {
+		bool operator!=(std::nullptr_t n) const {
 			return !(this == n);
+		}
+
+		template<typename O>
+		Weak<O> as() const {
+			return Weak<O>((O*)_object.load());
 		}
 
 	};
