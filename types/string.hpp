@@ -332,7 +332,7 @@ namespace fart::types {
 
 		virtual bool operator!=(const Type& other) const override {
 			if (!other.is(Type::Kind::string)) return true;
-			return this->operator!=((const String&)other);
+			return !this->operator==((const String&)other);
 		}
 
 		virtual bool operator==(const String& other) const override {
