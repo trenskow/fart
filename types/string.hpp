@@ -314,6 +314,8 @@ namespace fart::types {
 		}
 
 		inline Strong<String> capitalized() const {
+			if (this->length() == 0) return Strong<String>();
+			if (this->length() == 1) return this->uppercased();
 			return this->substring(0, 1)->uppercased()->appending(this->substring(1)->lowercased());
 		}
 
