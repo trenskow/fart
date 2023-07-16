@@ -378,7 +378,7 @@ namespace fart::types {
 			size_t idx = 0;
 			while (result->count() < max - 1) {
 				if (!separators.some([this,&idx,&result,&includeSeparator](const Data<T>& separator) {
-					size_t next;
+					size_t next = NotFound;
 					switch (includeSeparator) {
 						case IncludeSeparator::none:
 						case IncludeSeparator::suffix:
