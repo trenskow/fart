@@ -10,8 +10,10 @@
 #define hashable_hpp
 
 #include "../exceptions/exception.hpp"
+#include "../tools/math.hpp"
 
 using namespace fart::exceptions;
+using namespace fart::tools;
 
 namespace fart::types {
 
@@ -31,7 +33,9 @@ namespace fart::types {
 				}
 
 				inline Builder& add(double value) {
-					return this->add(*(uint64_t*)(&value));
+					uint64_t intValue = 0;
+					memcpy(&intValue, &value, math::min(sizeof(uint64_t), sizeof(double)));
+					return this->add(intValue);
 				}
 
 				inline Builder& add(float value) {
