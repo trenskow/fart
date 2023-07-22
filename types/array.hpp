@@ -275,9 +275,10 @@ namespace fart::types {
 			return last;
 		}
 
-		void replace(Strong<T> item, const size_t& index) noexcept(false) {
-			item->retain();
-			_storage.replace(item, index)->release();
+		void replace(const T& item, const size_t& index) noexcept(false) {
+			Strong<T> reference = item;
+			reference->retain();
+			_storage.replace(reference, index)->release();
 		}
 
 		Strong<Array<T>> replacing(const T& item, const size_t& idx) const noexcept(false) {
