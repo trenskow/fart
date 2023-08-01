@@ -118,13 +118,9 @@ namespace fart::types {
 	public:
 
 		static Strong<Array<T>> flatten(const Array<Array<T>>& arrays) {
-			Strong<Array<T>> result;
-			arrays.forEach([&result](Array<T>& array) {
-				array.forEach([&result](T& item) {
-					result = result->appending(item);
-				});
+			return arrays.template reduce<Strong<Array<T>>>(Strong<Array<T>>(), [](Strong<Array<T>> result, const Array& array) {
+				return result->appendingAll(array);
 			});
-			return result;
 		}
 
 		Array() : Type() {}
