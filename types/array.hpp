@@ -1,9 +1,9 @@
 //
-//  array.hpp
-//  fart
+// array.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/09/04.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/09/04.
+// See license in LICENSE.
 //
 
 #ifndef array_hpp

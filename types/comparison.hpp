@@ -1,9 +1,9 @@
 //
-//  comparison.hpp
-//  fart
+// comparison.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2023/01/21.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2023/01/21.
+// See license in LICENSE.
 //
 
 #ifndef comparison_hpp

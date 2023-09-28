@@ -1,9 +1,9 @@
 //
-//  uuid.hpp
-//  fart
+// uuid.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2022/08/28.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2022/08/28.
+// See license in LICENSE.
 //
 
 #ifndef uuid_hpp

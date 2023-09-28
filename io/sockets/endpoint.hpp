@@ -1,9 +1,9 @@
 //
-//  endpoint.hpp
-//  fart
+// endpoint.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/09/19.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/09/19.
+// See license in LICENSE.
 //
 
 #ifndef endpoint_hpp

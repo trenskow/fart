@@ -1,9 +1,9 @@
 //
-//  environment.hpp
-//  fart
+// environment.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2021/01/16.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2021/01/16.
+// See license in LICENSE.
 //
 
 #ifndef environment_hpp

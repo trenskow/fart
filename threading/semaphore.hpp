@@ -1,9 +1,9 @@
 //
-//  semaphore.hpp
-//  fart
+// semaphore.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2019/12/14.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2019/12/14.
+// See license in LICENSE.
 //
 
 #ifndef semaphore_hpp

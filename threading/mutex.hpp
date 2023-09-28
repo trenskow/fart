@@ -1,9 +1,9 @@
 //
-//  mutex.hpp
-//  fart
+// mutex.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/08/17.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/08/17.
+// See license in LICENSE.
 //
 
 #ifndef mutex_hpp

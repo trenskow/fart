@@ -1,9 +1,9 @@
 //
-//  allocator.hpp
-//  fart
+// allocator.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2021/07/19.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2021/07/19.
+// See license in LICENSE.
 //
 
 #ifndef allocator_hpp

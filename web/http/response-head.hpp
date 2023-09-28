@@ -1,9 +1,9 @@
 //
-//  response.hpp
-//  fart
+// response.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2019/12/12.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2019/12/12.
+// See license in LICENSE.
 //
 
 #ifndef response_hpp

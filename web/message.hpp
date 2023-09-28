@@ -1,9 +1,9 @@
 //
-//  message.hpp
-//  fart
+// message.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2019/12/11.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2019/12/11.
+// See license in LICENSE.
 //
 
 #ifndef message_hpp

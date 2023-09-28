@@ -1,9 +1,9 @@
 //
-//  sha256.hpp
-//  fart
+// sha256.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2023/05/08.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2023/05/08.
+// See license in LICENSE.
 //
 
 #ifndef sha256_hpp

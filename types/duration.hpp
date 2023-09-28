@@ -1,9 +1,9 @@
 //
-//  duration.hpp
-//  fart
+// duration.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2020/04/04.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2020/04/04.
+// See license in LICENSE.
 //
 
 #ifndef duration_hpp

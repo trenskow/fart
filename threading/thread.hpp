@@ -1,9 +1,9 @@
 //
-//  thread.hpp
-//  fart
+// thread.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/11/22.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/11/22.
+// See license in LICENSE.
 //
 
 #ifndef thread_hpp

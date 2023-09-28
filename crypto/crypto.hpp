@@ -1,9 +1,9 @@
 //
-//  crypto.hpp
-//  fart
+// crypto.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2023/05/08.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2023/05/08.
+// See license in LICENSE.
 //
 
 #ifndef crypto_hpp

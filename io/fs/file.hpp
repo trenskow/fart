@@ -1,9 +1,9 @@
 //
-//  file.hpp
-//  fart
+// file.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2020/04/12.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2020/04/12.
+// See license in LICENSE.
 //
 
 #ifndef file_hpp

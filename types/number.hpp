@@ -1,9 +1,9 @@
 //
-//  number.hpp
-//  fart
+// number.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/09/09.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/09/09.
+// See license in LICENSE.
 //
 
 #ifndef number_hpp

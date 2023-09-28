@@ -1,9 +1,9 @@
 //
-//  unicode.hpp
-//  fart
+// unicode.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2021/07/09.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2021/07/09.
+// See license in LICENSE.
 //
 
 #ifndef unicode_hpp

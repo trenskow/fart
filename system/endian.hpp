@@ -1,9 +1,9 @@
 //
-//  endian.hpp
-//  fart
+// endian.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2020/04/01.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2020/04/01.
+// See license in LICENSE.
 //
 
 #ifndef endian_hpp

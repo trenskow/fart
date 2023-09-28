@@ -1,9 +1,9 @@
 //
-//  type.hpp
-//  fart
+// type.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2018/09/10.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2018/09/10.
+// See license in LICENSE.
 //
 
 #ifndef type_hpp

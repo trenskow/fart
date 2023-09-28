@@ -1,10 +1,10 @@
 
 //
-//  pair.hpp
-//  fart
+// pair.hpp
+// fart
 //
-//  Created by Kristian Trenskow on 2021/01/24.
-//  Copyright © 2018-2023 Kristian Trenskow. All rights reserved.
+// Created by Kristian Trenskow on 2021/01/24.
+// See license in LICENSE.
 //
 
 #ifndef pair_hpp
