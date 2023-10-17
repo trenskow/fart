@@ -47,9 +47,19 @@ namespace fart::types {
 		}
 
 		virtual uint64_t hash() const override {
-			return Builder()
-				.add(*_first)
-				.add(*_second);
+
+			auto builder = Builder();
+
+			if constexpr (std::is_base_of<Hashable, First>::value) {
+				builder.add(*_first);
+			}
+
+			if constexpr (std::is_base_of<Hashable, Second>::value) {
+				builder.add(*_second);
+			}
+
+			return builder;
+
 		}
 
 		virtual Kind kind() const override {
@@ -58,7 +68,7 @@ namespace fart::types {
 
 		bool operator==(const Pair<First, Second>& other) const {
 			if (!Type::operator==(other)) return false;
-			return _first == other._first && _second == other.second;
+			return *_first == *other._first && *_second == *other._second;
 		}
 
 		Pair<First, Second>& operator=(const Pair<First, Second>& other) {

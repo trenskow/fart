@@ -60,7 +60,7 @@ namespace fart::io::fs {
 				wordexp_t exp_result;
 				wordexp(filename, &exp_result, 0);
 				size_t filenameLength = strlen(exp_result.we_wordv[0]);
-				auto ret = String::fromCString([&exp_result,&filenameLength](char* buffer, size_t length) {
+				auto ret = String::fromCString([&exp_result,&filenameLength](char* buffer, size_t) {
 					memcpy(buffer, exp_result.we_wordv[0], filenameLength);
 					return filenameLength;
 				}, filenameLength);
@@ -115,7 +115,7 @@ namespace fart::io::fs {
 			return this->_mutex.lockedValue([this,count](){
 				if (this->_mode == Mode::asWrite) throw FileModeException();
 				size_t toRead = math::min(sizeof(T) * count, this->_size - this->_position);
-				auto read = Data<T>::fromCBuffer([this,toRead](void* buffer, size_t length){
+				auto read = Data<T>::fromCBuffer([this](void* buffer, size_t length){
 					fread(buffer, sizeof(T), length / sizeof(T), this->_stream);
 					return length;
 				}, toRead);

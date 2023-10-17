@@ -416,6 +416,22 @@ namespace fart::exceptions {
 
 		};
 
+		class URLMalformedException : public Exception {
+
+		public:
+
+			virtual ~URLMalformedException() = default;
+
+			virtual const char* description() const override {
+				return "URL is malformed.";
+			}
+
+			virtual URLMalformedException* clone() const override {
+				return new URLMalformedException();
+			}
+
+		};
+
 	}
 
 	namespace web {
@@ -454,7 +470,7 @@ namespace fart::exceptions {
 				virtual const char* description() const override {
 					return "Data is incomplete.";
 				}
-				
+
 				virtual DataIncompleteException* clone() const override {
 					return new DataIncompleteException();
 				}

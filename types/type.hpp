@@ -37,6 +37,7 @@ namespace fart::types {
 			date,
 			pair,
 			uuid,
+			url,
 			null
 		};
 
@@ -74,7 +75,7 @@ namespace fart::types {
 		}
 
 		template<typename T>
-		T& as() const {
+		inline T& as() const {
 			return (T&)*this;
 		}
 

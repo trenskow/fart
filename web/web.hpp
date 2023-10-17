@@ -13,7 +13,6 @@
 #define web_hpp
 
 #include "./message.hpp"
-#include "./url.hpp"
 #include "./http/http.hpp"
 
 #endif /* web_hpp */

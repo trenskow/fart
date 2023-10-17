@@ -279,16 +279,23 @@ namespace fart::types {
 			});
 		}
 
-		size_t indexOf(const Data<T>& other, const size_t offset = 0) const {
-			for (size_t hidx = offset ; hidx < this->length() ; hidx++) {
-				bool found = true;
-				for (size_t nidx = 0 ; nidx < other.length() ; nidx++) {
-					if (this->_get(hidx + nidx) != other._get(nidx)) {
-						found = false;
-						break;
-					}
+		bool needle(const Data<T>& other, size_t offset) const {
+
+			if (other.length() + offset > this->length()) return false;
+
+			for (size_t idx = 0 ; idx < other.length() ; idx++) {
+				if (this->_get(offset + idx) != other._get(idx)) {
+					return false;
 				}
-				if (found) return hidx;
+			}
+
+			return true;
+
+		}
+
+		size_t indexOf(const Data<T>& other, size_t offset = 0) const {
+			for (size_t index = offset ; index < this->length() ; index++) {
+				if (this->needle(other, index)) return index;
 			}
 			return NotFound;
 		}
@@ -297,12 +304,31 @@ namespace fart::types {
 			return indexOf(Data<T>(&other, 1), offset);
 		}
 
+		size_t lastIndexOf(const Data<T>& other) const {
+			for (ssize_t index = this->length() - other.length() - 1; index >= 0 ; index--) {
+				if (this->needle(other, (size_t)index)) return index;
+			}
+			return NotFound;
+		}
+
 		inline bool contains(const Data<T>& other, const size_t offset = 0) const {
 			return indexOf(other, offset) != NotFound;
 		}
 
 		inline bool contains(const T other, const size_t offset = 0) const {
 			return indexOf(other, offset) != NotFound;
+		}
+
+		bool hasPrefix(const Data<T>& other) const {
+			if (other.length() > this->length()) return false;
+			return this->subdata(0, other.length())
+				->equals(other);
+		}
+
+		bool hasSuffix(const Data<T>& other) const {
+			if (other.length() > this->length()) return false;
+			return this->subdata(this->length() - other.length(), other.length())
+				->equals(other);
 		}
 
 		T replace(T element, const size_t index) {
@@ -320,8 +346,10 @@ namespace fart::types {
 			return oldValue;
 		}
 
-		inline Strong<Data<T>> subdata(const size_t offset, const size_t length = NotFound) const {
-			return Strong<Data<T>>(*this, offset, math::min(this->length() - offset, length));
+		Strong<Data<T>> subdata(const size_t offset, size_t length = NotFound) const {
+			if (length == NotFound) length = this->_length;
+			length = (size_t)math::min((ssize_t)this->length() - (ssize_t)offset, (ssize_t)length);
+			return Strong<Data<T>>(*this, offset, length);
 		}
 
 		Strong<Data<T>> remove(const size_t offset, const size_t length) {
@@ -572,13 +600,17 @@ namespace fart::types {
 			return Kind::data;
 		}
 
-		bool operator==(const Data<T>& other) const override {
-			if (!Type::operator==(other)) return false;
+		bool equals(const Data<T>& other) const {
 			if (this->length() != other.length()) return false;
 			for (size_t idx = 0 ; idx < this->length() ; idx++) {
 				if (this->_get(idx) != other._get(idx)) return false;
 			}
 			return true;
+		}
+
+		bool operator==(const Data<T>& other) const override {
+			if (!Type::operator==(other)) return false;
+			return this->equals(other);
 		}
 
 		bool operator>(const Data<T>& other) const override {

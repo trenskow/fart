@@ -41,10 +41,10 @@ namespace fart::types {
 
 		Dictionary(const Array<Pair<Key, Value>>& keyValues) : Type(), _keys(), _values() {
 			_keys = keyValues.template map<Key>([](const Pair<Key, Value>& keyValue) {
-				return keyValue.first();
+				return Strong<Key>(keyValue.first());
 			});
 			_values = keyValues.template map<Value>([](const Pair<Key, Value>& keyValue) {
-				return keyValue.second();
+				return Strong<Value>(keyValue.second());
 			});
 		}
 
@@ -68,8 +68,28 @@ namespace fart::types {
 			}
 		}
 
-		void set(std::pair<Key&, Value&> keyValue) {
+		Strong<Dictionary<Key, Value>> setting(Strong<Key> key, Strong<Value> value) {
+			Strong<Dictionary<Key, Value>> result;
+			result->setting(*this);
+			result->set(key, value);
+			return result;
+		}
+
+		void set(const std::pair<Key&, Value&> keyValue) {
 			set(keyValue.first, keyValue.second);
+		}
+
+		void set(const Dictionary<Key, Value>& dictionary) {
+			dictionary.iterate()->forEach([&](const Pair<Key, Value>& element) {
+				set(element.first(), element.second());
+			});
+		}
+
+		Strong<Dictionary<Key, Value>> setting(const Dictionary<Key, Value>& dictionary) {
+			Strong<Dictionary<Key, Value>> result;
+			result->set(*this);
+			result->set(dictionary);
+			return result;
 		}
 
 		void remove(Strong<Key> key) {
@@ -93,7 +113,7 @@ namespace fart::types {
 			return _keys.indexOf(key) != NotFound;
 		}
 
-		Strong<Value> get(Strong<Key> key) const noexcept(false) {
+		Strong<Value> get(const Key& key) const noexcept(false) {
 			size_t keyIndex = _keys.indexOf(key);
 			if (keyIndex == NotFound) {
 				throw KeyNotFoundException();
@@ -211,9 +231,13 @@ namespace fart::types {
 				return !other._keys.contains(key);
 			})) return false;
 
-			return _keys.every([&](const Key& key) {
-				return this->get(key) == other.get(key);
-			});
+			if constexpr (std::is_base_of<Hashable, Value>::value) {
+				return _keys.every([&](const Key& key) {
+					return this->get(key) == other.get(key);
+				});
+			} else {
+				return true;
+			}
 
 		}
 

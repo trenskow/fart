@@ -11,7 +11,7 @@
 
 #include "../message.hpp"
 #include "./head.hpp"
-#include "../url.hpp"
+#include "../../types/url.hpp"
 #include "./version.hpp"
 
 using namespace fart::types;
@@ -43,7 +43,7 @@ namespace fart::web::http {
 			else throw MethodNotSupportedException();
 
 			_version = parseVersion((_parts)[2]);
-			_path = Url::decode(_parts[1]);
+			_path = URL::escapeDecode(_parts[1]);
 
 		}
 

@@ -23,5 +23,6 @@
 #include "./date.hpp"
 #include "./pair.hpp"
 #include "./uuid.hpp"
+#include "./url.hpp"
 
 #endif /* types_hpp */

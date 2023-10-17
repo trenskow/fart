@@ -301,6 +301,18 @@ namespace fart::types {
 			return this->_storage.indexOf(chr);
 		}
 
+		inline size_t lastIndexOf(const String& other) const {
+			return this->_storage.lastIndexOf(other._storage);
+		}
+
+		bool hasPrefix(const String& other) const {
+			return this->_storage.hasPrefix(other._storage);
+		}
+
+		bool hasSuffix(const String& other) const {
+			return this->_storage.hasSuffix(other._storage);
+		}
+
 		inline Strong<String> substring(const size_t& offset, const size_t& length = NotFound) const {
 			return Strong<String>(_storage.subdata(offset, length));
 		}

@@ -31,7 +31,7 @@ namespace fart::web {
 			_listener->listen([this](Socket& acceptSocket) {
 				acceptSocket.setCloseCallback(_socketClosed, this);
 				_connections.append(acceptSocket);
-				acceptSocket.accept([this,&acceptSocket](const Data<uint8_t>& data, const Endpoint& sender) {
+				acceptSocket.accept([this,&acceptSocket](const Data<uint8_t>& data, const Endpoint&) {
 					this->_onData(data, acceptSocket);
 				});
 			});
@@ -39,7 +39,7 @@ namespace fart::web {
 
 	protected:
 
-		virtual void postProcess(const Message<Request>& request, Socket& socket) const {}
+		virtual void postProcess(const Message<Request>&, Socket&) const {}
 
 	private:
 

@@ -205,10 +205,6 @@ namespace fart::io::sockets {
 			return ::send(_socket, data.items(), data.length(), 0);
 		}
 
-		size_t sendTo(const Endpoint& endpoint, const Data<uint8_t>& data) const {
-			return 0;
-		}
-
 		void close() {
 			if (_state != SocketState::closed && _closeCallback.callback != nullptr) {
 				_closeCallback.callback(*this, _closeCallback.context);

@@ -145,10 +145,12 @@ namespace fart::memory {
 		}
 
 		bool operator==(const T& other) const {
+			if (this->_object == nullptr) return false;
 			return *this->_object == other;
 		}
 
 		bool operator!=(const T& other) const {
+			if (this->_object == nullptr) return true;
 			return *this->_object != other;
 		}
 
@@ -161,6 +163,11 @@ namespace fart::memory {
 		Strong<O> map(function<const Strong<O>(T& unwrapped)> todo) const {
 			if (_object == nullptr) return nullptr;
 			return todo(*this);
+		}
+
+		Strong<T> def(T& value) const {
+			if (this->_object == nullptr) return value;
+			return this->_object;
 		}
 
 	};

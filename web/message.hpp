@@ -26,12 +26,12 @@ namespace fart::web {
 
 	public:
 		MessageHead() {}
-		MessageHead(Data<uint8_t>& data) {}
+		MessageHead(Data<uint8_t>&) {}
 		virtual ~MessageHead() {}
 
 	protected:
 
-		virtual Data<uint8_t> headData(const Data<uint8_t>& lineBreak) const {
+		virtual Data<uint8_t> headData(const Data<uint8_t>&) const {
 			return Data<uint8_t>();
 		}
 
@@ -153,10 +153,7 @@ namespace fart::web {
 			});
 
 			result.append(lineBreak);
-
-			if (_body != nullptr) {
-				result.append(_body);
-			}
+			result.append(_body);
 
 			return result;
 

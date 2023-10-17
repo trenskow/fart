@@ -128,7 +128,7 @@ namespace fart::io::sockets {
 			return (sockaddr *)&this->_storage;
 		}
 
-		const size_t sockAddrLength() const {
+		size_t sockAddrLength() const {
 			switch (this->type()) {
 				case EndpointType::IPv4:
 					return sizeof(sockaddr_in);
