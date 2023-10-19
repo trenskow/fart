@@ -70,7 +70,7 @@ namespace fart::types {
 
 		Strong<Dictionary<Key, Value>> setting(Strong<Key> key, Strong<Value> value) {
 			Strong<Dictionary<Key, Value>> result;
-			result->setting(*this);
+			result = result->setting(*this);
 			result->set(key, value);
 			return result;
 		}
