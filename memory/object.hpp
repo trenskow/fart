@@ -46,28 +46,33 @@ namespace fart::memory {
 
 	private:
 
-		mutable size_t _retainCount;
+		mutable std::atomic<size_t> _retainCount;
 		mutable void** _weakReferences;
 		mutable size_t _weakReferencesSize;
 		mutable size_t _weakReferencesCount;
+		mutable Mutex _mutex;
 
 		void addWeakReference(void* weakReference) const {
-			if (_weakReferencesSize < _weakReferencesCount + 1) {
-				_weakReferencesSize = calculateBufferLength(_weakReferencesCount + 1);
-				_weakReferences = (void**)realloc(_weakReferences, _weakReferencesSize);
-				_weakReferences[_weakReferencesCount++] = weakReference;
-			}
+			_mutex.locked([this,weakReference]() {
+				if (_weakReferencesSize < _weakReferencesCount + 1) {
+					_weakReferencesSize = calculateBufferLength(_weakReferencesCount + 1);
+					_weakReferences = (void**)realloc(_weakReferences, _weakReferencesSize);
+					_weakReferences[_weakReferencesCount++] = weakReference;
+				}
+			});
 		}
 
 		void removeWeakReference(void* weakReference) const {
-			for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
-				if (_weakReferences[idx] == weakReference) {
-					for (size_t midx = idx ; midx <= _weakReferencesCount - 1 ; midx++) {
-						_weakReferences[midx] = _weakReferences[midx + 1];
+			_mutex.locked([this,weakReference]() {
+				for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
+					if (_weakReferences[idx] == weakReference) {
+						for (size_t midx = idx ; midx <= _weakReferencesCount - 1 ; midx++) {
+							_weakReferences[midx] = _weakReferences[midx + 1];
+						}
+						_weakReferencesCount--;
 					}
-					_weakReferencesCount--;
 				}
-			}
+			});
 		}
 
 	public:
@@ -80,12 +85,14 @@ namespace fart::memory {
 
 		virtual ~Object() {
 			assert(_retainCount == 0);
-			for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
-				((Weak<Object>*)_weakReferences[idx])->_object = nullptr;
-			}
-			if (_weakReferences != nullptr) {
-				free(_weakReferences);
-			}
+			_mutex.locked([&]() {
+				for (size_t idx = 0 ; idx < _weakReferencesCount ; idx++) {
+					((Weak<Object>*)_weakReferences[idx])->_object = nullptr;
+				}
+				if (_weakReferences != nullptr) {
+					free(_weakReferences);
+				}
+			});
 		}
 
 		Object& operator=(const Object&) {
