@@ -170,6 +170,11 @@ namespace fart::memory {
 			return this->_object;
 		}
 
+		Strong<T> with(function<void(T&)> todo) {
+			if (this->_object != nullptr) todo(*this->_object);
+			return *this;
+		}
+
 	};
 
 }
