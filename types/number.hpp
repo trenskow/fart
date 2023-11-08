@@ -16,14 +16,33 @@
 
 namespace fart::types {
 
-	enum class Subtype {
-		boolean,
-		floatingPoint,
-		integer
+	class Numeric : public Type {
+
+		public:
+
+			enum class Subtype {
+				boolean,
+				floatingPoint,
+				integer
+			};
+
+			Numeric() { }
+			virtual ~Numeric() { }
+
+			virtual Subtype subType() const = 0;
+
+			virtual Kind kind() const override {
+				return Kind::number;
+			}
+
+			bool is(Subtype subtype) const {
+				return subType() == subtype;
+			}
+
 	};
 
 	template<typename T>
-	class Number : public Type, public Comparable<Number<T>> {
+	class Number : public Numeric, public Comparable<Number<T>> {
 
 	private:
 		Subtype _subtype;
@@ -57,10 +76,10 @@ namespace fart::types {
 
 		static bool is(const Type& value) {
 			if (!value.is(Type::Kind::number)) return false;
-			if (std::is_same<T, bool>::value) return value.as<Number<uint64_t>>().subType() == Subtype::boolean;
-			if (std::is_same<T, double>::value) return value.as<Number<uint64_t>>().subType() == Subtype::floatingPoint;
-			if (std::is_same<T, float>::value) return value.as<Number<uint64_t>>().subType() == Subtype::floatingPoint;
-			return value.as<Number<uint64_t>>().subType() == Subtype::integer;
+			if (std::is_same<T, bool>::value) return value.as<Numeric>().subType() == Subtype::boolean;
+			if (std::is_same<T, double>::value) return value.as<Numeric>().subType() == Subtype::floatingPoint;
+			if (std::is_same<T, float>::value) return value.as<Numeric>().subType() == Subtype::floatingPoint;
+			return value.as<Numeric>().subType() == Subtype::integer;
 		}
 
 		Number() : _value(0), _subtype(Subtype::floatingPoint) {}
@@ -94,20 +113,12 @@ namespace fart::types {
 			return _value;
 		}
 
-		Subtype subType() const {
+		virtual Subtype subType() const override {
 			return _subtype;
 		}
 
 		virtual uint64_t hash() const override {
 			return (uint64_t)_value;
-		}
-
-		virtual Kind kind() const override {
-			return Kind::number;
-		}
-
-		bool is(Subtype subtype) const {
-			return _subtype == subtype;
 		}
 
 		virtual bool operator==(const Number<T>& other) const override {

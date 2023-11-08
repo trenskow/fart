@@ -421,14 +421,14 @@ namespace fart::serialization {
 					break;
 				}
 				case Type::Kind::number: {
-					switch (data.as<Number<uint64_t>>().subType()) {
-						case Subtype::boolean:
+					switch (data.as<Numeric>().subType()) {
+						case Numeric::Subtype::boolean:
 							result->append(data.as<types::Boolean>().value() ? "true" : "false");
 							break;
-						case Subtype::integer:
+						case Numeric::Subtype::integer:
 							result->append(String::format("%lld", data.as<Integer>().value()));
 							break;
-						case Subtype::floatingPoint: {
+						case Numeric::Subtype::floatingPoint: {
 							double value = data.as<Float>().value();
 							uint64_t length = snprintf(nullptr, 0, "%f", value);
 							char str[length + 1];
