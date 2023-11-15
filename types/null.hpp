@@ -17,6 +17,9 @@ namespace fart::types {
 
 	public:
 
+		Null() : Type() { }
+		Null(nullptr_t) : Type() { }
+
 		static Type::Kind typeKind() {
 			return Type::Kind::null;
 		}

@@ -29,7 +29,9 @@ namespace fart::types {
 			Numeric() { }
 			virtual ~Numeric() { }
 
-			virtual Subtype subType() const = 0;
+			virtual Subtype subType() const {
+				throw NotImplementedException();
+			}
 
 			virtual Kind kind() const override {
 				return Kind::number;
