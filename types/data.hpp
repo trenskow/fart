@@ -159,7 +159,7 @@ namespace fart::types {
 			if (srcIndex >= this->length()) throw OutOfBoundException(srcIndex);
 			if (dstIndex >= this->length()) throw OutOfBoundException(dstIndex);
 
-			this->ensureStorageOwnership();
+			this->_ensureStorageOwnership();
 
 			T src = this->_get(srcIndex);
 
