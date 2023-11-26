@@ -325,6 +325,11 @@ namespace fart::types {
 			return _storage.first();
 		}
 
+		inline Strong<T> first(Strong<T> defaultValue) const {
+			if (this->count() == 0) return defaultValue;
+			return this->first();
+		}
+
 		inline Strong<T> first(Tester tester) const noexcept(false) {
 			return _storage.first([&tester](T* item) {
 				return tester(*item);

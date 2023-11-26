@@ -17,6 +17,14 @@ namespace fart::types {
 
 	public:
 
+		static bool is(Strong<Type> value) {
+			return value == nullptr || value->kind() == Type::Kind::null;
+		}
+
+		static bool is(const Type& value) {
+			return value.kind() == Type::Kind::null;
+		}
+
 		Null() : Type() { }
 		Null(nullptr_t) : Type() { }
 
