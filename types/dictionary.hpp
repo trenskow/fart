@@ -187,7 +187,7 @@ namespace fart::types {
 		template<typename OtherValue>
 		Strong<Dictionary<Key, OtherValue>> mapValues(const function<Strong<OtherValue>(const Pair<Key, Value>&)>& todo) const {
 			Strong<Dictionary<Key, OtherValue>> result;
-			this->_keys.forEach([&todo,&result,this](const Key& key) {
+			this->_keys.forEach([&todo,&result,this](Key& key) {
 				Strong<Value> value = this->get(key);
 				result->set(key, todo(Pair<Key, Value>(key, value)));
 			});

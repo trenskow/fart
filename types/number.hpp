@@ -10,9 +10,11 @@
 #define number_hpp
 
 #include <type_traits>
+#include <limits>
 
 #include "./type.hpp"
 #include "./comparable.hpp"
+#include "./string.h"
 
 namespace fart::types {
 
@@ -57,6 +59,51 @@ namespace fart::types {
 		}
 
 		using Comparable<Number<T>>::operator==;
+
+		static bool within(
+			T value,
+			const String& range
+		) {
+
+			return range.split(",")
+				->some([&](const String& range) {
+
+					Data<T> boundaries = range.split("...")
+						->mapToData<T>([&](const String& boundary, size_t idx) {
+
+							double value = (double)numeric_limits<T>::min();
+
+							if (boundary == "") {
+								if (idx == 1) value = (double)numeric_limits<T>::max();
+							} else {
+								value = (double)((T)boundary.doubleValue());
+							}
+
+							return (T)math::max<double>(
+								(double)numeric_limits<T>::min(),
+								(T)math::max<double>(
+									(double)numeric_limits<T>::max(),
+									value));
+
+						});
+
+					assert(boundaries.length() > 0 && boundaries.length() <= 2);
+
+					T lowerBoundary = numeric_limits<T>::min();
+					T upperBoundary = numeric_limits<T>::max();
+
+					if (boundaries.length() == 1) {
+						lowerBoundary = upperBoundary = boundaries[0];
+					} else {
+						lowerBoundary = boundaries[0];
+						upperBoundary = boundaries[1];
+					}
+
+					return value >= lowerBoundary && value <= upperBoundary;
+
+				});
+
+		}
 
 		static T getValue(const Number<T>& number) {
 			switch (number.subType()) {
@@ -113,6 +160,12 @@ namespace fart::types {
 
 		T value() const {
 			return _value;
+		}
+
+		bool within(const String& range) {
+			return Number<T>::within(
+				this->value(),
+				range);
 		}
 
 		virtual Subtype subType() const override {
