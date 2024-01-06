@@ -85,7 +85,7 @@ namespace fart::types {
 			});
 		}
 
-		Strong<Dictionary<Key, Value>> setting(const Dictionary<Key, Value>& dictionary) {
+		Strong<Dictionary<Key, Value>> setting(const Dictionary<Key, Value>& dictionary) const {
 			Strong<Dictionary<Key, Value>> result;
 			result->set(*this);
 			result->set(dictionary);

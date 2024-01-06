@@ -81,7 +81,7 @@ namespace fart::types {
 
 							return (T)math::max<double>(
 								(double)numeric_limits<T>::min(),
-								(T)math::max<double>(
+								(T)math::min<double>(
 									(double)numeric_limits<T>::max(),
 									value));
 
