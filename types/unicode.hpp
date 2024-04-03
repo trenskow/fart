@@ -186,6 +186,28 @@ namespace fart::types {
 
 		static const size_t _lowerUpperCodePointPairCount = sizeof(_lowerUpperCodePointPairs) / sizeof(uint16_t);
 
+		static constexpr uint16_t _whitespaceCharacters[] = {
+			0x0020, // Space (' ')
+			0x00A0, // No-break space
+			0x2000, // En quad
+			0x2001, // Em quad
+			0x2002, // En space
+			0x2003, // Em space
+			0x2004, // Three-per-em space
+			0x2005, // Four-per-em space
+			0x2006, // Six-per-em space
+			0x2007, // Figure space
+			0x2008, // Punctuation space
+			0x2009, // Thin space
+			0x200A, // Hair space
+			0x200B, // Zero-width space
+			0x202F, // Narrow no-break space
+			0x205F, // Medium mathematical space
+			0x3000  // Ideographic space
+		};
+
+		static const size_t _whitespaceCharactersCount = sizeof(_whitespaceCharacters) / sizeof(uint16_t);
+
 	public:
 
 		static uint32_t lowerToUpper(const uint32_t lower) {
@@ -200,6 +222,13 @@ namespace fart::types {
 				if (_lowerUpperCodePointPairs[idx] == upper) return _lowerUpperCodePointPairs[idx - 1];
 			}
 			return upper;
+		}
+
+		static inline bool isWhitespace(const uint32_t codePoint) {
+			for (size_t idx = 0 ; idx < _whitespaceCharactersCount ; idx++) {
+				if (_whitespaceCharacters[idx] == codePoint) return true;
+			}
+			return false;
 		}
 
 	};

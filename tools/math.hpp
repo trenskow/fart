@@ -16,19 +16,22 @@ namespace fart::tools {
 	namespace math {
 
 		template<typename T>
-		inline const T max(const T& a, const T& b) {
+		inline const T max(T a, T b) {
 			return (a > b ? a : b);
 		}
 
 		template<typename T>
-		inline const T min(const T& a, const T& b) {
+		inline const T min(T a, T b) {
 			return (a < b ? a : b);
 		}
 
 		template<typename T>
-		inline const T limit() {
+		inline const T limit(bool sign = false) {
 			T result;
 			memset(&result, 0xFF, sizeof(T));
+			if (sign) {
+				result >>= 1;
+			}
 			return result;
 		}
 

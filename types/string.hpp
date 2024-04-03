@@ -132,11 +132,11 @@ namespace fart::types {
 			this->appending(newLine ? "\n" : "")->withCString(printf);
 		}
 
-		inline Strong<Data<uint8_t>> UTF8Data(const bool& nullTerminate = false) const {
+		inline Strong<Data<uint8_t>> UTF8Data(bool nullTerminate = false) const {
 			return _encodeUTF8(_storage, nullTerminate);
 		}
 
-		inline Strong<Data<uint16_t>> UTF16Data(const Endian::Variant& endian = Endian::systemVariant(), const bool& includeBOM = false) const {
+		inline Strong<Data<uint16_t>> UTF16Data(Endian::Variant endian = Endian::systemVariant(), bool includeBOM = false) const {
 			return _encodeUTF16(_storage, endian, includeBOM);
 		}
 
@@ -170,13 +170,13 @@ namespace fart::types {
 			});
 		}
 
-		inline Strong<Array<String>> split(const String& separator, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
+		inline Strong<Array<String>> split(const String& separator, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			return _storage.split(separator._storage, includeSeparator, max)->map<String>([](const Data<uint32_t>& current) {
 				return Strong<String>(current);
 			});
 		}
 
-		Strong<Array<String>> split(const Array<String>& separators, const IncludeSeparator& includeSeparator = IncludeSeparator::none, const size_t& max = 0) const {
+		Strong<Array<String>> split(const Array<String>& separators, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
 			auto stores = separators.map<Data<uint32_t>>([](const String& current) {
 				return current._storage;
 			});
@@ -197,7 +197,11 @@ namespace fart::types {
 			}), separator._storage));
 		}
 
-		double doubleValue(const size_t& startIndex = 0, size_t* consumed = nullptr, bool allowLeadingZero = true) const {
+		Strong<String> replacing(const String& needle, const String& replacement) const {
+			return String::join(this->split(needle), replacement);
+		}
+
+		double doubleValue(size_t startIndex = 0, size_t* consumed = nullptr, bool allowLeadingZero = true) const {
 
 			double integerMultiplier = 1;
 			bool integerMultiplierParsed = false;
@@ -293,16 +297,20 @@ namespace fart::types {
 
 		}
 
-		inline size_t indexOf(const String& other, const size_t& offset = 0) const {
+		inline size_t indexOf(const String& other, size_t offset = 0) const {
 			return this->_storage.indexOf(other._storage, offset);
 		}
 
-		inline size_t indexOf(const uint32_t& chr) const {
+		inline size_t indexOf(uint32_t chr) const {
 			return this->_storage.indexOf(chr);
 		}
 
 		inline size_t lastIndexOf(const String& other) const {
 			return this->_storage.lastIndexOf(other._storage);
+		}
+
+		bool contains(const String& other) const {
+			return this->indexOf(other) != NotFound;
 		}
 
 		bool hasPrefix(const String& other) const {
@@ -313,8 +321,12 @@ namespace fart::types {
 			return this->_storage.hasSuffix(other._storage);
 		}
 
-		inline Strong<String> substring(const size_t& offset, const size_t& length = NotFound) const {
+		inline Strong<String> substring(size_t offset, size_t length = NotFound) const {
 			return Strong<String>(_storage.subdata(offset, length));
+		}
+
+		inline Strong<String> slice(ssize_t start = 0, ssize_t end = math::limit<ssize_t>(true)) const {
+			return Strong<String>(_storage.slice(start, end));
 		}
 
 		inline Strong<String> uppercased() const {
@@ -329,6 +341,34 @@ namespace fart::types {
 			if (this->length() == 0) return Strong<String>();
 			if (this->length() == 1) return this->uppercased();
 			return this->substring(0, 1)->uppercased()->appending(this->substring(1)->lowercased());
+		}
+
+		Strong<String> trimmedStart() const {
+
+			ssize_t start = 0;
+
+			while (start < (ssize_t)this->_storage.length() && Unicode::isWhitespace(this->_storage[start])) {
+				start++;
+			}
+
+			return this->substring(start);
+
+		}
+
+		Strong<String> trimmedEnd() const {
+
+			ssize_t end = this->_storage.length() - 1;
+
+			while (end > 0 && Unicode::isWhitespace(this->_storage[end])) {
+				end--;
+			}
+
+			return this->substring(0, end + 1);
+
+		}
+
+		Strong<String> trimmed() const {
+			return this->trimmedStart()->trimmedEnd();
 		}
 
 		virtual uint64_t hash() const override {
@@ -362,7 +402,7 @@ namespace fart::types {
 			return this->lowercased()->_storage > other.lowercased()->_storage;
 		}
 
-		inline uint32_t operator[](const size_t& idx) const {
+		inline uint32_t operator[](size_t idx) const {
 			return _storage[idx];
 		}
 
@@ -454,7 +494,7 @@ namespace fart::types {
 
 		}
 
-		static Data<uint8_t> _encodeUTF8(const Data<uint32_t> &buffer, const bool& nullTerminate = false) noexcept(false) {
+		static Data<uint8_t> _encodeUTF8(const Data<uint32_t> &buffer, bool nullTerminate = false) noexcept(false) {
 
 			Data<uint8_t> ret;
 
@@ -491,7 +531,7 @@ namespace fart::types {
 
 		}
 
-		static Data<uint32_t> _decodeUTF16(const uint16_t* buffer, const size_t& length, const Endian::Variant& endian) noexcept(false) {
+		static Data<uint32_t> _decodeUTF16(const uint16_t* buffer, size_t length, Endian::Variant endian) noexcept(false) {
 
 			Data<uint32_t> ret;
 
@@ -517,7 +557,7 @@ namespace fart::types {
 
 		}
 
-		static Data<uint16_t> _encodeUTF16(const Data<uint32_t> &buffer, const Endian::Variant& endian, const bool& includeBOM) noexcept(false) {
+		static Data<uint16_t> _encodeUTF16(const Data<uint32_t>& buffer, Endian::Variant endian, bool includeBOM) noexcept(false) {
 
 			Data<uint16_t> ret;
 
@@ -542,26 +582,26 @@ namespace fart::types {
 
 		}
 
-		inline static Data<uint32_t> _decodeUTF32(const Data<uint32_t>& buffer, const Endian::Variant& endian) {
+		inline static Data<uint32_t> _decodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
 			return buffer.map<uint32_t>([&endian](uint32_t character) {
 				return Endian::convert(character, endian, Endian::systemVariant());
 			});
 		}
 
-		inline static Data<uint32_t> _encodeUTF32(const Data<uint32_t>& buffer, const Endian::Variant& endian) {
+		inline static Data<uint32_t> _encodeUTF32(const Data<uint32_t>& buffer, Endian::Variant endian) {
 			return buffer.map<uint32_t>([&endian](uint32_t character) {
 				return Endian::convert(character, Endian::systemVariant(), endian);
 			});
 		}
 
-		static uint8_t _valueFromHex(const uint8_t& chr, const size_t& idx) noexcept(false) {
+		static uint8_t _valueFromHex(uint8_t chr, size_t idx) noexcept(false) {
 			if (chr >= 'a' && chr <= 'f') return chr - ('a' - 'A');
 			if (chr >= 'A' && chr <= 'F') return (chr - 'A') + 10;
 			else if (chr >= '0' && chr <= '9') return chr - '0';
 			else throw DecoderException(idx);
 		}
 
-		static uint8_t _valueToHex(const uint8_t& value, const size_t& idx) noexcept(false) {
+		static uint8_t _valueToHex(uint8_t value, size_t idx) noexcept(false) {
 			if (value < 10) return '0' + value;
 			else if (value < 16) return 'A' + (value - 10);
 			else throw EncoderException(idx);
