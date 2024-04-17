@@ -469,6 +469,10 @@ namespace fart::types {
 			return subarray(index, count() - index);
 		}
 
+		inline Strong<Array<T>> slicing(ssize_t start = 0, ssize_t end = math::limit<ssize_t>()) const {
+			return Strong<Array<T>>(this->_storage.slicing(start, end));
+		}
+
 		inline Strong<Array<T>> reversed() const {
 			return Strong<Array<T>>(this->_storage.reversed());
 		}

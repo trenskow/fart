@@ -352,7 +352,7 @@ namespace fart::types {
 			return Strong<Data<T>>(*this, offset, length);
 		}
 
-		Strong<Data<T>> slice(ssize_t start = 0, ssize_t end = math::limit<ssize_t>(true)) const {
+		Strong<Data<T>> slicing(ssize_t start = 0, ssize_t end = math::limit<ssize_t>()) const {
 
 			if (start < 0) {
 				start = (this->length() - 1) + start;
@@ -362,10 +362,10 @@ namespace fart::types {
 				end = (this->length() - 1) + end;
 			}
 
-			end = math::min<ssize_t>(end, this->length() - 1);
-			start = math::min<ssize_t>(start, end);
+			end = math::min<ssize_t>((ssize_t)this->length() - 1, math::max<ssize_t>(-1, end));
+			start = math::max<ssize_t>(0, math::min<ssize_t>((ssize_t)this->length(), start));
 
-			return this->subdata(start, end - start + 1);
+			return Strong<Data<T>>(*this, start, math::min<ssize_t>((ssize_t)this->length(), end - start + 1));
 
 		}
 

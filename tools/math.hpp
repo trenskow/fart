@@ -9,6 +9,8 @@
 #ifndef math_hpp
 #define math_hpp
 
+#include <type_traits>
+
 #include <string.h>
 
 namespace fart::tools {
@@ -26,13 +28,16 @@ namespace fart::tools {
 		}
 
 		template<typename T>
-		inline const T limit(bool sign = false) {
-			T result;
-			memset(&result, 0xFF, sizeof(T));
-			if (sign) {
-				result >>= 1;
+		inline constexpr T limit() {
+
+			static_assert(std::is_integral<T>::value);
+
+			if constexpr (std::is_signed<T>::value) {
+				return (1ULL << (sizeof(T) * 8 - 1)) - 1;
+			} else {
+				return ~static_cast<T>(0);
 			}
-			return result;
+
 		}
 
 	}

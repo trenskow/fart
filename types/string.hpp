@@ -325,8 +325,8 @@ namespace fart::types {
 			return Strong<String>(_storage.subdata(offset, length));
 		}
 
-		inline Strong<String> slice(ssize_t start = 0, ssize_t end = math::limit<ssize_t>(true)) const {
-			return Strong<String>(_storage.slice(start, end));
+		inline Strong<String> slicing(ssize_t start = 0, ssize_t end = math::limit<ssize_t>()) const {
+			return Strong<String>(_storage.slicing(start, end));
 		}
 
 		inline Strong<String> uppercased() const {

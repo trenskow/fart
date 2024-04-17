@@ -59,7 +59,7 @@ namespace fart::memory {
 			_setObject(nullptr);
 		}
 
-		Weak(const Strong<T>& other) : Weak(other) {}
+		Weak(const Strong<T>& other) : Weak(*other) {}
 
 		Weak(Weak<T>&& other) : _object(other._object) {
 			other._object = nullptr;
@@ -106,12 +106,12 @@ namespace fart::memory {
 			return _object;
 		}
 
-		bool operator==(std::nullptr_t n) const {
-			return this->_object == n;
+		bool operator==(std::nullptr_t) const {
+			return this->_object == nullptr;
 		}
 
-		bool operator!=(std::nullptr_t n) const {
-			return !(this == n);
+		bool operator!=(std::nullptr_t) const {
+			return this->_object != nullptr;
 		}
 
 		template<typename O>
