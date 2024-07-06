@@ -193,6 +193,22 @@ namespace fart::exceptions {
 
 		};
 
+		class JSONEncodingCircularReferenceException : public Exception {
+
+		public:
+
+			virtual ~JSONEncodingCircularReferenceException() = default;
+
+			virtual const char* description() const override {
+				return "Circular reference detected.";
+			}
+
+			virtual JSONEncodingCircularReferenceException* clone() const override {
+				return new JSONEncodingCircularReferenceException();
+			}
+
+		};
+
 	}
 
 	namespace memory {
