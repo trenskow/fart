@@ -37,10 +37,9 @@ namespace fart::memory {
 		T* _object;
 
 		void _setObject(T* object, bool newObject = false) {
-			if (_object != nullptr) {
-				_object->release();
-				_object = nullptr;
-			}
+
+			T* oldObject = _object;
+
 			if (object) {
 				// If object is allocated on the stack, we make a copy on the heap.
 				if (!newObject && object->retainCount() == 0) {
@@ -54,6 +53,12 @@ namespace fart::memory {
 				}
 				_object->retain();
 			}
+
+			if (oldObject != nullptr) {
+				oldObject->release();
+				oldObject = nullptr;
+			}
+
 		}
 
 	public:
