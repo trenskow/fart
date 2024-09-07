@@ -87,7 +87,9 @@ namespace fart::types {
 
 						});
 
-					assert(boundaries.length() > 0 && boundaries.length() <= 2);
+					if (boundaries.length() < 1 || boundaries.length() > 2) {
+						throw RangeParserException();
+					}
 
 					T lowerBoundary = numeric_limits<T>::min();
 					T upperBoundary = numeric_limits<T>::max();

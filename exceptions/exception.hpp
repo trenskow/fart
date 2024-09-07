@@ -258,6 +258,22 @@ namespace fart::exceptions {
 
 		};
 
+		class RangeParserException : public Exception {
+
+		public:
+
+			virtual ~RangeParserException() = default;
+
+			virtual const char* description() const override {
+				return "Could not parse range.";
+			}
+
+			virtual RangeParserException* clone() const override {
+				return new RangeParserException();
+			}
+
+		};
+
 		class ISO8601Exception : public Exception {
 
 		public:
