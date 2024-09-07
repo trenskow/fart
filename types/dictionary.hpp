@@ -175,24 +175,39 @@ namespace fart::types {
 		}
 
 		template<typename OtherKey>
-		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<Strong<OtherKey>(const Pair<Key, Value>&)>& todo) const {
+		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<Strong<OtherKey>(const Pair<Key, Value>&, size_t)>& todo) const {
 			Strong<Dictionary<OtherKey, Value>> result;
-			this->_keys.forEach([&todo,&result,this](Key& key) {
+			this->_keys.forEach([&todo,&result,this](Key& key, size_t idx) {
 				Strong<Value> value = this->get(key);
-				result->set(todo(Pair<Key, Value>(key, value)), value);
+				result->set(todo(Pair<Key, Value>(key, value), idx), value);
+			});
+			return result;
+		}
+
+		template<typename OtherKey>
+		Strong<Dictionary<OtherKey, Value>> mapKeys(const function<Strong<OtherKey>(const Pair<Key, Value>&)>& todo) const {
+			return this->mapKeys<OtherKey>([&todo](const Pair<Key, Value>& pair, size_t) {
+				return todo(pair);
+			});
+		}
+
+		template<typename OtherValue>
+		Strong<Dictionary<Key, OtherValue>> mapValues(const function<Strong<OtherValue>(const Pair<Key, Value>&, size_t)>& todo) const {
+			Strong<Dictionary<Key, OtherValue>> result;
+			this->_keys.forEach([&todo,&result,this](Key& key, size_t idx) {
+				Strong<Value> value = this->get(key);
+				result->set(key, todo(Pair<Key, Value>(key, value), idx));
 			});
 			return result;
 		}
 
 		template<typename OtherValue>
 		Strong<Dictionary<Key, OtherValue>> mapValues(const function<Strong<OtherValue>(const Pair<Key, Value>&)>& todo) const {
-			Strong<Dictionary<Key, OtherValue>> result;
-			this->_keys.forEach([&todo,&result,this](Key& key) {
-				Strong<Value> value = this->get(key);
-				result->set(key, todo(Pair<Key, Value>(key, value)));
+			return this->mapValues<OtherValue>([&todo](const Pair<Key, Value>& pair, size_t) {
+				return todo(pair);
 			});
-			return result;
 		}
+
 
 		template<typename OtherValue>
 		Strong<Array<OtherValue>> map(const function<Strong<OtherValue>(const Pair<Key, Value>&)> todo) const {
