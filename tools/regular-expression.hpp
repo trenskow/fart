@@ -27,10 +27,6 @@ namespace fart::tools {
 				const String& pattern
 			) noexcept(false) : _pattern(pattern) {
 
-				pattern.withCString([](const char* pattern) {
-					printf("%s\n", pattern);
-				});
-
 				int flags = REG_EXTENDED;
 
 				if (pattern.length() < 2 || *pattern.substring(0, 1) != String("/")) {
@@ -45,14 +41,6 @@ namespace fart::tools {
 
 				String options = pattern.substring(lastSlash + 1);
 				String regexPattern = pattern.substring(1, lastSlash - 1);
-
-				options.withCString([](const char* options) {
-					printf("%s\n", options);
-				});
-
-				regexPattern.withCString([](const char* pattern) {
-					printf("%s\n", pattern);
-				});
 
 				if (options.contains("i")) {
 					flags |= REG_ICASE;
