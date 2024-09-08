@@ -179,7 +179,7 @@ namespace fart::types {
 			Strong<Dictionary<OtherKey, Value>> result;
 			this->_keys.forEach([&todo,&result,this](Key& key, size_t idx) {
 				Strong<Value> value = this->get(key);
-				result->set(todo(Pair<Key, Value>(key, value), idx), value);
+				result->set(todo(Strong<Pair<Key, Value>>(key, value), idx), value);
 			});
 			return result;
 		}
@@ -196,7 +196,7 @@ namespace fart::types {
 			Strong<Dictionary<Key, OtherValue>> result;
 			this->_keys.forEach([&todo,&result,this](Key& key, size_t idx) {
 				Strong<Value> value = this->get(key);
-				result->set(key, todo(Pair<Key, Value>(key, value), idx));
+				result->set(key, todo(Strong<Pair<Key, Value>>(key, value), idx));
 			});
 			return result;
 		}
