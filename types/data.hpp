@@ -305,7 +305,7 @@ namespace fart::types {
 		}
 
 		size_t lastIndexOf(const Data<T>& other) const {
-			for (ssize_t index = this->length() - other.length() - 1; index >= 0 ; index--) {
+			for (ssize_t index = this->length() - other.length(); index >= 0 ; index--) {
 				if (this->needle(other, (size_t)index)) return index;
 			}
 			return NotFound;
