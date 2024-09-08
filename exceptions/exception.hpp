@@ -559,6 +559,26 @@ namespace fart::exceptions {
 
 	}
 
+	namespace tools {
+
+		class InvalidPatternException : public Exception {
+
+			public:
+
+				virtual ~InvalidPatternException() = default;
+
+				virtual const char* description() const override {
+					return "Pattern is invalid.";
+				}
+
+				virtual InvalidPatternException* clone() const override {
+					return new InvalidPatternException();
+				}
+
+		};
+
+	}
+
 }
 
 #endif /* exception_hpp */

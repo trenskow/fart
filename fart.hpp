@@ -12,7 +12,6 @@
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
-#include "./tools/math.hpp"
 #include "./exceptions/exceptions.hpp"
 #include "./threading/threading.hpp"
 #include "./types/types.hpp"
@@ -22,6 +21,7 @@
 #include "./io/io.hpp"
 #include "./system/system.hpp"
 #include "./crypto/crypto.hpp"
+#include "./tools/tools.hpp"
 
 #pragma GCC visibility pop
 
