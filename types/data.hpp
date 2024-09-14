@@ -466,24 +466,24 @@ namespace fart::types {
 			return split(Array<Data<T>>(separator, 1), includeSeparator, max);
 		}
 
-		inline Strong<Array<Data<T>>> split(T* seperator, size_t length, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
-			return split(Data<T>(seperator, length), includeSeparator, max);
+		inline Strong<Array<Data<T>>> split(T* separator, size_t length, IncludeSeparator includeSeparator = IncludeSeparator::none, size_t max = 0) const {
+			return split(Data<T>(separator, length), includeSeparator, max);
 		}
 
-		inline static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>* seperator) {
-			return datas.template reduce<Strong<Data<T>>>(Strong<Data<T>>(), [datas, seperator](Strong<Data<T>> result, Data<T>&, size_t idx) {
-				result->append(datas[idx]);
-				if (seperator != nullptr && idx != datas.count() - 1) result->append(*seperator);
+		inline static Strong<Data<T>> join(const Array<Data<T>>& items, const Data<T>* separator) {
+			return items.template reduce<Strong<Data<T>>>(Strong<Data<T>>(), [items, separator](Strong<Data<T>> result, Data<T>&, size_t idx) {
+				result->append(items[idx]);
+				if (separator != nullptr && idx != items.count() - 1) result->append(*separator);
 				return result;
 			});
 		}
 
-		inline static Strong<Data<T>> join(const Array<Data<T>>& datas) {
-			return join(datas, nullptr);
+		inline static Strong<Data<T>> join(const Array<Data<T>>& items) {
+			return join(items, nullptr);
 		}
 
-		inline static Strong<Data<T>> join(const Array<Data<T>>& datas, const Data<T>& seperator) {
-			return join(datas, &seperator);
+		inline static Strong<Data<T>> join(const Array<Data<T>>& items, const Data<T>& separator) {
+			return join(items, &separator);
 		}
 
 		template<typename O>
