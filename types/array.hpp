@@ -578,7 +578,7 @@ namespace fart::types {
 			return Kind::array;
 		}
 
-		bool operator==(const Type& other) const {
+		virtual bool operator==(const Type& other) const override {
 
 			if (other.kind() != Kind::array) return false;
 
