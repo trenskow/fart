@@ -31,8 +31,6 @@ namespace fart::types {
 			return Type::Kind::date;
 		}
 
-		using Comparable<Date>::operator==;
-
 		enum class TimeZone {
 			utc,
 			local
@@ -335,8 +333,9 @@ namespace fart::types {
 			return hash;
 		}
 
-		virtual bool operator==(const Date& other) const override {
-			return this->to(TimeZone::utc)._time == other.to(TimeZone::utc)._time;
+		virtual bool operator==(const Type& other) const override {
+			if (other.kind() != Kind::date) return false;
+			return this->to(TimeZone::utc)._time == ((const Date&)other).to(TimeZone::utc)._time;
 		}
 
 		Date operator+(const Duration& duration) const {

@@ -30,7 +30,7 @@ namespace fart::memory {
 #endif
 	{
 
-		static_assert(std::is_base_of<Object, T>::value);
+		static_assert(is_base_of<Object, T>::value);
 
 	private:
 

@@ -625,9 +625,12 @@ namespace fart::types {
 			return true;
 		}
 
-		bool operator==(const Data<T>& other) const override {
-			if (!Type::operator==(other)) return false;
-			return this->equals(other);
+		bool operator==(const Type& other) const override {
+			if (other.kind() != Kind::data) return false;
+			if constexpr (!is_base_of<Data<T>, decltype(other)>::value) {
+				return false;
+			}
+			return this->equals((const Data<T>&)other);
 		}
 
 		bool operator>(const Data<T>& other) const override {

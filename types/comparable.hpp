@@ -10,12 +10,11 @@
 #define comparable_hpp
 
 #include "./comparison.hpp"
-#include "./equatable.hpp"
 
 namespace fart::types {
 
 	template<typename T>
-	class Comparable : public Equatable<T> {
+	class Comparable {
 
 		public:
 

@@ -25,8 +25,6 @@ namespace fart::types {
 
 	public:
 
-		using Comparable<Duration>::operator==;
-
 		static const Duration& zero() {
 			static const Duration zero = 0;
 			return zero;
@@ -176,7 +174,7 @@ namespace fart::types {
 			return this->seconds();
 		}
 
-		virtual bool operator==(const Duration& other) const override {
+		bool operator==(const Duration& other) const {
 			return _seconds == other._seconds;
 		}
 

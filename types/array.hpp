@@ -579,12 +579,21 @@ namespace fart::types {
 		}
 
 		bool operator==(const Array<T>& other) const {
+
 			if (!Type::operator==(other)) return false;
+
 			if (this->count() != other.count()) return false;
-			for (size_t idx = 0 ; idx < _storage.length() ; idx++) {
-				if (!(*_storage[idx] == *other._storage[idx])) return false;
+
+			if constexpr (std::is_base_of<Hashable, T>::value) {
+				for (size_t idx = 0 ; idx < _storage.length() ; idx++) {
+					if (!(*_storage[idx] == *other._storage[idx])) return false;
+				}
+			} else {
+				return true;
 			}
+
 			return true;
+
 		}
 
 		bool operator!=(const Array<T>& other) const {

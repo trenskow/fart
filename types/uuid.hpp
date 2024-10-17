@@ -89,8 +89,9 @@ namespace fart::types {
 				.add(this->_lower);
 		}
 
-		bool operator==(const UUID& other) const {
-			return this->_lower == other._lower && this->_upper == other._upper;
+		virtual bool operator==(const Type& other) const override {
+			if (other.kind() != Kind::uuid) return false;
+			return this->_lower == ((const UUID&)other)._lower && this->_upper == ((const UUID&)other)._upper;
 		}
 
 		bool operator!=(const UUID& other) const {

@@ -10,7 +10,6 @@
 #define types_hpp
 
 #include "./hashable.hpp"
-#include "./equatable.hpp"
 #include "./comparable.hpp"
 #include "./type.hpp"
 #include "./data.hpp"

@@ -236,33 +236,26 @@ namespace fart::types {
 			return Kind::dictionary;
 		}
 
-		bool operator==(const Dictionary<Key,Value>& other) const {
+		virtual bool operator==(const Type& other) const override {
 
-			if (!Type::operator==(other)) return false;
+			if (!other.is(Type::Kind::dictionary)) return false;
 
-			if (_keys.count() != other._keys.count()) return false;
+			const Dictionary<Key, Value>& otherDictionary = (const Dictionary<Key, Value>&)other;
+
+			if (_keys.count() != otherDictionary._keys.count()) return false;
 
 			if (_keys.some([&](const Key& key) {
-				return !other._keys.contains(key);
+				return !otherDictionary._keys.contains(key);
 			})) return false;
 
 			if constexpr (std::is_base_of<Hashable, Value>::value) {
 				return _keys.every([&](const Key& key) {
-					return this->get(key) == other.get(key);
+					return this->get(key) == otherDictionary.get(key);
 				});
 			} else {
 				return true;
 			}
 
-		}
-
-		bool operator!=(const Dictionary<Key, Value>& other) const {
-			return !(this->operator==(other));
-		}
-
-		virtual bool operator==(const Type& other) const override {
-			if (!other.is(Type::Kind::dictionary)) return false;
-			return this->operator==((const Dictionary<Key, Value>&)other);
 		}
 
 		virtual bool operator!=(const Type& other) const override {

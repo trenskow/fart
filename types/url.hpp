@@ -325,6 +325,18 @@ namespace fart::web {
 
 		}
 
+		virtual bool operator==(const Type& other) const override {
+			if (other.kind() != Kind::url) return false;
+			const URL& otherUrl = (const URL&)other;
+			return this->_scheme == otherUrl._scheme &&
+				(this->_userInfo == otherUrl._userInfo || (this->_userInfo != nullptr && otherUrl._userInfo != nullptr && *this->_userInfo == *otherUrl._userInfo)) &&
+				(this->_host == otherUrl._host || (this->_host != nullptr && otherUrl._host != nullptr && *this->_host == *otherUrl._host)) &&
+				this->_port == otherUrl._port &&
+				this->_path == otherUrl._path &&
+				this->_query == otherUrl._query &&
+				(this->_fragment == otherUrl._fragment || (this->_fragment != nullptr && otherUrl._fragment != nullptr && *this->_fragment == *otherUrl._fragment));
+		}
+
 	private:
 
 		uint16_t _schemaDefaultPort() const {

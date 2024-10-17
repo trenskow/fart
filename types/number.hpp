@@ -58,8 +58,6 @@ namespace fart::types {
 			return Type::Kind::number;
 		}
 
-		using Comparable<Number<T>>::operator==;
-
 		static bool within(
 			T value,
 			const String& range
@@ -178,8 +176,9 @@ namespace fart::types {
 			return (uint64_t)_value;
 		}
 
-		virtual bool operator==(const Number<T>& other) const override {
-			return _value == other._value;
+		virtual bool operator==(const Type& other) const override {
+			if (other.kind() != Type::Kind::number) return false;
+			return Number<T>::getValue(other) == Number<T>::getValue(*this);
 		}
 
 		virtual bool operator>(const Number<T>& other) const override {
