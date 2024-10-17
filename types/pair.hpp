@@ -66,11 +66,6 @@ namespace fart::types {
 			return Kind::pair;
 		}
 
-		bool operator==(const Type& other) const {
-			if (other.kind() != Kind::pair) return false;
-			return *_first == *((const Pair<First, Second>&)other)._first && *_second == *((const Pair<First, Second>&)other)._second;
-		}
-
 		Pair<First, Second>& operator=(const Pair<First, Second>& other) {
 			Type::operator=(other);
 			_first = other._first;
