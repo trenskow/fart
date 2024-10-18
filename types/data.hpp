@@ -60,7 +60,7 @@ namespace fart::types {
 			return Data<T>((T*)buffer, math::min(read, length));
 		}
 
-		Data(const T* items, size_t length) : Type(), _storage(new Storage()), _offset(0), _length(0), _hashIsDirty(true), _hash(0) {
+		Data(const T* items, size_t length) : Type(), _storage(new Storage()), _offset(0), _length(0), _size(sizeof(T)), _hashIsDirty(true), _hash(0) {
 			append(items, length);
 		}
 
@@ -82,7 +82,7 @@ namespace fart::types {
 			}
 		}
 
-		Data(const Data<T>& other, size_t offset, size_t length) : _storage(other._storage->retain()), _offset(other._offset + offset), _length(length), _hashIsDirty(offset == 0 && length == other._length), _hash(other._hash) { }
+		Data(const Data<T>& other, size_t offset, size_t length) : _storage(other._storage->retain()), _offset(other._offset + offset), _length(length), _size(sizeof(T)), _hashIsDirty(offset == 0 && length == other._length), _hash(other._hash) { }
 
 		Data(const Data<T>& other) : Data(other, 0, other._length) { }
 
@@ -90,11 +90,13 @@ namespace fart::types {
 			this->_storage = other._storage;
 			this->_offset = other._offset;
 			this->_length = other._length;
+			this->_size = other._size;
 			this->_hashIsDirty = other._hashIsDirty;
 			this->_hash = other._hash;
 			other._storage = nullptr;
 			other._offset = 0;
 			other._length = 0;
+			other._size = 0;
 			other._hashIsDirty = true;
 		}
 
@@ -102,6 +104,7 @@ namespace fart::types {
 			Storage::release(&this->_storage);
 			this->_offset = 0;
 			this->_length = 0;
+			this->_size = 0;
 		}
 
 		void append(const T* items, size_t length) {
@@ -220,6 +223,10 @@ namespace fart::types {
 
 		inline size_t length() const {
 			return this->_length;
+		}
+
+		inline size_t size() const {
+			return this->_size;
 		}
 
 		size_t count(function<bool(T& item)> tester) const {
@@ -627,9 +634,7 @@ namespace fart::types {
 
 		bool operator==(const Type& other) const override {
 			if (other.kind() != Kind::data) return false;
-			if constexpr (!is_base_of<Data<T>, decltype(other)>::value) {
-				return false;
-			}
+			if (this->_size != ((const Data<>&)other).size()) return false;
 			return this->equals((const Data<T>&)other);
 		}
 
@@ -648,6 +653,7 @@ namespace fart::types {
 			Storage::release(&this->_storage);
 			this->_storage = other._storage->retain();
 			this->_length = other._length;
+			this->_size = other._size;
 			this->_offset = other._offset;
 			this->_hashIsDirty = other._hashIsDirty;
 			this->_hash = other._hash;
@@ -659,11 +665,13 @@ namespace fart::types {
 			Storage::release(&this->_storage);
 			this->_storage = other._storage;
 			this->_length = other._length;
+			this->_size = other._size;
 			this->_offset = other._offset;
 			this->_hashIsDirty = other._hashIsDirty;
 			this->_hash = other._hash;
 			other._storage = nullptr;
 			other._length = 0;
+			other._size = 0;
 			other._offset = 0;
 			other._hashIsDirty = true;
 			Type::operator=(std::move(other));
@@ -759,6 +767,7 @@ namespace fart::types {
 		Storage* _storage;
 		size_t _offset;
 		size_t _length;
+		size_t _size;
 		mutable bool _hashIsDirty;
 		mutable uint64_t _hash;
 
