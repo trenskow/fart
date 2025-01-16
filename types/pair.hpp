@@ -16,9 +16,7 @@ namespace fart::types {
 	class Pair: public Type {
 
 		static_assert(std::is_base_of<Object, First>::value);
-		static_assert(std::is_base_of<Hashable, First>::value);
 		static_assert(std::is_base_of<Object, Second>::value);
-		static_assert(std::is_base_of<Hashable, First>::value);
 
 	public:
 
